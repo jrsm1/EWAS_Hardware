@@ -29,11 +29,12 @@
 #define TIMER_PERIOD    0x8000
 #define TIME_WAIT 30
 
+short timeout = 0;
 short seconds = 0;
 short check_format = 0;
 short record = 0;
 short counter = 0;
-char format[5];
+char format[6];
 short comma_counter = 0;
 short compare_value;
 
@@ -114,6 +115,8 @@ int main(void)
     MAP_Timer_A_startCounter(TIMER_A1_BASE, TIMER_A_UP_MODE);
     MAP_Interrupt_enableSleepOnIsrExit();
     MAP_Interrupt_enableMaster();
+    strcpy(gps.nMEA_Record, "GPGGA");
+    gps.valid_Data = 0;
     while (1)
     {
         MAP_PCM_gotoLPM0();
@@ -170,12 +173,18 @@ void EUSCIA2_IRQHandler(void)
                         record = 0;
                         check_format = 0;
                         counter = 0;
+                        timeout++;
+                        if(timeout == TIME_WAIT)
+                        {
+                            MAP_Interrupt_disableInterrupt(INT_EUSCIA2);
+                            printf(EUSCI_A0_BASE, "%s\r\n", "GPS has timed out, too many failed tries");
+                        }
                     }
                 }
             }
             else if (receivedChar == ' ')
             {
-                //ignore this character
+                //ignore this
             }
             else
             {
