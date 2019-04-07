@@ -1,0 +1,1474 @@
+******************************************************************************
+                  TI ARM Linker Unix v15.12.3                  
+******************************************************************************
+>> Linked Fri Apr  5 19:37:18 2019
+
+OUTPUT FILE NAME:   <NDT_MainBoard_Module.out>
+ENTRY POINT SYMBOL: "_c_int00"  address: 00006285
+
+
+MEMORY CONFIGURATION
+
+         name            origin    length      used     unused   attr    fill
+----------------------  --------  ---------  --------  --------  ----  --------
+  MAIN                  00000000   00040000  00008074  00037f8c  R  X
+  INFO                  00200000   00004000  00000000  00004000  R  X
+  SRAM_CODE             01000000   00010000  00001cfb  0000e305  RW X
+  SRAM_DATA             20000000   00010000  00001cfb  0000e305  RW  
+
+
+SEGMENT ALLOCATION MAP
+
+run origin  load origin   length   init length attrs members
+----------  ----------- ---------- ----------- ----- -------
+00000000    00000000    00008074   00008074    r-x
+  00000000    00000000    000000e4   000000e4    r-- .intvecs
+  000000e4    000000e4    00007808   00007808    r-x .text
+  000078ec    000078ec    0000053c   0000053c    r-- .const
+  00007e28    00007e28    0000024c   0000024c    r-- .cinit
+20000000    20000000    000000e8   00000000    rw-
+  20000000    20000000    000000e8   00000000    rw- .vtable
+20000100    20000100    00001a17   00000000    rw-
+  20000100    20000100    00000c2c   00000000    rw- .bss
+  20000d30    20000d30    00000800   00000000    rw- .sysmem
+  20001530    20001530    000005e7   00000000    rw- .data
+2000fe00    2000fe00    00000200   00000000    rw-
+  2000fe00    2000fe00    00000200   00000000    rw- .stack
+
+
+SECTION ALLOCATION MAP
+
+ output                                  attributes/
+section   page    origin      length       input sections
+--------  ----  ----------  ----------   ----------------
+.intvecs   0    00000000    000000e4     
+                  00000000    000000e4     startup_msp432p401r_ccs.obj (.intvecs:retain)
+
+.text      0    000000e4    00007808     
+                  000000e4    000003dc     rtsv7M4_T_le_v4SPD16_eabi.lib : memory.obj (.text)
+                  000004c0    00000324                                   : trgdrv.obj (.text)
+                  000007e4    0000030c                                   : lowlev.obj (.text)
+                  00000af0    000002f8     drivers_msp432p401x.aem4f : PowerMSP432.oem4f (.text:Power_sleep)
+                  00000de8    000002a0                               : SPIMSP432DMA.oem4f (.text:SPIMSP432DMA_open)
+                  00001088    00000298     fatfs.a : ff.obj (.text:find_volume)
+                  00001320    00000278     drivers_msp432p401x.aem4f : PowerMSP432.oem4f (.text:initPerfControl)
+                  00001598    000001f4     rtsv7M4_T_le_v4SPD16_eabi.lib : ull_div_t2.obj (.text)
+                  0000178c    000001c4                                   : fopen.obj (.text)
+                  00001950    000001b6     fatfs.a : ff.obj (.text:f_open)
+                  00001b06    00000002     startup_msp432p401r_ccs.obj (.text:Default_Handler)
+                  00001b08    000001a8     drivers_msp432p401x.aem4f : SDSPI.oem4f (.text:SDSPI_initialize)
+                  00001cb0    00000186     fatfs.a : ff.obj (.text:f_write)
+                  00001e36    00000002     msp432p4xx_driverlib.lib : interrupt.o (.text:IntDefaultHandler)
+                  00001e38    00000174     drivers_msp432p401x.aem4f : GPIOMSP432.oem4f (.text:GPIO_setConfig)
+                  00001fac    00000168     printf.obj (.text:UARTprintf)
+                  00002114    00000156     fatfs.a : ff.obj (.text:f_read)
+                  0000226a    00000140             : ff.obj (.text:f_lseek)
+                  000023aa    00000002     nortos_msp432p401x.aem4f : PowerMSP432_nortos.oem4f (.text:PowerMSP432_initPolicy)
+                  000023ac    00000134     rtsv7M4_T_le_v4SPD16_eabi.lib : strtol.obj (.text)
+                  000024e0    00000130     cmd.obj (.text:CMD_pwdn)
+                  00002610    00000130     msp432p4xx_driverlib.lib : cs.o (.text:CS_initClockSignal)
+                  00002740    00000130     drivers_msp432p401x.aem4f : UDMAMSP432.oem4f (.text:setupInterrupt)
+                  00002870    00000120     cmd.obj (.text:CMD_pwup)
+                  00002990    00000120     drivers_msp432p401x.aem4f : SPIMSP432DMA.oem4f (.text:SPIMSP432DMA_transfer)
+                  00002ab0    0000010c     fatfs.a : ff.obj (.text:f_rename)
+                  00002bbc    00000104     drivers_msp432p401x.aem4f : SPIMSP432DMA.oem4f (.text:SPIMSP432DMA_transferCancel)
+                  00002cc0    00000100     main.obj (.text:EUSCIB0_IRQHandler)
+                  00002dc0    000000fc     msp432p4xx_driverlib.lib : uart.o (.text:UART_initModule)
+                  00002ebc    000000fc     drivers_msp432p401x.aem4f : SPIMSP432DMA.oem4f (.text:configDMA)
+                  00002fb8    000000f0     msp432p4xx_driverlib.lib : dma.o (.text:DMA_setChannelTransfer)
+                  000030a8    000000ee     fatfs.a : ff.obj (.text:create_chain)
+                  00003196    000000ee             : ff.obj (.text:put_fat)
+                  00003284    000000ec     rtsv7M4_T_le_v4SPD16_eabi.lib : fread.obj (.text)
+                  00003370    000000e4     msp432p4xx_driverlib.lib : cs.o (.text:CS_startHFXTWithTimeout)
+                  00003454    000000e0                              : cs.o (.text:CS_startLFXTWithTimeout)
+                  00003534    000000dc     drivers_msp432p401x.aem4f : UDMAMSP432.oem4f (.text:UDMAMSP432_close)
+                  00003610    000000dc     msp432p4xx_driverlib.lib : cs.o (.text:_CSGetHFXTFrequency)
+                  000036ec    000000dc     rtsv7M4_T_le_v4SPD16_eabi.lib : setvbuf.obj (.text)
+                  000037c8    000000d8     nortos_msp432p401x.aem4f : SwiP_nortos.oem4f (.text:SwiP_construct)
+                  000038a0    000000d3     fatfs.a : ff.obj (.text:create_name)
+                  00003973    00000001     --HOLE-- [fill = 0]
+                  00003974    000000d0     drivers_msp432p401x.aem4f : SDFatFS.oem4f (.text:SDFatFS_open)
+                  00003a44    000000c8     rtsv7M4_T_le_v4SPD16_eabi.lib : fflush.obj (.text)
+                  00003b0c    000000c4     drivers_msp432p401x.aem4f : SDSPI.oem4f (.text:SDSPI_write)
+                  00003bd0    000000c0     nortos_msp432p401x.aem4f : TimerPMSP432_nortos.oem4f (.text:TimerP_construct)
+                  00003c90    000000bc     fatfs.a : ff.obj (.text:get_fat)
+                  00003d4c    000000b8             : ff.obj (.text:dir_next)
+                  00003e04    000000b4     nortos_msp432p401x.aem4f : ClockPTimer_nortos.oem4f (.text:ClockP_startup)
+                  00003eb8    000000b0     cmd.obj (.text:CMD_mode)
+                  00003f68    000000b0     msp432p4xx_driverlib.lib : spi.o (.text:SPI_initMaster)
+                  00004018    000000ac     nortos_msp432p401x.aem4f : ClockPTimer_nortos.oem4f (.text:ClockP_workFuncDynamic)
+                  000040c4    000000ac     cmdline.obj (.text:CmdLineProcess)
+                  00004170    000000ac     main.obj (.text:EUSCIA3_IRQHandler)
+                  0000421c    000000ac     drivers_msp432p401x.aem4f : GPIOMSP432.oem4f (.text:GPIO_init)
+                  000042c8    000000ac     rtsv7M4_T_le_v4SPD16_eabi.lib : _io_perm.obj (.text)
+                  00004374    000000a8     drivers_msp432p401x.aem4f : SDSPI.oem4f (.text:SDSPI_getNumSectors)
+                  0000441c    000000a8     fatfs.a : ffcio.obj (.text:ffcio_open)
+                  000044c4    000000a8     main.obj (.text:processCommand)
+                  0000456c    000000a2     fatfs.a : ff.obj (.text:f_unlink)
+                  0000460e    00000002     nortos_msp432p401x.aem4f : PowerMSP432_nortos.oem4f (.text:PowerMSP432_updateFreqs)
+                  00004610    000000a0     main.obj (.text:EUSCIA0_IRQHandler)
+                  000046b0    000000a0     nortos_msp432p401x.aem4f : SemaphoreP_nortos.oem4f (.text:SemaphoreP_pend)
+                  00004750    000000a0     rtsv7M4_T_le_v4SPD16_eabi.lib : _bufread.obj (.text)
+                  000047f0    0000009c     cmd.obj (.text:CMD_read)
+                  0000488c    0000009c     drivers_msp432p401x.aem4f : PowerMSP432.oem4f (.text:Power_init)
+                  00004928    0000009c                               : SDSPI.oem4f (.text:SDSPI_read)
+                  000049c4    0000009c     nortos_msp432p401x.aem4f : SwiP_nortos.oem4f (.text:SwiP_dispatch)
+                  00004a60    0000009c     fatfs.a : ff.obj (.text:f_sync)
+                  00004afc    0000009c     rtsv7M4_T_le_v4SPD16_eabi.lib : memcpy_t2.obj (.text)
+                  00004b98    00000098                                   : fclose.obj (.text)
+                  00004c30    00000094     drivers_msp432p401x.aem4f : UDMAMSP432.oem4f (.text:UDMAMSP432_init)
+                  00004cc4    00000094                               : UDMAMSP432.oem4f (.text:UDMAMSP432_open)
+                  00004d58    00000092                               : SDSPI.oem4f (.text:sendCmd)
+                  00004dea    00000002     nortos_msp432p401x.aem4f : SemaphoreP_nortos.oem4f (.text:clkFxn)
+                  00004dec    0000008c     cmd.obj (.text:CMD_setGain)
+                  00004e78    0000008c     main.obj (.text:EUSCIA2_IRQHandler)
+                  00004f04    0000008c     main.obj (.text:main)
+                  00004f90    0000008c     fatfs.a : ff.obj (.text:sync_fs)
+                  0000501c    00000088     msp432p4xx_driverlib.lib : gpio.o (.text:GPIO_setAsPeripheralModuleFunctionInputPin)
+                  000050a4    00000088     fatfs.a : ff.obj (.text:dir_sdi)
+                  0000512c    00000086     drivers_msp432p401x.aem4f : SPIMSP432DMA.oem4f (.text:initHw)
+                  000051b2    00000002     rtsv7M4_T_le_v4SPD16_eabi.lib : mpu_init.obj (.text)
+                  000051b4    00000084     drivers_msp432p401x.aem4f : PowerMSP432.oem4f (.text:restartHFXT)
+                  00005238    00000080     nortos_msp432p401x.aem4f : ClockPTimer_nortos.oem4f (.text:ClockP_start)
+                  000052b8    00000080     msp432p4xx_driverlib.lib : interrupt.o (.text:Interrupt_disableInterrupt)
+                  00005338    00000080                              : interrupt.o (.text:Interrupt_enableInterrupt)
+                  000053b8    00000080     drivers_msp432p401x.aem4f : SDSPI.oem4f (.text:recvDataBlock)
+                  00005438    0000007c     fatfs.a : ff.obj (.text:f_mount)
+                  000054b4    0000007c     printf.obj (.text:xtoa)
+                  00005530    0000007a     rtsv7M4_T_le_v4SPD16_eabi.lib : memset_t2.obj (.text)
+                  000055aa    00000002                                   : startup.obj (.text)
+                  000055ac    00000078     cmd.obj (.text:CMD_help)
+                  00005624    00000078     nortos_msp432p401x.aem4f : ClockPTimer_nortos.oem4f (.text:ClockP_walkQueueDynamic)
+                  0000569c    00000078     system_msp432p401r.obj (.text:SystemInit)
+                  00005714    00000078     drivers_msp432p401x.aem4f : SDSPI.oem4f (.text:transmitDataBlock)
+                  0000578c    00000074     fatfs.a : ff.obj (.text:follow_path)
+                  00005800    00000070     nortos_msp432p401x.aem4f : HwiPMSP432_nortos.oem4f (.text:HwiP_construct)
+                  00005870    00000070     fatfs.a : ff.obj (.text:remove_chain)
+                  000058e0    00000070     rtsv7M4_T_le_v4SPD16_eabi.lib : autoinit.obj (.text)
+                  00005950    0000006e     fatfs.a : ff.obj (.text:check_fs)
+                  000059be    00000002     --HOLE-- [fill = 0]
+                  000059c0    0000006c     cmd.obj (.text:CMD_diagnose)
+                  00005a2c    0000006c     drivers_msp432p401x.aem4f : SDSPI.oem4f (.text:SDSPI_open)
+                  00005a98    0000006c     nortos_msp432p401x.aem4f : TimerPMSP432_nortos.oem4f (.text:TimerP_getCurrentTick)
+                  00005b04    0000006c     main.obj (.text:configureSDCard)
+                  00005b70    0000006a     rtsv7M4_T_le_v4SPD16_eabi.lib : copy_decompress_rle.obj (.text)
+                  00005bda    00000002     --HOLE-- [fill = 0]
+                  00005bdc    00000068     drivers_msp432p401x.aem4f : GPIOMSP432.oem4f (.text:GPIO_hwiIntFxn)
+                  00005c44    00000068     msp432p4xx_driverlib.lib : i2c.o (.text:I2C_masterSendMultiByteStart)
+                  00005cac    00000068                              : interrupt.o (.text:Interrupt_pendInterrupt)
+                  00005d14    00000068     nortos_msp432p401x.aem4f : SwiP_nortos.oem4f (.text:SwiP_post)
+                  00005d7c    00000068     rtsv7M4_T_le_v4SPD16_eabi.lib : trgmsg.obj (.text)
+                  00005de4    00000064     drivers_msp432p401x.aem4f : PowerMSP432.oem4f (.text:PowerMSP432_getFreqs)
+                  00005e48    00000064                               : SPIMSP432DMA.oem4f (.text:SPIMSP432DMA_close)
+                  00005eac    00000064     rtsv7M4_T_le_v4SPD16_eabi.lib : fseek.obj (.text)
+                  00005f10    0000005c     drivers_msp432p401x.aem4f : GPIOMSP432.oem4f (.text:GPIO_write)
+                  00005f6c    0000005c     msp432p4xx_driverlib.lib : interrupt.o (.text:Interrupt_registerInterrupt)
+                  00005fc8    0000005a     fatfs.a : ff.obj (.text:dir_read)
+                  00006022    00000002     --HOLE-- [fill = 0]
+                  00006024    00000058     drivers_msp432p401x.aem4f : GPIOMSP432.oem4f (.text:GPIO_setCallback)
+                  0000607c    00000058     msp432p4xx_driverlib.lib : interrupt.o (.text:Interrupt_unpendInterrupt)
+                  000060d4    00000058     nortos_msp432p401x.aem4f : TimerPMSP432_nortos.oem4f (.text:TimerP_dynamicStub)
+                  0000612c    00000058     drivers_msp432p401x.aem4f : SPIMSP432DMA.oem4f (.text:spiHwiFxn)
+                  00006184    00000056     msp432p4xx_driverlib.lib : uart.o (.text:UART_getEnabledInterruptStatus)
+                  000061da    00000002     --HOLE-- [fill = 0]
+                  000061dc    00000054                              : interrupt.o (.text:Interrupt_setPriority)
+                  00006230    00000054     fatfs.a : ff.obj (.text:dir_find)
+                  00006284    00000054     rtsv7M4_T_le_v4SPD16_eabi.lib : boot.obj (.text)
+                  000062d8    00000054                                   : exit.obj (.text)
+                  0000632c    00000054     drivers_msp432p401x.aem4f : SDSPI.oem4f (.text:waitUntilReady)
+                  00006380    00000052     fatfs.a : ff.obj (.text:dir_clear)
+                  000063d2    00000002     --HOLE-- [fill = 0]
+                  000063d4    00000050     cmd.obj (.text:CMD_getData)
+                  00006424    00000050     nortos_msp432p401x.aem4f : SemaphoreP_nortos.oem4f (.text:SemaphoreP_construct)
+                  00006474    00000050     drivers_msp432p401x.aem4f : UDMAMSP432.oem4f (.text:UDMAMSP432_hwiFxn)
+                  000064c4    0000004c     rtsv7M4_T_le_v4SPD16_eabi.lib : cpy_tbl.obj (.text)
+                  00006510    0000004a     fatfs.a : ff.obj (.text:validate)
+                  0000655a    00000002     --HOLE-- [fill = 0]
+                  0000655c    00000048     msp432p4xx_driverlib.lib : i2c.o (.text:I2C_masterSendMultiByteNextWithTimeout)
+                  000065a4    00000048     nortos_msp432p401x.aem4f : PowerMSP432_nortos.oem4f (.text:PowerMSP432_sleepPolicy)
+                  000065ec    00000048     drivers_msp432p401x.aem4f : PowerMSP432.oem4f (.text:Power_releaseConstraint)
+                  00006634    00000046     fatfs.a : ff.obj (.text:dir_alloc)
+                  0000667a    00000002     --HOLE-- [fill = 0]
+                  0000667c    00000044     drivers_msp432p401x.aem4f : SDFatFS.oem4f (.text:SDFatFS_init)
+                  000066c0    00000044                               : SD.oem4f (.text:SD_init)
+                  00006704    00000044                               : SPI.oem4f (.text:SPI_init)
+                  00006748    00000044     nortos_msp432p401x.aem4f : SemaphoreP_nortos.oem4f (.text:SemaphoreP_post)
+                  0000678c    00000044                              : SwiP_nortos.oem4f (.text:SwiP_restore)
+                  000067d0    00000044                              : TimerPMSP432_nortos.oem4f (.text:TimerP_start)
+                  00006814    00000044     fatfs.a : ff.obj (.text:get_ldnumber)
+                  00006858    00000044             : ff.obj (.text:sync_window)
+                  0000689c    00000040     nortos_msp432p401x.aem4f : TimerPMSP432_nortos.oem4f (.text:TimerP_setNextTick)
+                  000068dc    00000040     msp432p4xx_driverlib.lib : spi.o (.text:is_A_Module)
+                  0000691c    00000040     rtsv7M4_T_le_v4SPD16_eabi.lib : strtok.obj (.text)
+                  0000695c    0000003c     drivers_msp432p401x.aem4f : SDFatFS.oem4f (.text:SDFatFS_diskIOctrl)
+                  00006998    0000003c                               : SD.oem4f (.text:SD_open)
+                  000069d4    0000003c                               : SPI.oem4f (.text:SPI_open)
+                  00006a10    0000003c     nortos_msp432p401x.aem4f : TimerPMSP432_nortos.oem4f (.text:TimerP_initDevice)
+                  00006a4c    0000003c     main.obj (.text:configureConsoleUART)
+                  00006a88    0000003c     main.obj (.text:configureESPUART)
+                  00006ac4    0000003a     fatfs.a : ff.obj (.text:dir_register)
+                  00006afe    00000002     --HOLE-- [fill = 0]
+                  00006b00    00000038     drivers_msp432p401x.aem4f : PowerMSP432.oem4f (.text:Power_setConstraint)
+                  00006b38    00000038                               : SDFatFS.oem4f (.text:SDFatFS_close)
+                  00006b70    00000038                               : PowerMSP432.oem4f (.text:notify)
+                  00006ba8    00000036     fatfs.a : ff.obj (.text:move_window)
+                  00006bde    00000002     --HOLE-- [fill = 0]
+                  00006be0    00000034     msp432p4xx_driverlib.lib : cs.o (.text:CS_setDCOCenteredFrequency)
+                  00006c14    00000034     fatfs.a : ff.obj (.text:dbc_2nd)
+                  00006c48    00000034             : ffcio.obj (.text:ffcio_lseek)
+                  00006c7c    00000030     msp432p4xx_driverlib.lib : uart.o (.text:UART_enableInterrupt)
+                  00006cac    00000030     drivers_msp432p401x.aem4f : SPIMSP432DMA.oem4f (.text:mapPin)
+                  00006cdc    00000030     rtsv7M4_T_le_v4SPD16_eabi.lib : strncpy.obj (.text)
+                  00006d0c    0000002c     drivers_msp432p401x.aem4f : SDFatFS.oem4f (.text:SDFatFS_diskRead)
+                  00006d38    0000002c                               : SDFatFS.oem4f (.text:SDFatFS_diskWrite)
+                  00006d64    0000002c     fatfs.a : diskio.obj (.text:disk_register)
+                  00006d90    0000002a     nortos_msp432p401x.aem4f : HwiPMSP432_nortos.oem4f (.text:HwiP_create)
+                  00006dba    0000002a     drivers_msp432p401x.aem4f : SPIMSP432DMA.oem4f (.text:perfChangeNotifyFxn)
+                  00006de4    0000002a     rtsv7M4_T_le_v4SPD16_eabi.lib : strspn.obj (.text)
+                  00006e0e    00000002     --HOLE-- [fill = 0]
+                  00006e10    00000028     nortos_msp432p401x.aem4f : ClockPTimer_nortos.oem4f (.text:ClockP_getSystemTicks)
+                  00006e38    00000028     drivers_msp432p401x.aem4f : PowerMSP432.oem4f (.text:Power_registerNotify)
+                  00006e60    00000028     msp432p4xx_driverlib.lib : spi.o (.text:SPI_getInterruptStatus)
+                  00006e88    00000028     fatfs.a : ff.obj (.text:dbc_1st)
+                  00006eb0    00000028     drivers_msp432p401x.aem4f : PowerMSP432.oem4f (.text:disableFaultCounter)
+                  00006ed8    00000028                               : PowerMSP432.oem4f (.text:disableHFXT)
+                  00006f00    00000028     fatfs.a : diskio.obj (.text:disk_unregister)
+                  00006f28    00000028             : ff.obj (.text:ld_clust)
+                  00006f50    00000026     drivers_msp432p401x.aem4f : List.oem4f (.text:List_put)
+                  00006f76    00000026                               : List.oem4f (.text:List_remove)
+                  00006f9c    00000026     fatfs.a : ff.obj (.text:f_close)
+                  00006fc2    00000002     --HOLE-- [fill = 0]
+                  00006fc4    00000024     nortos_msp432p401x.aem4f : ClockPTimer_nortos.oem4f (.text:ClockP_getTicks)
+                  00006fe8    00000024                              : ClockPTimer_nortos.oem4f (.text:ClockP_scheduleNextTick)
+                  0000700c    00000024                              : HwiPMSP432_nortos.oem4f (.text:HwiP_dispatch)
+                  00007030    00000024     drivers_msp432p401x.aem4f : SDFatFS.oem4f (.text:SDFatFS_diskInitialize)
+                  00007054    00000024                               : SDSPI.oem4f (.text:SDSPI_close)
+                  00007078    00000024     fatfs.a : diskio.obj (.text:disk_ioctl)
+                  0000709c    00000024             : diskio.obj (.text:disk_read)
+                  000070c0    00000024     printf.obj (.text:puts)
+                  000070e4    00000024     rtsv7M4_T_le_v4SPD16_eabi.lib : strcspn.obj (.text)
+                  00007108    00000024     fatfs.a : ff.obj (.text:st_clust)
+                  0000712c    00000022             : ff.obj (.text:mem_cmp)
+                  0000714e    00000002     --HOLE-- [fill = 0]
+                  00007150    00000020     msp432p4xx_driverlib.lib : cs.o (.text:CS_setExternalClockSourceFrequency)
+                  00007170    00000020     nortos_msp432p401x.aem4f : ClockPTimer_nortos.oem4f (.text:ClockP_add)
+                  00007190    00000020     drivers_msp432p401x.aem4f : PowerMSP432.oem4f (.text:Power_unregisterNotify)
+                  000071b0    00000020     nortos_msp432p401x.aem4f : QueueP_nortos.oem4f (.text:QueueP_put)
+                  000071d0    00000020     fatfs.a : diskio.obj (.text:disk_write)
+                  000071f0    00000020             : ffcio.obj (.text:ffcio_close)
+                  00007210    00000020             : ffcio.obj (.text:ffcio_read)
+                  00007230    00000020             : ffcio.obj (.text:ffcio_write)
+                  00007250    00000020     printf.obj (.text:sendByte)
+                  00007270    00000020     drivers_msp432p401x.aem4f : SDSPI.oem4f (.text:sendInitialClockTrain)
+                  00007290    00000020                               : SDSPI.oem4f (.text:spiTransfer)
+                  000072b0    0000001c     msp432p4xx_driverlib.lib : interrupt.o (.text:Interrupt_unregisterInterrupt)
+                  000072cc    0000001c     nortos_msp432p401x.aem4f : SwiP_nortos.oem4f (.text:SwiP_disable)
+                  000072e8    0000001c     fatfs.a : ff.obj (.text:dir_remove)
+                  00007304    0000001c             : diskio.obj (.text:disk_initialize)
+                  00007320    0000001c             : diskio.obj (.text:disk_status)
+                  0000733c    0000001c     MSP_EXP432P401R.obj (.text:dmaErrorHwi)
+                  00007358    0000001c     printf.obj (.text:puth)
+                  00007374    0000001a     nortos_msp432p401x.aem4f : QueueP_nortos.oem4f (.text:QueueP_get)
+                  0000738e    0000001a                              : SemaphoreP_nortos.oem4f (.text:SemaphoreP_createBinary)
+                  000073a8    00000018                              : ClockPTimer_nortos.oem4f (.text:ClockP_destruct)
+                  000073c0    00000018     msp432p4xx_driverlib.lib : spi.o (.text:EUSCI_A_SPI_getInterruptStatus)
+                  000073d8    00000018                              : spi.o (.text:EUSCI_B_SPI_getInterruptStatus)
+                  000073f0    00000018     nortos_msp432p401x.aem4f : HwiPMSP432_nortos.oem4f (.text:HwiP_delete)
+                  00007408    00000018                              : HwiPMSP432_nortos.oem4f (.text:HwiP_inISR)
+                  00007420    00000018     msp432p4xx_driverlib.lib : sysctl_a.o (.text:SysCtl_A_disableNMISource)
+                  00007438    00000018                              : sysctl_a.o (.text:SysCtl_A_enableNMISource)
+                  00007450    00000018                              : uart.o (.text:UART_getInterruptStatus)
+                  00007468    00000018     fatfs.a : ff.obj (.text:clst2sect)
+                  00007480    00000018             : ffsystem.obj (.text:ff_cre_syncobj)
+                  00007498    00000018     rtsv7M4_T_le_v4SPD16_eabi.lib : args_main.obj (.text)
+                  000074b0    00000018                                   : strcmp.obj (.text)
+                  000074c8    00000016     nortos_msp432p401x.aem4f : SemaphoreP_nortos.oem4f (.text:SemaphoreP_create)
+                  000074de    00000016     msp432p4xx_driverlib.lib : uart.o (.text:UART_clearInterruptFlag)
+                  000074f4    00000016                              : uart.o (.text:UART_enableModule)
+                  0000750a    00000016     fatfs.a : ff.obj (.text:ld_dword)
+                  00007520    00000016     nortos_msp432p401x.aem4f : SwiP_nortos.oem4f (.text:maxbit)
+                  00007536    00000016     fatfs.a : ff.obj (.text:mem_cpy)
+                  0000754c    00000016     rtsv7M4_T_le_v4SPD16_eabi.lib : strchr.obj (.text)
+                  00007562    00000016     fatfs.a : ff.obj (.text:st_dword)
+                  00007578    00000016             : ff.obj (.text:unlock_fs)
+                  0000758e    00000002     --HOLE-- [fill = 0]
+                  00007590    00000014     drivers_msp432p401x.aem4f : PowerMSP432.oem4f (.text:Power_idleFunc)
+                  000075a4    00000014                               : SPI.oem4f (.text:SPI_Params_init)
+                  000075b8    00000014     nortos_msp432p401x.aem4f : SwiP_nortos.oem4f (.text:SwiP_handleHwi)
+                  000075cc    00000014                              : TimerPMSP432_nortos.oem4f (.text:TimerP_getCount)
+                  000075e0    00000014     fatfs.a : ffsystem.obj (.text:ff_req_grant)
+                  000075f4    00000014     rtsv7M4_T_le_v4SPD16_eabi.lib : _lock.obj (.text)
+                  00007608    00000014                                   : strcpy.obj (.text)
+                  0000761c    00000014                                   : strlen.obj (.text)
+                  00007630    00000012     nortos_msp432p401x.aem4f : HwiPMSP432_nortos.oem4f (.text:HwiP_Params_init)
+                  00007642    00000012     fatfs.a : ff.obj (.text:chk_chr)
+                  00007654    00000012             : ffcio.obj (.text:ffcio_rename)
+                  00007666    00000012             : ffcio.obj (.text:ffcio_unlink)
+                  00007678    00000012             : ff.obj (.text:mem_set)
+                  0000768a    00000012     printf.obj (.text:putc)
+                  0000769c    00000010     nortos_msp432p401x.aem4f : HwiPMSP432_nortos.oem4f (.text:HwiP_disable)
+                  000076ac    00000010     msp432p4xx_driverlib.lib : interrupt.o (.text:Interrupt_disableMaster)
+                  000076bc    00000010                              : interrupt.o (.text:Interrupt_enableMaster)
+                  000076cc    00000010     drivers_msp432p401x.aem4f : PowerMSP432.oem4f (.text:PowerMSP432_getNumPerfLevels)
+                  000076dc    00000010                               : PowerMSP432.oem4f (.text:Power_disablePolicy)
+                  000076ec    00000010                               : PowerMSP432.oem4f (.text:Power_enablePolicy)
+                  000076fc    00000010                               : SDFatFS.oem4f (.text:SDFatFS_diskStatus)
+                  0000770c    00000010     nortos_msp432p401x.aem4f : SemaphoreP_nortos.oem4f (.text:SemaphoreP_Params_init)
+                  0000771c    00000010                              : SwiP_nortos.oem4f (.text:SwiP_Params_init)
+                  0000772c    00000010     msp432p4xx_driverlib.lib : sysctl_a.o (.text:SysCtl_A_getNMISourceStatus)
+                  0000773c    00000010                              : sysctl.o (.text:SysCtl_getNMISourceStatus)
+                  0000774c    00000010     nortos_msp432p401x.aem4f : TimerPMSP432_nortos.oem4f (.text:TimerP_Params_init)
+                  0000775c    0000000e                              : QueueP_nortos.oem4f (.text:QueueP_empty)
+                  0000776a    0000000e                              : QueueP_nortos.oem4f (.text:QueueP_remove)
+                  00007778    0000000e     rtsv7M4_T_le_v4SPD16_eabi.lib : copy_decompress_none.obj (.text:decompress:none)
+                  00007786    0000000c     msp432p4xx_driverlib.lib : cpu.o (.text:CPU_cpsid)
+                  00007792    0000000c                              : cpu.o (.text:CPU_cpsie)
+                  0000779e    00000002     --HOLE-- [fill = 0]
+                  000077a0    0000000c     nortos_msp432p401x.aem4f : ClockPTimer_nortos.oem4f (.text:ClockP_doTick)
+                  000077ac    0000000c                              : ClockPTimer_nortos.oem4f (.text:ClockP_getSystemTickPeriod)
+                  000077b8    0000000c     drivers_msp432p401x.aem4f : PowerMSP432.oem4f (.text:Power_getConstraintMask)
+                  000077c4    0000000c                               : PowerMSP432.oem4f (.text:Power_getPerformanceLevel)
+                  000077d0    0000000c     startup_msp432p401r_ccs.obj (.text:Reset_Handler)
+                  000077dc    0000000c     drivers_msp432p401x.aem4f : SDSPI.oem4f (.text:SDSPI_init)
+                  000077e8    0000000c     nortos_msp432p401x.aem4f : TimerPMSP432_nortos.oem4f (.text:TimerP_getFreq)
+                  000077f4    0000000c                              : TimerPMSP432_nortos.oem4f (.text:TimerP_getMaxTicks)
+                  00007800    0000000c     fatfs.a : ff.obj (.text:ld_word)
+                  0000780c    0000000a     drivers_msp432p401x.aem4f : SD.oem4f (.text:SD_close)
+                  00007816    0000000a                               : SD.oem4f (.text:SD_getNumSectors)
+                  00007820    0000000a                               : SD.oem4f (.text:SD_getSectorSize)
+                  0000782a    0000000a                               : SD.oem4f (.text:SD_initialize)
+                  00007834    0000000a                               : SD.oem4f (.text:SD_read)
+                  0000783e    0000000a                               : SD.oem4f (.text:SD_write)
+                  00007848    0000000a                               : SPI.oem4f (.text:SPI_close)
+                  00007852    0000000a                               : SPI.oem4f (.text:SPI_transfer)
+                  0000785c    0000000a     fatfs.a : ffsystem.obj (.text:ff_del_syncobj)
+                  00007866    0000000a             : ff.obj (.text:st_word)
+                  00007870    00000008     nortos_msp432p401x.aem4f : HwiPMSP432_nortos.oem4f (.text:HwiP_restore)
+                  00007878    00000008     MSP_EXP432P401R.obj (.text:MSP_EXP432P401R_initGeneral)
+                  00007880    00000008     drivers_msp432p401x.aem4f : SPIMSP432DMA.oem4f (.text:blockingTransferCallback)
+                  00007888    00000008     main.obj (.text:fatfs_getFatTime)
+                  00007890    00000008     rtsv7M4_T_le_v4SPD16_eabi.lib : rewind.obj (.text)
+                  00007898    00000006     nortos_msp432p401x.aem4f : QueueP_nortos.oem4f (.text:QueueP_init)
+                  0000789e    00000006     drivers_msp432p401x.aem4f : SDSPI.oem4f (.text:SDSPI_control)
+                  000078a4    00000006                               : SDSPI.oem4f (.text:SDSPI_getSectorSize)
+                  000078aa    00000006                               : SPIMSP432DMA.oem4f (.text:SPIMSP432DMA_control)
+                  000078b0    00000006     rtsv7M4_T_le_v4SPD16_eabi.lib : copy_decompress_rle.obj (.text:decompress:rle24)
+                  000078b6    00000006     fatfs.a : ff.obj (.text:lock_fs)
+                  000078bc    00000004     nortos_msp432p401x.aem4f : ClockPTimer_nortos.oem4f (.text:ClockP_isActive)
+                  000078c0    00000004                              : HwiPMSP432_nortos.oem4f (.text:HwiP_clearInterrupt)
+                  000078c4    00000004                              : HwiPMSP432_nortos.oem4f (.text:HwiP_disableInterrupt)
+                  000078c8    00000004                              : HwiPMSP432_nortos.oem4f (.text:HwiP_enableInterrupt)
+                  000078cc    00000004                              : HwiPMSP432_nortos.oem4f (.text:HwiP_post)
+                  000078d0    00000004                              : QueueP_nortos.oem4f (.text:QueueP_head)
+                  000078d4    00000004                              : QueueP_nortos.oem4f (.text:QueueP_next)
+                  000078d8    00000004     drivers_msp432p401x.aem4f : SPIMSP432DMA.oem4f (.text:SPIMSP432DMA_init)
+                  000078dc    00000004     nortos_msp432p401x.aem4f : SemaphoreP_nortos.oem4f (.text:SemaphoreP_delete)
+                  000078e0    00000004                              : TimerPMSP432_nortos.oem4f (.text:TimerP_setPeriod)
+                  000078e4    00000004     fatfs.a : diskio.obj (.text:get_fattime)
+                  000078e8    00000004     rtsv7M4_T_le_v4SPD16_eabi.lib : pre_init.obj (.text)
+
+.const     0    000078ec    0000053c     
+                  000078ec    00000134     cmd.obj (.const:.string)
+                  00007a20    00000101     rtsv7M4_T_le_v4SPD16_eabi.lib : ctype.obj (.const:.string:_ctypes_)
+                  00007b21    00000003     MSP_EXP432P401R.obj (.const)
+                  00007b24    00000090     MSP_EXP432P401R.obj (.const:spiMSP432DMAHWAttrs)
+                  00007bb4    00000050     msp432p4xx_driverlib.lib : interrupt.o (.const:g_pulRegs)
+                  00007c04    00000038     MSP_EXP432P401R.obj (.const:PowerMSP432_config)
+                  00007c3c    00000030     msp432p4xx_driverlib.lib : gpio.o (.const:GPIO_PORT_TO_BASE)
+                  00007c6c    00000030     MSP_EXP432P401R.obj (.const:SPI_config)
+                  00007c9c    00000028     printf.obj (.const:dv)
+                  00007cc4    00000024     drivers_msp432p401x.aem4f : SDSPI.oem4f (.const:SDSPI_fxnTable)
+                  00007ce8    00000024     main.obj (.const:consoleConfig)
+                  00007d0c    00000024     main.obj (.const:espConfig)
+                  00007d30    00000020     drivers_msp432p401x.aem4f : SPI.oem4f (.const:SPI_defaultParams)
+                  00007d50    00000018                               : SPIMSP432DMA.oem4f (.const:SPIMSP432DMA_fxnTable)
+                  00007d68    00000014     MSP_EXP432P401R.obj (.const:GPIOMSP432_config)
+                  00007d7c    00000010     printf.obj (.const:.string:hex$1)
+                  00007d8c    00000010     nortos_msp432p401x.aem4f : SwiP_nortos.oem4f (.const:SwiP_defaultParams)
+                  00007d9c    0000000f     main.obj (.const:.string:daq1)
+                  00007dab    00000001     --HOLE-- [fill = 0]
+                  00007dac    0000000c     MSP_EXP432P401R.obj (.const:SD_config)
+                  00007db8    0000000c     MSP_EXP432P401R.obj (.const:udmaMSP432HWAttrs)
+                  00007dc4    0000000a     drivers_msp432p401x.aem4f : SDSPI.oem4f (.const:.string:$P$T2$3)
+                  00007dce    0000000a     fatfs.a : ff.obj (.const:.string:DbcTbl)
+                  00007dd8    00000008     MSP_EXP432P401R.obj (.const:UDMAMSP432_config)
+                  00007de0    00000008     drivers_msp432p401x.aem4f : SPIMSP432DMA.oem4f (.const:frameFormat)
+                  00007de8    00000008     msp432p4xx_driverlib.lib : interrupt.o (.const:g_pulDisRegs)
+                  00007df0    00000008                              : interrupt.o (.const:g_pulEnRegs)
+                  00007df8    00000008                              : interrupt.o (.const:g_pulPendRegs)
+                  00007e00    00000008                              : interrupt.o (.const:g_pulUnpendRegs)
+                  00007e08    00000006     drivers_msp432p401x.aem4f : GPIOMSP432.oem4f (.const:.string:interruptType)
+                  00007e0e    00000006                               : GPIOMSP432.oem4f (.const:.string:portInterruptIds)
+                  00007e14    00000004                               : SDSPI.oem4f (.const:.string:$P$T0$1)
+                  00007e18    00000004     MSP_EXP432P401R.obj (.const:SDFatFS_config)
+                  00007e1c    00000004     drivers_msp432p401x.aem4f : SD.oem4f (.const:SD_defaultParams)
+                  00007e20    00000004     MSP_EXP432P401R.obj (.const:sdspiHWAttrs)
+                  00007e24    00000002     drivers_msp432p401x.aem4f : SDSPI.oem4f (.const:.string:$P$T1$2)
+                  00007e26    00000002                               : SDSPI.oem4f (.const:.string:$P$T3$4)
+
+.cinit     0    00007e28    0000024c     
+                  00007e28    00000210     (.cinit..data.load) [load image, compression = rle]
+                  00008038    0000000b     (.cinit..bss.load) [load image, compression = rle]
+                  00008043    00000005     --HOLE-- [fill = 0]
+                  00008048    00000009     (.cinit..vtable.load) [load image, compression = rle]
+                  00008051    00000003     --HOLE-- [fill = 0]
+                  00008054    00000008     (__TI_handler_table)
+                  0000805c    00000018     (__TI_cinit_table)
+
+.init_array 
+*          0    00000000    00000000     UNINITIALIZED
+
+.binit     0    00000000    00000000     
+
+.vtable    0    20000000    000000e8     UNINITIALIZED
+                  20000000    000000e8     msp432p4xx_driverlib.lib : interrupt.o (.vtable)
+
+.bss       0    20000100    00000c2c     UNINITIALIZED
+                  20000100    00000258     main.obj (.bss:RXData)
+                  20000358    00000240     (.common:sdfatfsObjects)
+                  20000598    00000120     rtsv7M4_T_le_v4SPD16_eabi.lib : trgmsg.obj (.bss:_CIOBUF_)
+                  200006b8    00000120     (.common:spiMSP432DMAObjects)
+                  200007d8    00000028     fatfs.a : ffcio.obj (.bss:filTable)
+                  20000800    00000100     MSP_EXP432P401R.obj (.bss:dmaControlTable)
+                  20000900    000000a0     nortos_msp432p401x.aem4f : ClockPTimer_nortos.oem4f (.bss:ClockP_module)
+                  200009a0    000000a0     (.common:__TI_tmpnams)
+                  20000a40    00000080     main.obj (.bss:COMMAND)
+                  20000ac0    00000080     main.obj (.bss:consoleInput)
+                  20000b40    00000080     main.obj (.bss:wifiInput)
+                  20000bc0    00000030     drivers_msp432p401x.aem4f : GPIOMSP432.oem4f (.bss:gpioCallbackInfo)
+                  20000bf0    00000024     cmdline.obj (.bss:g_ppcArgv)
+                  20000c14    00000020     nortos_msp432p401x.aem4f : SwiP_nortos.oem4f (.bss:SwiP_readyList)
+                  20000c34    00000020     drivers_msp432p401x.aem4f : UDMAMSP432.oem4f (.bss:hwiFxnArgs)
+                  20000c54    00000020                               : UDMAMSP432.oem4f (.bss:hwiFxnHandlers)
+                  20000c74    0000001c     nortos_msp432p401x.aem4f : SwiP_nortos.oem4f (.bss:SwiP_hwiStruct)
+                  20000c90    0000001c                              : TimerPMSP432_nortos.oem4f (.bss:TimerP_hwiStruct)
+                  20000cac    00000010     fatfs.a : ff.obj (.bss:FatFs)
+                  20000cbc    00000010     drivers_msp432p401x.aem4f : UDMAMSP432.oem4f (.bss:hwiHandles)
+                  20000ccc    00000010                               : SDFatFS.oem4f (.bss:sdFatFSHandles)
+                  20000cdc    0000000d     nortos_msp432p401x.aem4f : SwiP_nortos.oem4f (.bss)
+                  20000ce9    00000001     (.common:udmaMSP432Object)
+                  20000cea    00000002     fatfs.a : ff.obj (.bss)
+                  20000cec    0000000c     (.common:sdspiObjects)
+                  20000cf8    00000008     msp432p4xx_driverlib.lib : cs.o (.bss)
+                  20000d00    00000008     rtsv7M4_T_le_v4SPD16_eabi.lib : trgdrv.obj (.bss:parmbuf)
+                  20000d08    00000008     nortos_msp432p401x.aem4f : ClockPTimer_nortos.oem4f (.bss:timerFreq)
+                  20000d10    00000004     drivers_msp432p401x.aem4f : GPIOMSP432.oem4f (.bss)
+                  20000d14    00000004     main.obj (.bss)
+                  20000d18    00000004     nortos_msp432p401x.aem4f : ClockPTimer_nortos.oem4f (.bss)
+                  20000d1c    00000004                              : TimerPMSP432_nortos.oem4f (.bss)
+                  20000d20    00000004     (.common:masterToSlavePacket)
+                  20000d24    00000004     (.common:sdfatfsHandle)
+                  20000d28    00000004     (.common:src)
+
+.sysmem    0    20000d30    00000800     UNINITIALIZED
+                  20000d30    00000008     rtsv7M4_T_le_v4SPD16_eabi.lib : memory.obj (.sysmem)
+                  20000d38    000007f8     --HOLE--
+
+.data      0    20001530    000005e7     UNINITIALIZED
+                  20001530    00000140     nortos_msp432p401x.aem4f : HwiPMSP432_nortos.oem4f (.data:HwiP_dispatchTable)
+                  20001670    00000130     drivers_msp432p401x.aem4f : PowerMSP432.oem4f (.data:PowerMSP432_perfLevels)
+                  200017a0    000000f0     rtsv7M4_T_le_v4SPD16_eabi.lib : defs.obj (.data:_ftable)
+                  20001890    000000d0                                   : lowlev.obj (.data:$O1$$)
+                  20001960    0000006c     cmd.obj (.data:g_psCmdTable)
+                  200019cc    00000050     fatfs.a : diskio.obj (.data:drive_fxn_table)
+                  20001a1c    00000030     MSP_EXP432P401R.obj (.data:gpioPinConfigs)
+                  20001a4c    0000002c     drivers_msp432p401x.aem4f : PowerMSP432.oem4f (.data:PowerMSP432_module)
+                  20001a78    00000010                               : UDMAMSP432.oem4f (.data)
+                  20001a88    00000010     MSP_EXP432P401R.obj (.data:gpioCallbackFunctions)
+                  20001a98    00000010     rtsv7M4_T_le_v4SPD16_eabi.lib : defs.obj (.data)
+                  20001aa8    0000000c                                   : exit.obj (.data:$O1$$)
+                  20001ab4    0000000c                                   : memory.obj (.data:$O1$$)
+                  20001ac0    0000000c     nortos_msp432p401x.aem4f : TimerPMSP432_nortos.oem4f (.data:TimerP_defaultParams)
+                  20001acc    00000009     main.obj (.data)
+                  20001ad5    00000003     nortos_msp432p401x.aem4f : SemaphoreP_nortos.oem4f (.data)
+                  20001ad8    00000008     rtsv7M4_T_le_v4SPD16_eabi.lib : _lock.obj (.data:$O1$$)
+                  20001ae0    00000008     nortos_msp432p401x.aem4f : SemaphoreP_nortos.oem4f (.data:SemaphoreP_defaultParams)
+                  20001ae8    00000008                              : ClockPTimer_nortos.oem4f (.data)
+                  20001af0    00000008                              : HwiPMSP432_nortos.oem4f (.data)
+                  20001af8    00000004     fatfs.a : ffcio.obj (.data)
+                  20001afc    00000004     main.obj (.data:fatfsPrefix)
+                  20001b00    00000004     rtsv7M4_T_le_v4SPD16_eabi.lib : errno.obj (.data)
+                  20001b04    00000004                                   : fopen.obj (.data)
+                  20001b08    00000004                                   : stkdepth_vars.obj (.data)
+                  20001b0c    00000004                                   : strtok.obj (.data)
+                  20001b10    00000002     drivers_msp432p401x.aem4f : GPIOMSP432.oem4f (.data)
+                  20001b12    00000001                               : SD.oem4f (.data)
+                  20001b13    00000001                               : SDFatFS.oem4f (.data)
+                  20001b14    00000001                               : SPI.oem4f (.data)
+                  20001b15    00000001     nortos_msp432p401x.aem4f : SwiP_nortos.oem4f (.data)
+                  20001b16    00000001                              : TimerPMSP432_nortos.oem4f (.data)
+
+.stack     0    2000fe00    00000200     UNINITIALIZED
+                  2000fe00    00000200     --HOLE--
+
+MODULE SUMMARY
+
+       Module                        code    ro data   rw data
+       ------                        ----    -------   -------
+    ./
+       main.obj                      1272    87        2026   
+       system_msp432p401r.obj        120     0         0      
+    +--+-----------------------------+-------+---------+---------+
+       Total:                        1392    87        2026   
+                                                              
+    ./boardConfigs/
+       MSP_EXP432P401R.obj           36      311       2394   
+    +--+-----------------------------+-------+---------+---------+
+       Total:                        36      311       2394   
+                                                              
+    ./ccs/
+       startup_msp432p401r_ccs.obj   14      228       0      
+    +--+-----------------------------+-------+---------+---------+
+       Total:                        14      228       0      
+                                                              
+    ./utils/
+       cmd.obj                       1372    308       216    
+       printf.obj                    598     56        0      
+       cmdline.obj                   172     0         72     
+    +--+-----------------------------+-------+---------+---------+
+       Total:                        2142    364       288    
+                                                              
+    /opt/ti/ccsv6/tools/compiler/arm_15.12.3.LTS/lib/rtsv7M4_T_le_v4SPD16_eabi.lib
+       lowlev.obj                    780     0         416    
+       memory.obj                    988     0         24     
+       defs.obj                      0       0         832    
+       trgdrv.obj                    804     0         16     
+       trgmsg.obj                    104     0         576    
+       ull_div_t2.obj                500     0         0      
+       fopen.obj                     452     0         8      
+       strtol.obj                    308     0         0      
+       ctype.obj                     0       257       0      
+       fread.obj                     236     0         0      
+       setvbuf.obj                   220     0         0      
+       fflush.obj                    200     0         0      
+       _io_perm.obj                  172     0         0      
+       _bufread.obj                  160     0         0      
+       memcpy_t2.obj                 156     0         0      
+       fclose.obj                    152     0         0      
+       memset_t2.obj                 122     0         0      
+       autoinit.obj                  112     0         0      
+       copy_decompress_rle.obj       112     0         0      
+       exit.obj                      84      0         24     
+       fseek.obj                     100     0         0      
+       boot.obj                      84      0         0      
+       cpy_tbl.obj                   76      0         0      
+       strtok.obj                    64      0         8      
+       strncpy.obj                   48      0         0      
+       strspn.obj                    42      0         0      
+       _lock.obj                     20      0         16     
+       strcspn.obj                   36      0         0      
+       args_main.obj                 24      0         0      
+       strcmp.obj                    24      0         0      
+       strchr.obj                    22      0         0      
+       strcpy.obj                    20      0         0      
+       strlen.obj                    20      0         0      
+       copy_decompress_none.obj      14      0         0      
+       errno.obj                     0       0         8      
+       rewind.obj                    8       0         0      
+       stkdepth_vars.obj             0       0         8      
+       pre_init.obj                  4       0         0      
+       mpu_init.obj                  2       0         0      
+       startup.obj                   2       0         0      
+    +--+-----------------------------+-------+---------+---------+
+       Total:                        6272    257       1936   
+                                                              
+    /opt/ti/simplelink_msp432p4_sdk_2_30_00_14/kernel/nortos/lib/nortos_msp432p401x.aem4f
+       ClockPTimer_nortos.oem4f      796     0         360    
+       HwiPMSP432_nortos.oem4f       296     0         656    
+       SwiP_nortos.oem4f             630     16        148    
+       TimerPMSP432_nortos.oem4f     644     0         90     
+       SemaphoreP_nortos.oem4f       378     0         22     
+       QueueP_nortos.oem4f           100     0         0      
+       PowerMSP432_nortos.oem4f      76      0         0      
+    +--+-----------------------------+-------+---------+---------+
+       Total:                        2920    16        1276   
+                                                              
+    /opt/ti/simplelink_msp432p4_sdk_2_30_00_14/source/third_party/fatfs/lib/ccs/m4f/fatfs.a
+       ff.obj                        5629    10        36     
+       ffcio.obj                     352     0         88     
+       diskio.obj                    248     0         160    
+       ffsystem.obj                  54      0         0      
+    +--+-----------------------------+-------+---------+---------+
+       Total:                        6283    10        284    
+                                                              
+    /opt/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/driverlib/ccs/msp432p4xx_driverlib.lib
+       interrupt.o                   686     112       464    
+       cs.o                          1060    0         16     
+       uart.o                        454     0         0      
+       spi.o                         328     0         0      
+       dma.o                         240     0         0      
+       gpio.o                        136     48        0      
+       i2c.o                         176     0         0      
+       sysctl_a.o                    64      0         0      
+       cpu.o                         24      0         0      
+       sysctl.o                      16      0         0      
+    +--+-----------------------------+-------+---------+---------+
+       Total:                        3184    160       480    
+                                                              
+    /opt/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/drivers/lib/drivers_msp432p401x.aem4f
+       PowerMSP432.oem4f             2208    0         696    
+       SPIMSP432DMA.oem4f            1902    32        0      
+       SDSPI.oem4f                   1654    54        0      
+       UDMAMSP432.oem4f              900     0         192    
+       GPIOMSP432.oem4f              828     12        108    
+       SDFatFS.oem4f                 532     0         34     
+       SPI.oem4f                     168     32        2      
+       SD.oem4f                      188     4         2      
+       List.oem4f                    76      0         0      
+    +--+-----------------------------+-------+---------+---------+
+       Total:                        8456    134       1034   
+                                                              
+       Heap:                         0       0         4096   
+       Stack:                        0       0         1024   
+       Linker Generated:             0       580       0      
+    +--+-----------------------------+-------+---------+---------+
+       Grand Total:                  30699   2147      14838  
+
+
+LINKER GENERATED COPY TABLES
+
+__TI_cinit_table @ 0000805c records: 3, size/record: 8, table size: 24
+	.data: load addr=00007e28, load size=00000210 bytes, run addr=20001530, run size=000005e7 bytes, compression=rle
+	.bss: load addr=00008038, load size=0000000b bytes, run addr=20000100, run size=00000c2c bytes, compression=rle
+	.vtable: load addr=00008048, load size=00000009 bytes, run addr=20000000, run size=000000e8 bytes, compression=rle
+
+
+LINKER GENERATED HANDLER TABLE
+
+__TI_handler_table @ 00008054 records: 2, size/record: 4, table size: 8
+	index: 0, handler: __TI_decompress_rle24
+	index: 1, handler: __TI_decompress_none
+
+
+GLOBAL SYMBOLS: SORTED ALPHABETICALLY BY Name 
+
+address   name                                      
+-------   ----                                      
+00001b07  ADC14_IRQHandler                          
+00001b07  AES256_IRQHandler                         
+00001b07  BusFault_Handler                          
+000062d9  C$$EXIT                                   
+00005dab  C$$IO$$                                   
+000059c1  CMD_diagnose                              
+000063d5  CMD_getData                               
+000055ad  CMD_help                                  
+00003eb9  CMD_mode                                  
+000024e1  CMD_pwdn                                  
+00002871  CMD_pwup                                  
+000047f1  CMD_read                                  
+00004ded  CMD_setGain                               
+00001b07  COMP_E0_IRQHandler                        
+00001b07  COMP_E1_IRQHandler                        
+00007787  CPU_cpsid                                 
+00007793  CPU_cpsie                                 
+00001b07  CS_IRQHandler                             
+00002611  CS_initClockSignal                        
+00006be1  CS_setDCOCenteredFrequency                
+00007151  CS_setExternalClockSourceFrequency        
+00003371  CS_startHFXTWithTimeout                   
+00003455  CS_startLFXTWithTimeout                   
+00007171  ClockP_add                                
+000073a9  ClockP_destruct                           
+000077a1  ClockP_doTick                             
+000077ad  ClockP_getSystemTickPeriod                
+00006e11  ClockP_getSystemTicks                     
+00006fc5  ClockP_getTicks                           
+000078bd  ClockP_isActive                           
+00006fe9  ClockP_scheduleNextTick                   
+00005239  ClockP_start                              
+00003e05  ClockP_startup                            
+20001aec  ClockP_tickPeriod                         
+00005625  ClockP_walkQueueDynamic                   
+00004019  ClockP_workFuncDynamic                    
+000040c5  CmdLineProcess                            
+00001b07  DMA_ERR_IRQHandler                        
+00001b07  DMA_INT0_IRQHandler                       
+00001b07  DMA_INT1_IRQHandler                       
+00001b07  DMA_INT2_IRQHandler                       
+00001b07  DMA_INT3_IRQHandler                       
+00002fb9  DMA_setChannelTransfer                    
+00001b07  DebugMon_Handler                          
+00001b07  Default_Handler                           
+00004611  EUSCIA0_IRQHandler                        
+00004611  EUSCIA0_IRQHandler                        
+00001b07  EUSCIA1_IRQHandler                        
+00004e79  EUSCIA2_IRQHandler                        
+00004e79  EUSCIA2_IRQHandler                        
+00004171  EUSCIA3_IRQHandler                        
+00004171  EUSCIA3_IRQHandler                        
+00002cc1  EUSCIB0_IRQHandler                        
+00002cc1  EUSCIB0_IRQHandler                        
+00001b07  EUSCIB1_IRQHandler                        
+00001b07  EUSCIB2_IRQHandler                        
+00001b07  EUSCIB3_IRQHandler                        
+000073c1  EUSCI_A_SPI_getInterruptStatus            
+000073d9  EUSCI_B_SPI_getInterruptStatus            
+00001b07  FLCTL_IRQHandler                          
+00001b07  FPU_IRQHandler                            
+00007d68  GPIOMSP432_config                         
+00005bdd  GPIO_hwiIntFxn                            
+0000421d  GPIO_init                                 
+0000501d  GPIO_setAsPeripheralModuleFunctionInputPin
+00006025  GPIO_setCallback                          
+00001e39  GPIO_setConfig                            
+00005f11  GPIO_write                                
+00000797  HOSTclock                                 
+0000075f  HOSTclose                                 
+00000721  HOSTgetenv                                
+000006c5  HOSTlseek                                 
+00000673  HOSTopen                                  
+00000627  HOSTread                                  
+000005c9  HOSTrename                                
+0000058f  HOSTtime                                  
+00000545  HOSTtime64                                
+0000050d  HOSTunlink                                
+000004c1  HOSTwrite                                 
+00001b07  HardFault_Handler                         
+00007631  HwiP_Params_init                          
+000078c1  HwiP_clearInterrupt                       
+00005801  HwiP_construct                            
+00006d91  HwiP_create                               
+000073f1  HwiP_delete                               
+0000769d  HwiP_disable                              
+000078c5  HwiP_disableInterrupt                     
+0000700d  HwiP_dispatch                             
+000078c9  HwiP_enableInterrupt                      
+00007409  HwiP_inISR                                
+20001af0  HwiP_key                                  
+000078cd  HwiP_post                                 
+00007871  HwiP_restore                              
+20001af4  HwiP_swiPIntNum                           
+0000655d  I2C_masterSendMultiByteNextWithTimeout    
+00005c45  I2C_masterSendMultiByteStart              
+000052b9  Interrupt_disableInterrupt                
+000076ad  Interrupt_disableMaster                   
+00005339  Interrupt_enableInterrupt                 
+000076bd  Interrupt_enableMaster                    
+00005cad  Interrupt_pendInterrupt                   
+00005f6d  Interrupt_registerInterrupt               
+000061dd  Interrupt_setPriority                     
+0000607d  Interrupt_unpendInterrupt                 
+000072b1  Interrupt_unregisterInterrupt             
+00006f51  List_put                                  
+00006f77  List_remove                               
+00007879  MSP_EXP432P401R_initGeneral               
+00001b07  MemManage_Handler                         
+00001b07  NMI_Handler                               
+00001b07  PCM_IRQHandler                            
+00001b07  PORT1_IRQHandler                          
+00001b07  PORT2_IRQHandler                          
+00001b07  PORT3_IRQHandler                          
+00001b07  PORT4_IRQHandler                          
+00001b07  PORT5_IRQHandler                          
+00001b07  PORT6_IRQHandler                          
+00001b07  PSS_IRQHandler                            
+00001b07  PendSV_Handler                            
+00007c04  PowerMSP432_config                        
+00005de5  PowerMSP432_getFreqs                      
+000076cd  PowerMSP432_getNumPerfLevels              
+000023ab  PowerMSP432_initPolicy                    
+20001a4c  PowerMSP432_module                        
+20001670  PowerMSP432_perfLevels                    
+000065a5  PowerMSP432_sleepPolicy                   
+0000460f  PowerMSP432_updateFreqs                   
+000076dd  Power_disablePolicy                       
+000076ed  Power_enablePolicy                        
+000077b9  Power_getConstraintMask                   
+000077c5  Power_getPerformanceLevel                 
+00007591  Power_idleFunc                            
+0000488d  Power_init                                
+00006e39  Power_registerNotify                      
+000065ed  Power_releaseConstraint                   
+00006b01  Power_setConstraint                       
+00000af1  Power_sleep                               
+00007191  Power_unregisterNotify                    
+0000775d  QueueP_empty                              
+00007375  QueueP_get                                
+000078d1  QueueP_head                               
+00007899  QueueP_init                               
+000078d5  QueueP_next                               
+000071b1  QueueP_put                                
+0000776b  QueueP_remove                             
+00001b07  RTC_C_IRQHandler                          
+000077d1  Reset_Handler                             
+00006b39  SDFatFS_close                             
+00007e18  SDFatFS_config                            
+00007b21  SDFatFS_count                             
+0000695d  SDFatFS_diskIOctrl                        
+00007031  SDFatFS_diskInitialize                    
+00006d0d  SDFatFS_diskRead                          
+000076fd  SDFatFS_diskStatus                        
+00006d39  SDFatFS_diskWrite                         
+0000667d  SDFatFS_init                              
+00003975  SDFatFS_open                              
+00007055  SDSPI_close                               
+0000789f  SDSPI_control                             
+00007cc4  SDSPI_fxnTable                            
+00004375  SDSPI_getNumSectors                       
+000078a5  SDSPI_getSectorSize                       
+000077dd  SDSPI_init                                
+00001b09  SDSPI_initialize                          
+00005a2d  SDSPI_open                                
+00004929  SDSPI_read                                
+00003b0d  SDSPI_write                               
+0000780d  SD_close                                  
+00007dac  SD_config                                 
+00007b22  SD_count                                  
+00007e1c  SD_defaultParams                          
+00007817  SD_getNumSectors                          
+00007821  SD_getSectorSize                          
+000066c1  SD_init                                   
+0000782b  SD_initialize                             
+00006999  SD_open                                   
+00007835  SD_read                                   
+0000783f  SD_write                                  
+UNDEFED   SHT$$INIT_ARRAY$$Base                     
+UNDEFED   SHT$$INIT_ARRAY$$Limit                    
+00005e49  SPIMSP432DMA_close                        
+000078ab  SPIMSP432DMA_control                      
+00007d50  SPIMSP432DMA_fxnTable                     
+000078d9  SPIMSP432DMA_init                         
+00000de9  SPIMSP432DMA_open                         
+00002991  SPIMSP432DMA_transfer                     
+00002bbd  SPIMSP432DMA_transferCancel               
+000075a5  SPI_Params_init                           
+00007849  SPI_close                                 
+00007c6c  SPI_config                                
+00007b23  SPI_count                                 
+00007d30  SPI_defaultParams                         
+00006e61  SPI_getInterruptStatus                    
+00006705  SPI_init                                  
+00003f69  SPI_initMaster                            
+000069d5  SPI_open                                  
+00007853  SPI_transfer                              
+00001b07  SVC_Handler                               
+0000770d  SemaphoreP_Params_init                    
+00006425  SemaphoreP_construct                      
+000074c9  SemaphoreP_create                         
+0000738f  SemaphoreP_createBinary                   
+20001ae0  SemaphoreP_defaultParams                  
+000078dd  SemaphoreP_delete                         
+000046b1  SemaphoreP_pend                           
+00006749  SemaphoreP_post                           
+0000771d  SwiP_Params_init                          
+000037c9  SwiP_construct                            
+000072cd  SwiP_disable                              
+000049c5  SwiP_dispatch                             
+00005d15  SwiP_post                                 
+0000678d  SwiP_restore                              
+00007421  SysCtl_A_disableNMISource                 
+00007439  SysCtl_A_enableNMISource                  
+0000772d  SysCtl_A_getNMISourceStatus               
+0000773d  SysCtl_getNMISourceStatus                 
+00001b07  SysTick_Handler                           
+0000569d  SystemInit                                
+00001b07  T32_INT1_IRQHandler                       
+00001b07  T32_INT2_IRQHandler                       
+00001b07  T32_INTC_IRQHandler                       
+00001b07  TA0_0_IRQHandler                          
+00001b07  TA0_N_IRQHandler                          
+00001b07  TA1_0_IRQHandler                          
+00001b07  TA1_N_IRQHandler                          
+00001b07  TA2_0_IRQHandler                          
+00001b07  TA2_N_IRQHandler                          
+00001b07  TA3_0_IRQHandler                          
+00001b07  TA3_N_IRQHandler                          
+0000774d  TimerP_Params_init                        
+00003bd1  TimerP_construct                          
+000060d5  TimerP_dynamicStub                        
+00005a99  TimerP_getCurrentTick                     
+000077e9  TimerP_getFreq                            
+000077f5  TimerP_getMaxTicks                        
+00006a11  TimerP_initDevice                         
+0000689d  TimerP_setNextTick                        
+000078e1  TimerP_setPeriod                          
+000067d1  TimerP_start                              
+000074df  UART_clearInterruptFlag                   
+00006c7d  UART_enableInterrupt                      
+000074f5  UART_enableModule                         
+00006185  UART_getEnabledInterruptStatus            
+00007451  UART_getInterruptStatus                   
+00002dc1  UART_initModule                           
+00001fad  UARTprintf                                
+00003535  UDMAMSP432_close                          
+00007dd8  UDMAMSP432_config                         
+00004c31  UDMAMSP432_init                           
+00004cc5  UDMAMSP432_open                           
+00001b07  UsageFault_Handler                        
+4000480c  WDTCTL_SYM                                
+00001b07  WDT_A_IRQHandler                          
+20000598  __CIOBUF_                                 
+20010000  __STACK_END                               
+00000200  __STACK_SIZE                              
+00000800  __SYSMEM_SIZE                             
+0000805c  __TI_CINIT_Base                           
+00008074  __TI_CINIT_Limit                          
+00008054  __TI_Handler_Table_Base                   
+0000805c  __TI_Handler_Table_Limit                  
+000058e1  __TI_auto_init                            
+00004751  __TI_buff_read                            
+00001855  __TI_cleanup                              
+20001aa8  __TI_cleanup_ptr                          
+00004b99  __TI_closefile                            
+00007779  __TI_decompress_none                      
+000078b1  __TI_decompress_rle24                     
+00003a45  __TI_doflush                              
+20001aac  __TI_dtors_ptr                            
+20001ab0  __TI_enable_exit_profile_output           
+20001a98  __TI_ft_end                               
+ffffffff  __TI_pprof_out_hndl                       
+ffffffff  __TI_prof_data_size                       
+ffffffff  __TI_prof_data_start                      
+0000432b  __TI_rd_ok                                
+00005daf  __TI_readmsg                              
+00000000  __TI_static_base__                        
+200009a0  __TI_tmpnams                              
+00005d7d  __TI_writemsg                             
+000042c9  __TI_wrt_ok                               
+00005531  __aeabi_memclr                            
+00005531  __aeabi_memclr4                           
+00005531  __aeabi_memclr8                           
+00004afd  __aeabi_memcpy                            
+00004afd  __aeabi_memcpy4                           
+00004afd  __aeabi_memcpy8                           
+00005533  __aeabi_memset                            
+00005533  __aeabi_memset4                           
+00005533  __aeabi_memset8                           
+20001aa4  __aeabi_stderr                            
+20001a9c  __aeabi_stdin                             
+20001aa0  __aeabi_stdout                            
+00001599  __aeabi_uldivmod                          
+ffffffff  __binit__                                 
+ffffffff  __c_args__                                
+000051b3  __mpu_init                                
+2000fe00  __stack                                   
+00007499  _args_main                                
+00006285  _c_int00                                  
+00007a20  _ctypes_                                  
+200017a0  _ftable                                   
+20001ad8  _lock                                     
+00007603  _nop                                      
+000075fb  _register_lock                            
+000075f5  _register_unlock                          
+20000d30  _sys_memory                               
+000055ab  _system_post_cinit                        
+000078e9  _system_pre_init                          
+20001adc  _unlock                                   
+000062dd  abort                                     
+00000a45  add_device                                
+ffffffff  binit                                     
+0000048d  calloc                                    
+00004deb  clkFxn                                    
+000009f5  close                                     
+00006a4d  configureConsoleUART                      
+00006a89  configureESPUART                          
+00005b05  configureSDCard                           
+00007ce8  consoleConfig                             
+000064c5  copy_in                                   
+00007d9c  daq1                                      
+00007305  disk_initialize                           
+00007079  disk_ioctl                                
+0000709d  disk_read                                 
+00006d65  disk_register                             
+00007321  disk_status                               
+00006f01  disk_unregister                           
+000071d1  disk_write                                
+20001b00  errno                                     
+00007d0c  espConfig                                 
+000062e5  exit                                      
+00006f9d  f_close                                   
+0000226b  f_lseek                                   
+00005439  f_mount                                   
+00001951  f_open                                    
+00002115  f_read                                    
+00002ab1  f_rename                                  
+00004a61  f_sync                                    
+0000456d  f_unlink                                  
+00001cb1  f_write                                   
+20001afc  fatfsPrefix                               
+00007889  fatfs_getFatTime                          
+00004bff  fclose                                    
+00007481  ff_cre_syncobj                            
+0000785d  ff_del_syncobj                            
+00006749  ff_rel_grant                              
+000075e1  ff_req_grant                              
+000071f1  ffcio_close                               
+00006c49  ffcio_lseek                               
+0000441d  ffcio_open                                
+00007211  ffcio_read                                
+00007655  ffcio_rename                              
+00007667  ffcio_unlink                              
+00007231  ffcio_write                               
+00003a91  fflush                                    
+000018ab  fopen                                     
+00003285  fread                                     
+000001db  free                                      
+00001881  freopen                                   
+00005ead  fseek                                     
+20000000  g_pfnRAMVectors                           
+20001960  g_psCmdTable                              
+000078e5  get_fattime                               
+20001a88  gpioCallbackFunctions                     
+20001a1c  gpioPinConfigs                            
+00000000  interruptVectors                          
+000009d1  lseek                                     
+00004f05  main                                      
+20001b08  main_func_sp                              
+00000173  malloc                                    
+20001acd  masterToSlaveByteCtr                      
+20001acc  masterToSlaveIndex                        
+20000d20  masterToSlavePacket                       
+000003a9  memalign                                  
+00004afd  memcpy                                    
+00005539  memset                                    
+000000e5  minit                                     
+00000923  open                                      
+000044c5  processCommand                            
+0000768b  putc                                      
+000070c1  puts                                      
+000008ff  read                                      
+0000029d  realloc                                   
+00000875  remove                                    
+000008d7  remove_device                             
+00000899  rename                                    
+00007891  rewind                                    
+20000d24  sdfatfsHandle                             
+20000358  sdfatfsObjects                            
+00007e20  sdspiHWAttrs                              
+20000cec  sdspiObjects                              
+00007251  sendByte                                  
+000036ed  setvbuf                                   
+00007b24  spiMSP432DMAHWAttrs                       
+200006b8  spiMSP432DMAObjects                       
+20000d28  src                                       
+0000754d  strchr                                    
+000074b1  strcmp                                    
+00007609  strcpy                                    
+000070e5  strcspn                                   
+0000761d  strlen                                    
+00006cdd  strncpy                                   
+00006de5  strspn                                    
+0000691d  strtok                                    
+000023ad  strtol                                    
+00007db8  udmaMSP432HWAttrs                         
+20000ce9  udmaMSP432Object                          
+00000875  unlink                                    
+000007e5  write                                     
+
+
+GLOBAL SYMBOLS: SORTED BY Symbol Address 
+
+address   name                                      
+-------   ----                                      
+00000000  __TI_static_base__                        
+00000000  interruptVectors                          
+000000e5  minit                                     
+00000173  malloc                                    
+000001db  free                                      
+00000200  __STACK_SIZE                              
+0000029d  realloc                                   
+000003a9  memalign                                  
+0000048d  calloc                                    
+000004c1  HOSTwrite                                 
+0000050d  HOSTunlink                                
+00000545  HOSTtime64                                
+0000058f  HOSTtime                                  
+000005c9  HOSTrename                                
+00000627  HOSTread                                  
+00000673  HOSTopen                                  
+000006c5  HOSTlseek                                 
+00000721  HOSTgetenv                                
+0000075f  HOSTclose                                 
+00000797  HOSTclock                                 
+000007e5  write                                     
+00000800  __SYSMEM_SIZE                             
+00000875  remove                                    
+00000875  unlink                                    
+00000899  rename                                    
+000008d7  remove_device                             
+000008ff  read                                      
+00000923  open                                      
+000009d1  lseek                                     
+000009f5  close                                     
+00000a45  add_device                                
+00000af1  Power_sleep                               
+00000de9  SPIMSP432DMA_open                         
+00001599  __aeabi_uldivmod                          
+00001855  __TI_cleanup                              
+00001881  freopen                                   
+000018ab  fopen                                     
+00001951  f_open                                    
+00001b07  ADC14_IRQHandler                          
+00001b07  AES256_IRQHandler                         
+00001b07  BusFault_Handler                          
+00001b07  COMP_E0_IRQHandler                        
+00001b07  COMP_E1_IRQHandler                        
+00001b07  CS_IRQHandler                             
+00001b07  DMA_ERR_IRQHandler                        
+00001b07  DMA_INT0_IRQHandler                       
+00001b07  DMA_INT1_IRQHandler                       
+00001b07  DMA_INT2_IRQHandler                       
+00001b07  DMA_INT3_IRQHandler                       
+00001b07  DebugMon_Handler                          
+00001b07  Default_Handler                           
+00001b07  EUSCIA1_IRQHandler                        
+00001b07  EUSCIB1_IRQHandler                        
+00001b07  EUSCIB2_IRQHandler                        
+00001b07  EUSCIB3_IRQHandler                        
+00001b07  FLCTL_IRQHandler                          
+00001b07  FPU_IRQHandler                            
+00001b07  HardFault_Handler                         
+00001b07  MemManage_Handler                         
+00001b07  NMI_Handler                               
+00001b07  PCM_IRQHandler                            
+00001b07  PORT1_IRQHandler                          
+00001b07  PORT2_IRQHandler                          
+00001b07  PORT3_IRQHandler                          
+00001b07  PORT4_IRQHandler                          
+00001b07  PORT5_IRQHandler                          
+00001b07  PORT6_IRQHandler                          
+00001b07  PSS_IRQHandler                            
+00001b07  PendSV_Handler                            
+00001b07  RTC_C_IRQHandler                          
+00001b07  SVC_Handler                               
+00001b07  SysTick_Handler                           
+00001b07  T32_INT1_IRQHandler                       
+00001b07  T32_INT2_IRQHandler                       
+00001b07  T32_INTC_IRQHandler                       
+00001b07  TA0_0_IRQHandler                          
+00001b07  TA0_N_IRQHandler                          
+00001b07  TA1_0_IRQHandler                          
+00001b07  TA1_N_IRQHandler                          
+00001b07  TA2_0_IRQHandler                          
+00001b07  TA2_N_IRQHandler                          
+00001b07  TA3_0_IRQHandler                          
+00001b07  TA3_N_IRQHandler                          
+00001b07  UsageFault_Handler                        
+00001b07  WDT_A_IRQHandler                          
+00001b09  SDSPI_initialize                          
+00001cb1  f_write                                   
+00001e39  GPIO_setConfig                            
+00001fad  UARTprintf                                
+00002115  f_read                                    
+0000226b  f_lseek                                   
+000023ab  PowerMSP432_initPolicy                    
+000023ad  strtol                                    
+000024e1  CMD_pwdn                                  
+00002611  CS_initClockSignal                        
+00002871  CMD_pwup                                  
+00002991  SPIMSP432DMA_transfer                     
+00002ab1  f_rename                                  
+00002bbd  SPIMSP432DMA_transferCancel               
+00002cc1  EUSCIB0_IRQHandler                        
+00002cc1  EUSCIB0_IRQHandler                        
+00002dc1  UART_initModule                           
+00002fb9  DMA_setChannelTransfer                    
+00003285  fread                                     
+00003371  CS_startHFXTWithTimeout                   
+00003455  CS_startLFXTWithTimeout                   
+00003535  UDMAMSP432_close                          
+000036ed  setvbuf                                   
+000037c9  SwiP_construct                            
+00003975  SDFatFS_open                              
+00003a45  __TI_doflush                              
+00003a91  fflush                                    
+00003b0d  SDSPI_write                               
+00003bd1  TimerP_construct                          
+00003e05  ClockP_startup                            
+00003eb9  CMD_mode                                  
+00003f69  SPI_initMaster                            
+00004019  ClockP_workFuncDynamic                    
+000040c5  CmdLineProcess                            
+00004171  EUSCIA3_IRQHandler                        
+00004171  EUSCIA3_IRQHandler                        
+0000421d  GPIO_init                                 
+000042c9  __TI_wrt_ok                               
+0000432b  __TI_rd_ok                                
+00004375  SDSPI_getNumSectors                       
+0000441d  ffcio_open                                
+000044c5  processCommand                            
+0000456d  f_unlink                                  
+0000460f  PowerMSP432_updateFreqs                   
+00004611  EUSCIA0_IRQHandler                        
+00004611  EUSCIA0_IRQHandler                        
+000046b1  SemaphoreP_pend                           
+00004751  __TI_buff_read                            
+000047f1  CMD_read                                  
+0000488d  Power_init                                
+00004929  SDSPI_read                                
+000049c5  SwiP_dispatch                             
+00004a61  f_sync                                    
+00004afd  __aeabi_memcpy                            
+00004afd  __aeabi_memcpy4                           
+00004afd  __aeabi_memcpy8                           
+00004afd  memcpy                                    
+00004b99  __TI_closefile                            
+00004bff  fclose                                    
+00004c31  UDMAMSP432_init                           
+00004cc5  UDMAMSP432_open                           
+00004deb  clkFxn                                    
+00004ded  CMD_setGain                               
+00004e79  EUSCIA2_IRQHandler                        
+00004e79  EUSCIA2_IRQHandler                        
+00004f05  main                                      
+0000501d  GPIO_setAsPeripheralModuleFunctionInputPin
+000051b3  __mpu_init                                
+00005239  ClockP_start                              
+000052b9  Interrupt_disableInterrupt                
+00005339  Interrupt_enableInterrupt                 
+00005439  f_mount                                   
+00005531  __aeabi_memclr                            
+00005531  __aeabi_memclr4                           
+00005531  __aeabi_memclr8                           
+00005533  __aeabi_memset                            
+00005533  __aeabi_memset4                           
+00005533  __aeabi_memset8                           
+00005539  memset                                    
+000055ab  _system_post_cinit                        
+000055ad  CMD_help                                  
+00005625  ClockP_walkQueueDynamic                   
+0000569d  SystemInit                                
+00005801  HwiP_construct                            
+000058e1  __TI_auto_init                            
+000059c1  CMD_diagnose                              
+00005a2d  SDSPI_open                                
+00005a99  TimerP_getCurrentTick                     
+00005b05  configureSDCard                           
+00005bdd  GPIO_hwiIntFxn                            
+00005c45  I2C_masterSendMultiByteStart              
+00005cad  Interrupt_pendInterrupt                   
+00005d15  SwiP_post                                 
+00005d7d  __TI_writemsg                             
+00005dab  C$$IO$$                                   
+00005daf  __TI_readmsg                              
+00005de5  PowerMSP432_getFreqs                      
+00005e49  SPIMSP432DMA_close                        
+00005ead  fseek                                     
+00005f11  GPIO_write                                
+00005f6d  Interrupt_registerInterrupt               
+00006025  GPIO_setCallback                          
+0000607d  Interrupt_unpendInterrupt                 
+000060d5  TimerP_dynamicStub                        
+00006185  UART_getEnabledInterruptStatus            
+000061dd  Interrupt_setPriority                     
+00006285  _c_int00                                  
+000062d9  C$$EXIT                                   
+000062dd  abort                                     
+000062e5  exit                                      
+000063d5  CMD_getData                               
+00006425  SemaphoreP_construct                      
+000064c5  copy_in                                   
+0000655d  I2C_masterSendMultiByteNextWithTimeout    
+000065a5  PowerMSP432_sleepPolicy                   
+000065ed  Power_releaseConstraint                   
+0000667d  SDFatFS_init                              
+000066c1  SD_init                                   
+00006705  SPI_init                                  
+00006749  SemaphoreP_post                           
+00006749  ff_rel_grant                              
+0000678d  SwiP_restore                              
+000067d1  TimerP_start                              
+0000689d  TimerP_setNextTick                        
+0000691d  strtok                                    
+0000695d  SDFatFS_diskIOctrl                        
+00006999  SD_open                                   
+000069d5  SPI_open                                  
+00006a11  TimerP_initDevice                         
+00006a4d  configureConsoleUART                      
+00006a89  configureESPUART                          
+00006b01  Power_setConstraint                       
+00006b39  SDFatFS_close                             
+00006be1  CS_setDCOCenteredFrequency                
+00006c49  ffcio_lseek                               
+00006c7d  UART_enableInterrupt                      
+00006cdd  strncpy                                   
+00006d0d  SDFatFS_diskRead                          
+00006d39  SDFatFS_diskWrite                         
+00006d65  disk_register                             
+00006d91  HwiP_create                               
+00006de5  strspn                                    
+00006e11  ClockP_getSystemTicks                     
+00006e39  Power_registerNotify                      
+00006e61  SPI_getInterruptStatus                    
+00006f01  disk_unregister                           
+00006f51  List_put                                  
+00006f77  List_remove                               
+00006f9d  f_close                                   
+00006fc5  ClockP_getTicks                           
+00006fe9  ClockP_scheduleNextTick                   
+0000700d  HwiP_dispatch                             
+00007031  SDFatFS_diskInitialize                    
+00007055  SDSPI_close                               
+00007079  disk_ioctl                                
+0000709d  disk_read                                 
+000070c1  puts                                      
+000070e5  strcspn                                   
+00007151  CS_setExternalClockSourceFrequency        
+00007171  ClockP_add                                
+00007191  Power_unregisterNotify                    
+000071b1  QueueP_put                                
+000071d1  disk_write                                
+000071f1  ffcio_close                               
+00007211  ffcio_read                                
+00007231  ffcio_write                               
+00007251  sendByte                                  
+000072b1  Interrupt_unregisterInterrupt             
+000072cd  SwiP_disable                              
+00007305  disk_initialize                           
+00007321  disk_status                               
+00007375  QueueP_get                                
+0000738f  SemaphoreP_createBinary                   
+000073a9  ClockP_destruct                           
+000073c1  EUSCI_A_SPI_getInterruptStatus            
+000073d9  EUSCI_B_SPI_getInterruptStatus            
+000073f1  HwiP_delete                               
+00007409  HwiP_inISR                                
+00007421  SysCtl_A_disableNMISource                 
+00007439  SysCtl_A_enableNMISource                  
+00007451  UART_getInterruptStatus                   
+00007481  ff_cre_syncobj                            
+00007499  _args_main                                
+000074b1  strcmp                                    
+000074c9  SemaphoreP_create                         
+000074df  UART_clearInterruptFlag                   
+000074f5  UART_enableModule                         
+0000754d  strchr                                    
+00007591  Power_idleFunc                            
+000075a5  SPI_Params_init                           
+000075e1  ff_req_grant                              
+000075f5  _register_unlock                          
+000075fb  _register_lock                            
+00007603  _nop                                      
+00007609  strcpy                                    
+0000761d  strlen                                    
+00007631  HwiP_Params_init                          
+00007655  ffcio_rename                              
+00007667  ffcio_unlink                              
+0000768b  putc                                      
+0000769d  HwiP_disable                              
+000076ad  Interrupt_disableMaster                   
+000076bd  Interrupt_enableMaster                    
+000076cd  PowerMSP432_getNumPerfLevels              
+000076dd  Power_disablePolicy                       
+000076ed  Power_enablePolicy                        
+000076fd  SDFatFS_diskStatus                        
+0000770d  SemaphoreP_Params_init                    
+0000771d  SwiP_Params_init                          
+0000772d  SysCtl_A_getNMISourceStatus               
+0000773d  SysCtl_getNMISourceStatus                 
+0000774d  TimerP_Params_init                        
+0000775d  QueueP_empty                              
+0000776b  QueueP_remove                             
+00007779  __TI_decompress_none                      
+00007787  CPU_cpsid                                 
+00007793  CPU_cpsie                                 
+000077a1  ClockP_doTick                             
+000077ad  ClockP_getSystemTickPeriod                
+000077b9  Power_getConstraintMask                   
+000077c5  Power_getPerformanceLevel                 
+000077d1  Reset_Handler                             
+000077dd  SDSPI_init                                
+000077e9  TimerP_getFreq                            
+000077f5  TimerP_getMaxTicks                        
+0000780d  SD_close                                  
+00007817  SD_getNumSectors                          
+00007821  SD_getSectorSize                          
+0000782b  SD_initialize                             
+00007835  SD_read                                   
+0000783f  SD_write                                  
+00007849  SPI_close                                 
+00007853  SPI_transfer                              
+0000785d  ff_del_syncobj                            
+00007871  HwiP_restore                              
+00007879  MSP_EXP432P401R_initGeneral               
+00007889  fatfs_getFatTime                          
+00007891  rewind                                    
+00007899  QueueP_init                               
+0000789f  SDSPI_control                             
+000078a5  SDSPI_getSectorSize                       
+000078ab  SPIMSP432DMA_control                      
+000078b1  __TI_decompress_rle24                     
+000078bd  ClockP_isActive                           
+000078c1  HwiP_clearInterrupt                       
+000078c5  HwiP_disableInterrupt                     
+000078c9  HwiP_enableInterrupt                      
+000078cd  HwiP_post                                 
+000078d1  QueueP_head                               
+000078d5  QueueP_next                               
+000078d9  SPIMSP432DMA_init                         
+000078dd  SemaphoreP_delete                         
+000078e1  TimerP_setPeriod                          
+000078e5  get_fattime                               
+000078e9  _system_pre_init                          
+00007a20  _ctypes_                                  
+00007b21  SDFatFS_count                             
+00007b22  SD_count                                  
+00007b23  SPI_count                                 
+00007b24  spiMSP432DMAHWAttrs                       
+00007c04  PowerMSP432_config                        
+00007c6c  SPI_config                                
+00007cc4  SDSPI_fxnTable                            
+00007ce8  consoleConfig                             
+00007d0c  espConfig                                 
+00007d30  SPI_defaultParams                         
+00007d50  SPIMSP432DMA_fxnTable                     
+00007d68  GPIOMSP432_config                         
+00007d9c  daq1                                      
+00007dac  SD_config                                 
+00007db8  udmaMSP432HWAttrs                         
+00007dd8  UDMAMSP432_config                         
+00007e18  SDFatFS_config                            
+00007e1c  SD_defaultParams                          
+00007e20  sdspiHWAttrs                              
+00008054  __TI_Handler_Table_Base                   
+0000805c  __TI_CINIT_Base                           
+0000805c  __TI_Handler_Table_Limit                  
+00008074  __TI_CINIT_Limit                          
+20000000  g_pfnRAMVectors                           
+20000358  sdfatfsObjects                            
+20000598  __CIOBUF_                                 
+200006b8  spiMSP432DMAObjects                       
+200009a0  __TI_tmpnams                              
+20000ce9  udmaMSP432Object                          
+20000cec  sdspiObjects                              
+20000d20  masterToSlavePacket                       
+20000d24  sdfatfsHandle                             
+20000d28  src                                       
+20000d30  _sys_memory                               
+20001670  PowerMSP432_perfLevels                    
+200017a0  _ftable                                   
+20001960  g_psCmdTable                              
+20001a1c  gpioPinConfigs                            
+20001a4c  PowerMSP432_module                        
+20001a88  gpioCallbackFunctions                     
+20001a98  __TI_ft_end                               
+20001a9c  __aeabi_stdin                             
+20001aa0  __aeabi_stdout                            
+20001aa4  __aeabi_stderr                            
+20001aa8  __TI_cleanup_ptr                          
+20001aac  __TI_dtors_ptr                            
+20001ab0  __TI_enable_exit_profile_output           
+20001acc  masterToSlaveIndex                        
+20001acd  masterToSlaveByteCtr                      
+20001ad8  _lock                                     
+20001adc  _unlock                                   
+20001ae0  SemaphoreP_defaultParams                  
+20001aec  ClockP_tickPeriod                         
+20001af0  HwiP_key                                  
+20001af4  HwiP_swiPIntNum                           
+20001afc  fatfsPrefix                               
+20001b00  errno                                     
+20001b08  main_func_sp                              
+2000fe00  __stack                                   
+20010000  __STACK_END                               
+4000480c  WDTCTL_SYM                                
+ffffffff  __TI_pprof_out_hndl                       
+ffffffff  __TI_prof_data_size                       
+ffffffff  __TI_prof_data_start                      
+ffffffff  __binit__                                 
+ffffffff  __c_args__                                
+ffffffff  binit                                     
+UNDEFED   SHT$$INIT_ARRAY$$Base                     
+UNDEFED   SHT$$INIT_ARRAY$$Limit                    
+
+[410 symbols]
