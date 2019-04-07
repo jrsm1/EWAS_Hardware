@@ -48,25 +48,3 @@ void EUSCIB2_IRQHandler(void){
         EUSCI_B2->IFG = 0;
     }
 }
-
-////moving data from sram to master
-//int datacount = 0;
-//void EUSCIA2_IRQHandler(void){
-//    if(EUSCI_B2->CTLW0 & BIT4){
-//        if(datacount == 0){
-//            P7OUT = (uint8_t) 0x0; P9OUT = (uint8_t) 0x0; P10OUT = (uint8_t) 0x0;   //address reset
-//            P2OUT = (uint8_t) 0x0; P2DIR = (uint8_t) 0x0;                           //ready io
-//            P4OUT = (uint8_t) 0xA;                                                  //read enable
-//            P3OUT = (uint8_t) 0x1;                                                  //chip enable
-//            EUSCI_B2->TXBUF = (uint8_t) P2IN;                                       //start moving data
-//            datacount++;
-//        }
-//        else{ //if(datacount!=200){
-//            if(++P7OUT == 0)
-//                if(++P9OUT == 0)
-//                    P10OUT++;
-//            EUSCI_B2->TXBUF = P2IN;
-//            datacount++;
-//        }
-//    }
-//}

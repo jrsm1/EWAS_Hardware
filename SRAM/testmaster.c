@@ -13,12 +13,9 @@ void i2cinit(){
     EUSCI_B0->CTLW0 |= (uint16_t) 0x0800;               //CTLW0[11] = UCMST = 1b        /master mode
     EUSCI_B0->CTLW0 |= (uint16_t) 0x0600;               //CLTW0[10:9] = UCMODE = 11b    /I2C mode
     EUSCI_B0->CTLW0 |= (uint16_t) 0x0040;               //CTLW0[7:6] = UCSSEL = 01b     /ACLK source
+    EUSCI_B0->CTLW1 |= (uint16_t) 0x0008;               //CTLW1[3:2] = UCASTP = 10b     /automatic stop with byte count
 
-//    EUSCI_B0->CTLW1 |= (uint16_t) 0x0008;               //CTLW1[3:2] = UCASTP = 10b     /automatically stop when byte counter is reached
-
-//    EUSCI_B0->TBCNT |= (uint16_t) 200;               //byte counter = 200
-
-    EUSCI_B0->BRW |= (uint16_t) 0x2;                    //baud rate
+    EUSCI_B0->BRW |= (uint16_t) 0x1;                    //baud rate
 
     //EUSCI_B0 SDA
     P1SEL1 &= ~BIT6;
@@ -34,15 +31,9 @@ void i2cinit(){
 }
 
 void readslave(char n){
-    EUSCI_B0->TBCNT |= (uint16_t) n;            //byte counter = 200
+    EUSCI_B0->TBCNT = (uint16_t) n;            //byte counter
     EUSCI_B0->CTLW0 &= (uint16_t) 0xFFEF;       //CTLW0[4] = UCTR = 0b  /receiver
     EUSCI_B0->CTLW0 |= BIT1;                    //start
-//    char i;
-//    for(i=0; i<n; i++){
-//        while(!(EUSCI_B0->IFG & BIT0));         //wait on RXBUF
-//        data[n] = EUSCI_B0->RXBUF;              //store incoming byte in array
-//    }
-//    EUSCI_B0->CTLW0 |= BIT2;                    //stop
 }
 
 void main(void){
@@ -50,6 +41,7 @@ void main(void){
     //Clock system
     CS->KEY = CS_KEY_VAL;                               //setting key to make clock registers editable
     CS->CTL1 |= (uint32_t) 0x00000200;                  //CTL1[10:8]=SELA=010b - ACLK source set to REFOCLK
+    CS->CTL1 |= (uint32_t) 0x00000000;                  //CTL1[26:24]=DIVA=111b - ACLK div = 128
     CS->CLKEN |= (uint32_t) 0x00008000;                 //CLKEN[15]=REFOFSEL=1b - REFOCLK set to 128kHz
     CS->KEY = 0;
 
@@ -58,7 +50,7 @@ void main(void){
     NVIC->ISER[0] = 1 << (EUSCIB0_IRQn);
 
     setSlave(0x60);
-    readslave(200);
+    readslave(5);
 
     for(;;);
 }
