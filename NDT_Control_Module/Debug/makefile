@@ -137,32 +137,32 @@ endif
 
 # Add inputs and outputs from these tool invocations to the build variables 
 EXE_OUTPUTS += \
-NDT_MainBoard_Module.out \
+NDT_Control_Module.out \
 
 EXE_OUTPUTS__QUOTED += \
-"NDT_MainBoard_Module.out" \
+"NDT_Control_Module.out" \
 
 BIN_OUTPUTS += \
-NDT_MainBoard_Module.hex \
+NDT_Control_Module.hex \
 
 BIN_OUTPUTS__QUOTED += \
-"NDT_MainBoard_Module.hex" \
+"NDT_Control_Module.hex" \
 
 
 # All Target
-all: NDT_MainBoard_Module.out
+all: NDT_Control_Module.out
 
 # Tool invocations
-NDT_MainBoard_Module.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
+NDT_Control_Module.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
 	@echo 'Building target: $@'
 	@echo 'Invoking: MSP432 Linker'
-	"/opt/ti/ccsv6/tools/compiler/arm_15.12.3.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=FPv4SPD16 -me --advice:power=none -g --define=__MSP432P401R__ --define=DeviceFamily_MSP432P401x --display_error_number --diag_warning=225 --diag_warning=255 --diag_wrap=off --gen_func_subsections=on -z -m"NDT_MainBoard_Module.map" --stack_size=512 -i"/opt/ti/simplelink_msp432p4_sdk_2_30_00_14/source" -i"/opt/ti/simplelink_msp432p4_sdk_2_30_00_14/kernel/nortos" -i"/opt/ti/ccsv6/tools/compiler/arm_15.12.3.LTS/lib" -i"/opt/ti/ccsv6/tools/compiler/arm_15.12.3.LTS/include" --reread_libs --warn_sections --display_error_number --diag_wrap=off --xml_link_info="NDT_MainBoard_Module_linkInfo.xml" --rom_model -o "NDT_MainBoard_Module.out" $(ORDERED_OBJS)
+	"/opt/ti/ccsv6/tools/compiler/arm_15.12.3.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=FPv4SPD16 -me --advice:power=none -g --define=__MSP432P401R__ --define=DeviceFamily_MSP432P401x --display_error_number --diag_warning=225 --diag_warning=255 --diag_wrap=off --gen_func_subsections=on -z -m"NDT_Control_Module.map" --stack_size=512 -i"/opt/ti/simplelink_msp432p4_sdk_2_30_00_14/source" -i"/opt/ti/simplelink_msp432p4_sdk_2_30_00_14/kernel/nortos" -i"/opt/ti/ccsv6/tools/compiler/arm_15.12.3.LTS/lib" -i"/opt/ti/ccsv6/tools/compiler/arm_15.12.3.LTS/include" --reread_libs --warn_sections --display_error_number --diag_wrap=off --xml_link_info="NDT_Control_Module_linkInfo.xml" --rom_model -o "NDT_Control_Module.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: $@'
 	@echo ' '
 
-NDT_MainBoard_Module.hex: $(EXE_OUTPUTS)
+NDT_Control_Module.hex: $(EXE_OUTPUTS)
 	@echo 'Invoking: MSP432 Hex Utility'
-	"/opt/ti/ccsv6/tools/compiler/arm_15.12.3.LTS/bin/armhex"  -o "NDT_MainBoard_Module.hex" $(EXE_OUTPUTS__QUOTED)
+	"/opt/ti/ccsv6/tools/compiler/arm_15.12.3.LTS/bin/armhex"  -o "NDT_Control_Module.hex" $(EXE_OUTPUTS__QUOTED)
 	@echo 'Finished building: $@'
 	@echo ' '
 
