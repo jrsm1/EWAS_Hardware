@@ -155,8 +155,8 @@ void EUSCIA2_IRQHandler(void)
             printf(EUSCI_A0_BASE, "%c", receivedChar);
             if (receivedChar == ',')
             {
+                gps.transmission[counter++] = receivedChar;
                 comma_counter++;
-                counter = 0;
                 if (comma_counter == 7)
                 {
                     comma_counter = 0;
