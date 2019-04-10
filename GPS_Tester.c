@@ -1,8 +1,5 @@
 /*
- * GPS.c
- *
- *  Created on: Mar 27, 2019
- *      Author: Christian J. Cancel Ramos
+ * GPS_Tester.c
  *
  *               MSP432P401
  *             -----------------
@@ -29,14 +26,11 @@
 #define TIMER_PERIOD    0x8000
 #define TIME_WAIT 30
 
-short timeout = 0;
 short seconds = 0;
-short check_format = 0;
-short record = 0;
-short counter = 0;
-char format[6];
+short column = 0;
+short row = 0;
 short comma_counter = 0;
-short compare_value;
+char transmission[1000][20];
 
 /* UART Configuration Parameter. These are the configuration parameters to
  * make the eUSCI A UART module to operate with a 9600 baud rate. These
@@ -152,95 +146,13 @@ void EUSCIA2_IRQHandler(void)
     {
         char receivedChar = MAP_UART_receiveData(EUSCI_A2_BASE);
         //Check to see if we are within a valid transmission. If we are not, enter if statement.
-        if (record)
+        if(receivedChar == ',')
         {
-            printf(EUSCI_A0_BASE, "%c", receivedChar);
-            if (receivedChar == ',')
-            {
-                comma_counter++;
-                counter = 0;
-                if (comma_counter == 7)
-                {
-                    comma_counter = 0;
-                    if (gps.valid_Data)
-                    {
-                        MAP_Interrupt_disableInterrupt(INT_EUSCIA2);
-                        printf(EUSCI_A0_BASE, "%s\r\n", "Data is Valid");
-                    }
-                    else
-                    {
-                        printf(EUSCI_A0_BASE, "%s\r\n", "Data is Invalid");
-                        record = 0;
-                        check_format = 0;
-                        counter = 0;
-                        timeout++;
-                        if(timeout == TIME_WAIT)
-                        {
-                            MAP_Interrupt_disableInterrupt(INT_EUSCIA2);
-                            printf(EUSCI_A0_BASE, "%s\r\n", "GPS has timed out, too many failed tries");
-                        }
-                    }
-                }
-            }
-            else if (receivedChar == ' ')
-            {
-                //ignore this
-            }
-            else
-            {
-                switch (comma_counter)
-                {
-                case 1:                        //utc time
-                    gps.utc[counter++] = receivedChar;
-                    break;
-                case 2:                        //latitude
-                    gps.latitude[counter++] = receivedChar;
-                    break;
-                case 3:                        //N/S
-                    gps.N_S = receivedChar;
-                    break;
-                case 4:                        //longitude
-                    gps.longtitude[counter++] = receivedChar;
-                    break;
-                case 5:
-                    gps.E_W = receivedChar;
-                    break;
-                case 6:
-                    if (receivedChar == '1' || receivedChar == '2'
-                            || receivedChar == '3')
-                        gps.valid_Data = 1;
-                    else
-                        gps.valid_Data = 0;
-                    break;
-                }
-            }
+            row++;
         }
-        else if (check_format && counter < 5)
+        else
         {
-            format[counter++] = receivedChar;
-            printf(EUSCI_A0_BASE, "%c", format[counter - 1]);
-            if (counter == 5)
-            {
-                printf(EUSCI_A0_BASE, "\r\n");
-                compare_value = strcmp(format, gps.nMEA_Record);
-                if (!compare_value)
-                {
-                    record = 1;
-                    check_format = 0;
-                    counter = 0;
-                }
-                else
-                {
-                    check_format = 0;
-                    counter = 0;
-                    record = 0;
-                }
-            }
-        }
-        else if (receivedChar == '$' && !check_format)
-        {
-            printf(EUSCI_A0_BASE, "%c", receivedChar);
-            check_format = 1;
+            transmission[row][column++] = receivedChar;
         }
     }
 }

@@ -26,10 +26,12 @@
 #include "printf.h"
 
 #define MAX_FAILS 10
+#define MAX_RETRIES 3
 #define TIMER_PERIOD    0x8000
 #define TIME_WAIT 30
 
 short timeout = 0;
+short timeout_timeout = 0;
 short seconds = 0;
 short check_format = 0;
 short record = 0;
@@ -70,12 +72,8 @@ TIMER_A_CLOCKSOURCE_ACLK,              // ACLK Clock Source
 typedef struct GPSformats
 {
     char nMEA_Record[6];
-    char utc[10];
-    char latitude[10];
-    char N_S;
-    char longtitude[11];
-    char E_W;
     short valid_Data;
+    char transmission[83];
 } GPS;
 
 GPS gps;
@@ -157,8 +155,8 @@ void EUSCIA2_IRQHandler(void)
             printf(EUSCI_A0_BASE, "%c", receivedChar);
             if (receivedChar == ',')
             {
+                gps.transmission[counter++] = receivedChar;
                 comma_counter++;
-                counter = 0;
                 if (comma_counter == 7)
                 {
                     comma_counter = 0;
@@ -177,7 +175,20 @@ void EUSCIA2_IRQHandler(void)
                         if(timeout == TIME_WAIT)
                         {
                             MAP_Interrupt_disableInterrupt(INT_EUSCIA2);
-                            printf(EUSCI_A0_BASE, "%s\r\n", "GPS has timed out, too many failed tries");
+                            timeout_timeout++;
+                            if(timeout_timeout == MAX_RETRIES)
+                            {
+                                printf(EUSCI_A0_BASE,"%s\r\n","GPS did not sync after 3 tries.");
+                                seconds = 0;
+                                timeout = 0;
+                            }
+                            else
+                            {
+                                printf(EUSCI_A0_BASE,"%s\r\n","GPS did not sync within 30 seconds. Retrying.");
+                                seconds = 0;
+                                timeout = 0;
+                                MAP_Interrupt_enableInterrupt(INT_TA1_0);
+                            }
                         }
                     }
                 }
@@ -190,21 +201,6 @@ void EUSCIA2_IRQHandler(void)
             {
                 switch (comma_counter)
                 {
-                case 1:                        //utc time
-                    gps.utc[counter++] = receivedChar;
-                    break;
-                case 2:                        //latitude
-                    gps.latitude[counter++] = receivedChar;
-                    break;
-                case 3:                        //N/S
-                    gps.N_S = receivedChar;
-                    break;
-                case 4:                        //longitude
-                    gps.longtitude[counter++] = receivedChar;
-                    break;
-                case 5:
-                    gps.E_W = receivedChar;
-                    break;
                 case 6:
                     if (receivedChar == '1' || receivedChar == '2'
                             || receivedChar == '3')
@@ -212,6 +208,8 @@ void EUSCIA2_IRQHandler(void)
                     else
                         gps.valid_Data = 0;
                     break;
+                default:
+                    gps.transmission[counter++] = receivedChar;
                 }
             }
         }

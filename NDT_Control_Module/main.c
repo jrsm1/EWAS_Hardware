@@ -33,11 +33,29 @@
 
 
 /* ESP32 UART Macros */
+/*
 #define ESP32_UART_BASE				EUSCI_A2_BASE
 #define ESP32_UART_GPIO_PORT		GPIO_PORT_P3
 #define ESP32_UART_INT				INT_EUSCIA2
 #define ESP32_UART_RX				GPIO_PIN2
 #define ESP32_UART_TX				GPIO_PIN3
+*/
+
+
+/* GPS UART Macros*/
+#define GPS_UART_BASE				EUSCI_A2_BASE
+#define GPS_UART_GPIO_PORT			GPIO_PORT_P3
+#define GPS_UART_INT				INT_EUSCIA2
+#define GPS_UART_RX					GPIO_PIN2
+#define GPS_UART_TX					GPIO_PIN3
+
+
+/* GPS Timer Macros*/
+#define MAX_FAILS 					10
+#define TIMER_PERIOD    			0x8000
+#define TIME_WAIT 					30
+#define GPS_TIMER_BASE				TIMER_A1_BASE
+#define GPS_TIMER_INT				INT_TA1_0
 
 
 /* FTDI UART Macros */
@@ -50,10 +68,15 @@
 
 /* I2C Bus Macros */
 #define DEFAULT_SLAVE_ADDRESS   	0x60 //0xC0 >> 1
-#define I2C_BUS_BASE				EUSCI_B0_BASE
+#define I2C_BUS_BASE				EUSCI_B2_BASE
+#define I2C_BUS_GPIO_PORT			GPIO_PORT_P3
+#define I2C_BUS_INT					INT_EUSCIB2
+#define I2C_BUS_SCL					GPIO_PIN6
+#define I2C_BUS_SDA					GPIO_PIN7
 #define I2C_BUS_MAX_DAQS			8
 #define MASTER_TO_SLAVE_PACKET_SIZE 3
 #define NUM_OF_REC_BYTES			600
+
 
 /* General System Macros */
 #define BUFFER_SIZE 				128
@@ -65,9 +88,11 @@
 #define CPY_BUFF_SIZE       		2048
 #endif
 
+
 /* String conversion macro */
 #define STR_(n)             		#n
 #define STR(n)              		STR_(n)
+
 
 /* Drive number used for FatFs */
 #define DRIVE_NUM           		0
@@ -79,7 +104,9 @@
 
 
 void configureConsoleUART(void);
-void configureESPUART(void);
+//void configureESPUART(void);
+void configureGPSUART(void);
+void configureGPSTimer(void);
 void configureFTDIUART(void);
 void configureI2CBus(void);
 void configureSDCard(void);
@@ -92,25 +119,53 @@ void sendUARTString(uint32_t moduleInstance, char * msg);
 //		Global Variables		//
 /********************************/
 
+
 static char consoleInput[BUFFER_SIZE];
-static char wifiInput[BUFFER_SIZE];
+//static char wifiInput[BUFFER_SIZE];
 static char COMMAND[BUFFER_SIZE];
 char masterToSlavePacket[MASTER_TO_SLAVE_PACKET_SIZE];
 uint8_t masterToSlaveIndex = 0;
 uint8_t masterToSlaveByteCtr = 3;
-static volatile uint8_t wifiIndex = 0;
+//static volatile uint8_t wifiIndex = 0;
 static volatile uint8_t inputIndex = 0;
 static volatile bool slavesInitialized = false;
 static volatile uint8_t slaveIndex = 0;
 static volatile uint8_t inputFlag = 0;
-static volatile uint8_t wifiFlag = 0;
+//static volatile uint8_t wifiFlag = 0;
 static volatile uint8_t cardFlag = 0;
 const uint8_t DAQAddresses[] = {0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57};
-static uint8_t activeDAQModules = 0;
-
+//static uint8_t activeDAQModules = 0;
 static uint8_t RXData[NUM_OF_REC_BYTES];
 static volatile uint32_t xferIndex;
 
+
+/* GPS Global Variables */
+short timeout = 0;
+short seconds = 0;
+short check_format = 0;
+short record = 0;
+short counter = 0;
+char format[6];
+short comma_counter = 0;
+short compare_value;
+
+typedef struct GPSformats
+{
+    char nMEA_Record[6];
+    char utc[10];
+    char latitude[10];
+    char N_S;
+    char longtitude[11];
+    char E_W;
+    short valid_Data;
+} GPS;
+
+GPS gps;
+
+//
+
+
+/* Module Configuration Global Variables */
 
 //Console Baudrate 9600bps
 const eUSCI_UART_Config consoleConfig =
@@ -128,6 +183,7 @@ const eUSCI_UART_Config consoleConfig =
 
 
 //ESP32 Baudrate 9600bps
+/*
 const eUSCI_UART_Config espConfig =
 {
         EUSCI_A_UART_CLOCKSOURCE_SMCLK,          // SMCLK Clock Source
@@ -140,6 +196,22 @@ const eUSCI_UART_Config espConfig =
         EUSCI_A_UART_MODE,                       // UART mode
         EUSCI_A_UART_OVERSAMPLING_BAUDRATE_GENERATION  // Oversampling
 };
+*/
+
+//GPS Baudrate 9600bps
+const eUSCI_UART_Config gpsConfig =
+{
+        EUSCI_A_UART_CLOCKSOURCE_SMCLK,          // SMCLK Clock Source
+        78,                                     // BRDIV = 78
+        2,                                      // UCxBRF = 2
+        0,                                       // UCxBRS = 0
+        EUSCI_A_UART_NO_PARITY,                  // No Parity
+        EUSCI_A_UART_LSB_FIRST,                  // LSB First
+        EUSCI_A_UART_ONE_STOP_BIT,               // One stop bit
+        EUSCI_A_UART_MODE,                       // UART mode
+        EUSCI_A_UART_OVERSAMPLING_BAUDRATE_GENERATION  // Oversampling
+};
+
 
 
 //FTDI Baudrate 115200bps
@@ -162,12 +234,21 @@ const eUSCI_I2C_MasterConfig i2cBusConfig =
 {
         EUSCI_B_I2C_CLOCKSOURCE_SMCLK,          // SMCLK Clock Source
         12000000,                                // SMCLK = 12MHz
-        EUSCI_B_I2C_SET_DATA_RATE_100KBPS,      // Desired I2C Clock of 100khz
+        EUSCI_B_I2C_SET_DATA_RATE_400KBPS,      // Desired I2C Clock of 100khz
         0,                                      // No byte counter threshold
         EUSCI_B_I2C_NO_AUTO_STOP                // No Autostop
 };
 
 
+//GPS Timer Configuration
+const Timer_A_UpModeConfig upConfig = {
+		TIMER_A_CLOCKSOURCE_ACLK,              // ACLK Clock Source
+        TIMER_A_CLOCKSOURCE_DIVIDER_1,          // ACLK/1 = 32.768kHz
+        TIMER_PERIOD,                           // 32768 ticks
+        TIMER_A_TAIE_INTERRUPT_DISABLE,         // Disable Timer interrupt
+        TIMER_A_CCIE_CCR0_INTERRUPT_ENABLE,    // Enable CCR0 interrupt
+        TIMER_A_DO_CLEAR                        // Clear value
+};
 
 
 ////////////////////////////////////////
@@ -185,8 +266,8 @@ char fatfsPrefix[] = "fat";
 
 unsigned char cpy_buff[CPY_BUFF_SIZE + 1];
 const char textarray[] = \
-"***********************************************************************\n"
-"0         1         2         3         4         5         6         7\n";
+		"***********************************************************************\n"
+		"0         1         2         3         4         5         6         7\n";
 
 
 ///////////////////////////////////////
@@ -204,11 +285,12 @@ int main(void)
     WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;
 
 //    /* Variables to keep track of the file copy progress */
-    unsigned int bytesRead = 0;
+    //unsigned int bytesRead = 0;
     //unsigned int bytesWritten = 0;
-    unsigned int filesize;
+    //unsigned int filesize;
     //unsigned int totalBytesCopied = 0;
-
+    strcpy(gps.nMEA_Record, "GPGGA");
+    gps.valid_Data = 0;
 
     memset(consoleInput, 0x00, BUFFER_SIZE);
 
@@ -216,13 +298,15 @@ int main(void)
 
     //SD Card configuration changes MCLK, SMCLK, re-init to desired values
     CS_initClockSignal(CS_SMCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_1);
+    //CS_initClockSignal(CS_ACLK, CS_REFOCLK_SELECT, CS_CLOCK_DIVIDER_1);
 
     configureConsoleUART();
     //configureESPUART(); //Currently not in use
 //    configureFTDIUART();
-//    configureI2CBus();
+//    configureGPSUART();
+    configureI2CBus();
 
-//    initializeSlaves();
+    initializeSlaves();
 
 
 //	masterToSlavePacket[0] = 0xCA;
@@ -235,7 +319,7 @@ int main(void)
 
         if(inputFlag){
         	inputFlag = 0;
-///*
+/*
         	if(wifiFlag){
         		wifiFlag = 0;
         		processCommand(wifiInput);
@@ -243,7 +327,7 @@ int main(void)
         	}else{
         		processCommand(consoleInput);
         	}
-//*/
+*/
         	processCommand(consoleInput);
             inputIndex = 0;
 
@@ -267,57 +351,72 @@ void configureConsoleUART(void){
 
     CS_setDCOCenteredFrequency(SYSTEM_FREQ); //DCO Freq is used for MCLK, SMCLK upon reset
 
-    /* Configuring UART Module */
     UART_initModule(CONSOLE_UART_BASE, &consoleConfig);
 
-    /* Enable UART module */
     UART_enableModule(CONSOLE_UART_BASE);
 
-    /* Enabling interrupts */
     UART_enableInterrupt(CONSOLE_UART_BASE, EUSCI_A_UART_RECEIVE_INTERRUPT);
     Interrupt_enableInterrupt(CONSOLE_UART_INT);
-    //Interrupt_enableSleepOnIsrExit();
 }
 
 
+/*
 void configureESPUART(void){
     GPIO_setAsPeripheralModuleFunctionInputPin(ESP32_UART_GPIO_PORT,
     		ESP32_UART_RX | ESP32_UART_TX, GPIO_PRIMARY_MODULE_FUNCTION);
 
     CS_setDCOCenteredFrequency(SYSTEM_FREQ); //DCO Freq is used for MCLK, SMCLK upon reset
 
-    /* Configuring UART Module */
+    // Configuring UART Module
     UART_initModule(ESP32_UART_BASE, &espConfig);
 
-    /* Enable UART module */
+    // Enable UART module
     UART_enableModule(ESP32_UART_BASE);
 
-    /* Enabling interrupts */
+    // Enabling interrupts
     UART_enableInterrupt(ESP32_UART_BASE, EUSCI_A_UART_RECEIVE_INTERRUPT);
     Interrupt_enableInterrupt(ESP32_UART_INT);
     //Interrupt_enableSleepOnIsrExit();
 
 }
+*/
+
+
+void configureGPSUART(void){
+    GPIO_setAsPeripheralModuleFunctionInputPin(GPS_UART_GPIO_PORT,
+    		CONSOLE_UART_RX | CONSOLE_UART_TX, GPIO_PRIMARY_MODULE_FUNCTION);
+
+    CS_setDCOCenteredFrequency(SYSTEM_FREQ); //DCO Freq is used for MCLK, SMCLK upon reset
+
+    UART_initModule(GPS_UART_BASE, &gpsConfig);
+
+    UART_enableModule(GPS_UART_BASE);
+
+    //UART_enableInterrupt(CONSOLE_UART_BASE, EUSCI_A_UART_RECEIVE_INTERRUPT);
+    //Interrupt_enableInterrupt(CONSOLE_UART_INT);
+}
+
+
+void configureGPSTimer(void){
+	Timer_A_configureUpMode(GPS_TIMER_BASE, &upConfig);
+	Interrupt_enableInterrupt(GPS_TIMER_INT);
+
+	Timer_A_startCounter(GPS_TIMER_BASE, TIMER_A_UP_MODE);
+}
 
 
 void configureFTDIUART(void){
-
-
     GPIO_setAsPeripheralModuleFunctionInputPin(FTDI_UART_GPIO_PORT,
     		FTDI_UART_RX | FTDI_UART_TX, GPIO_PRIMARY_MODULE_FUNCTION);
 
     CS_setDCOCenteredFrequency(SYSTEM_FREQ); //DCO Freq is used for MCLK, SMCLK upon reset
 
-    /* Configuring UART Module */
     UART_initModule(FTDI_UART_BASE, &ftdiConfig);
 
-    /* Enable UART module */
     UART_enableModule(FTDI_UART_BASE);
 
-    /* Enabling interrupts */
     UART_enableInterrupt(FTDI_UART_BASE, EUSCI_A_UART_RECEIVE_INTERRUPT);
     Interrupt_enableInterrupt(FTDI_UART_INT);
-//    Interrupt_enableSleepOnIsrExit();
 
 }
 
@@ -343,8 +442,9 @@ void configureSDCard(void){
 
 void configureI2CBus(void){
 
-	GPIO_setAsPeripheralModuleFunctionInputPin(GPIO_PORT_P1,
-	            GPIO_PIN6 + GPIO_PIN7, GPIO_PRIMARY_MODULE_FUNCTION);
+	//TODO SD Card now uses these pins, switch I2C to UCB1!!!
+	GPIO_setAsPeripheralModuleFunctionInputPin(I2C_BUS_GPIO_PORT,
+			I2C_BUS_SCL + I2C_BUS_SDA, GPIO_PRIMARY_MODULE_FUNCTION);
 
 
 	/* Initializing I2C Master to SMCLK at 400khz with no autostop */
@@ -380,7 +480,7 @@ void initializeSlaves(void){
 	      /* Send only a Start condition and the address byte */
 	      if(slaveIndex < I2C_BUS_MAX_DAQS){
 	    	  I2C_masterSendMultiByteStartWithTimeout(I2C_BUS_BASE,
-	        		  DAQAddresses[slaveIndex++], 0xFFFFFFFF);
+	        		  DAQAddresses[slaveIndex++], 0x0000FFFF);
 	    	  //TODO
 	    	  	 /*
 	    	  	  * If DAQ responds, add 1 to DAQ counter, else continue
@@ -390,14 +490,13 @@ void initializeSlaves(void){
 	    	  slavesInitialized = true;
 	      }
 	//          MAP_Interrupt_enableSleepOnIsrExit();
-	//          MAP_PCM_gotoLPM0InterruptSafe();
     }
     //Only one slave, for demo purposes only
     //I2C_setSlaveAddress(I2C_BUS_BASE, 0x50);
     //Enable Interrupts after initialization
     I2C_enableInterrupt(I2C_BUS_BASE, EUSCI_B_I2C_TRANSMIT_INTERRUPT0 +
     			EUSCI_B_I2C_NAK_INTERRUPT + EUSCI_B_I2C_RECEIVE_INTERRUPT0);
-    Interrupt_enableInterrupt(INT_EUSCIB0);
+    Interrupt_enableInterrupt(I2C_BUS_INT);
 }
 
 
@@ -427,9 +526,7 @@ void processCommand(char *CommandText){
 	}
 }
 
-/*
- *
- */
+
 void sendUARTString(uint32_t moduleInstance, char * msg){
 
 	while(UART_queryStatusFlags(moduleInstance, EUSCI_A_UART_BUSY));
@@ -447,10 +544,12 @@ void sendUARTString(uint32_t moduleInstance, char * msg){
 }
 
 
+/********************************/
+//	Interrupt Service Routines	//
+/********************************/
+
+
 //Console UART handler, lookup way to change function name without errors
-/*
- *
- */
 void EUSCIA0_IRQHandler(void){
 
     uint32_t status = UART_getEnabledInterruptStatus(CONSOLE_UART_BASE);
@@ -476,10 +575,10 @@ void EUSCIA0_IRQHandler(void){
 }
 
 
+
+
 //ESP32 UART handler, lookup way to change function name without errors
 /*
- *
- */
 void EUSCIA2_IRQHandler(void){
 
     uint32_t status = MAP_UART_getEnabledInterruptStatus(ESP32_UART_BASE);
@@ -499,11 +598,118 @@ void EUSCIA2_IRQHandler(void){
      }
 
 }
+*/
+
+//GPS UART Handler
+void EUSCIA2_IRQHandler(void){
+	uint32_t status = MAP_UART_getEnabledInterruptStatus(EUSCI_A2_BASE);
+
+	    MAP_UART_clearInterruptFlag(EUSCI_A2_BASE, status);
+
+	    if (status & EUSCI_A_UART_RECEIVE_INTERRUPT_FLAG)
+	    {
+	        char receivedChar = MAP_UART_receiveData(EUSCI_A2_BASE);
+	        //Check to see if we are within a valid transmission. If we are not, enter if statement.
+	        if (record)
+	        {
+	            UARTprintf(CONSOLE_UART_BASE, "%c", receivedChar);
+	            if (receivedChar == ',')
+	            {
+	                comma_counter++;
+	                counter = 0;
+	                if (comma_counter == 7)
+	                {
+	                    comma_counter = 0;
+	                    if (gps.valid_Data)
+	                    {
+	                        MAP_Interrupt_disableInterrupt(INT_EUSCIA2);
+	                        UARTprintf(CONSOLE_UART_BASE, "%s\r\n", "Data is Valid");
+	                    }
+	                    else
+	                    {
+	                        UARTprintf(CONSOLE_UART_BASE, "%s\r\n", "Data is Invalid");
+	                        record = 0;
+	                        check_format = 0;
+	                        counter = 0;
+	                        timeout++;
+	                        if(timeout == TIME_WAIT)
+	                        {
+	                            MAP_Interrupt_disableInterrupt(INT_EUSCIA2);
+	                            UARTprintf(CONSOLE_UART_BASE, "%s\r\n", "GPS has timed out, too many failed tries");
+	                        }
+	                    }
+	                }
+	            }
+	            else if (receivedChar == ' ')
+	            {
+	                //ignore this
+	            }
+	            else
+	            {
+	                switch (comma_counter)
+	                {
+	                case 1:                        //utc time
+	                    gps.utc[counter++] = receivedChar;
+	                    break;
+	                case 2:                        //latitude
+	                    gps.latitude[counter++] = receivedChar;
+	                    break;
+	                case 3:                        //N/S
+	                    gps.N_S = receivedChar;
+	                    break;
+	                case 4:                        //longitude
+	                    gps.longtitude[counter++] = receivedChar;
+	                    break;
+	                case 5:
+	                    gps.E_W = receivedChar;
+	                    break;
+	                case 6:
+	                    if (receivedChar == '1' || receivedChar == '2'
+	                            || receivedChar == '3')
+	                        gps.valid_Data = 1;
+	                    else
+	                        gps.valid_Data = 0;
+	                    break;
+	                }
+	            }
+	        }
+	        else if (check_format && counter < 5)
+	        {
+	            format[counter++] = receivedChar;
+	            UARTprintf(CONSOLE_UART_BASE, "%c", format[counter - 1]);
+	            if (counter == 5)
+	            {
+	                UARTprintf(CONSOLE_UART_BASE, "\r\n");
+	                compare_value = strcmp(format, gps.nMEA_Record);
+	                if (!compare_value)
+	                {
+	                    record = 1;
+	                    check_format = 0;
+	                    counter = 0;
+	                }
+	                else
+	                {
+	                    check_format = 0;
+	                    counter = 0;
+	                    record = 0;
+	                }
+	            }
+	        }
+	        else if (receivedChar == '$' && !check_format)
+	        {
+	            UARTprintf(CONSOLE_UART_BASE, "%c", receivedChar);
+	            check_format = 1;
+	        }
+	    }
 
 
-//FTDI UART handler, lookup way to change function name without errors
+}
+
+
+
+
 /*
- *
+ * FTDI UART handler, lookup way to change function name without errors
  */
 void EUSCIA3_IRQHandler(void){
 
@@ -530,9 +736,9 @@ void EUSCIA3_IRQHandler(void){
 }
 
 
-//I2C Bus handler
+
 /*
- *
+ * I2C Bus handler
  */
 void EUSCIB0_IRQHandler(void)
 {
@@ -570,10 +776,9 @@ void EUSCIB0_IRQHandler(void)
 //    	MAP_I2C_masterReceiveMultiByteStop(EUSCI_B0_BASE);
         if (xferIndex == NUM_OF_REC_BYTES - 2)
         {
-//            MAP_I2C_disableInterrupt(EUSCI_B0_BASE,
-//                    EUSCI_B_I2C_RECEIVE_INTERRUPT0);
+//            MAP_I2C_disableInterrupt(EUSCI_B0_BASE, EUSCI_B_I2C_RECEIVE_INTERRUPT0);
             MAP_I2C_enableInterrupt(I2C_BUS_BASE, EUSCI_B_I2C_STOP_INTERRUPT);
-//
+
 //            /*
 //             * Switch order so that stop is being set during reception of last
 //             * byte read byte so that next byte can be read.
@@ -584,9 +789,8 @@ void EUSCIB0_IRQHandler(void)
             cardFlag = true;
         } else
         {
-            RXData[xferIndex++] = MAP_I2C_masterReceiveMultiByteNext(
-            		I2C_BUS_BASE);
-//
+            RXData[xferIndex++] = MAP_I2C_masterReceiveMultiByteNext(I2C_BUS_BASE);
+
         }
     }
     else if (status & EUSCI_B_I2C_STOP_INTERRUPT)
@@ -594,6 +798,21 @@ void EUSCIB0_IRQHandler(void)
 //        MAP_Interrupt_disableSleepOnIsrExit();
 //        MAP_I2C_disableInterrupt(EUSCI_B0_BASE, EUSCI_B_I2C_STOP_INTERRUPT);
     }
+}
+
+
+void TA1_0_IRQHandler(void)
+{
+    seconds++;
+    UARTprintf(EUSCI_A0_BASE, "Time until we check GPS: %i\r\n",
+    TIME_WAIT - seconds);
+    if (seconds == TIME_WAIT)
+    {
+        MAP_UART_enableInterrupt(EUSCI_A2_BASE, EUSCI_A_UART_RECEIVE_INTERRUPT);
+        MAP_Interrupt_enableInterrupt(INT_EUSCIA2);
+        MAP_Interrupt_disableInterrupt(INT_TA1_0);
+    }
+    MAP_Timer_A_clearCaptureCompareInterrupt(TIMER_A1_BASE,TIMER_A_CAPTURECOMPARE_REGISTER_0);
 }
 
 
