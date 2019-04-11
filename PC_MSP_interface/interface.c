@@ -84,6 +84,18 @@ uint_fast8_t received_byte;
 char test_char;
 int rcount = 0;
 int modules_connected_code[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+char configuration[1000];
+int conf_place =  0;
+char *all_data = "this is all the data";
+int live1[3] = {1, 1, 1};
+int live2[3] = {1, 1, 1};
+char *gps_data = "gps data";
+int valid_conf = 0;
+int trans_count = 0;
+int status = 1;
+int diagnosis = 1;
+
+
 
 int main(void)
 {
@@ -149,30 +161,95 @@ void EUSCIA1_IRQHandler(void)
 
 }
 
+/**
+ * Decode instruction funciton
+ * uses the global variable as @rxdata the received data.
+ * the first char byte in the rxdata array is the instruction
+ *
+ * for
+ */
 void decodeInstruction(){
     uint8_t inst = rxdata[0];
     //set configuration
-    if(inst == (uint8_t) 128){
+    if(inst == (uint8_t) 128){ //x80
         //todo: set configuration locally
-        transmitByteData((uint8_t) 255); //send success byte
-    } else if(inst == (uint8_t) 129){ //request configuration
+        transmitByteData((uint8_t) 128); //send success byte
+        int i = 1;
+        conf_place = 0;
+        while(rcount > 1){
+            configuration[i-1] = rxdata[i];
+            rcount--;
+            i++;
+            conf_place++;
+        }
+        i = 0;
+    } else if(inst == (uint8_t) 129){ //request configuration x81
         //todo: transmit configuration to application
-        transmitByteData((uint8_t) 255);
-    } else if(inst == (uint8_t) 130){ //request start
+        transmitByteData((uint8_t) 129);
+        int temp = conf_place;
+        int i = 0;
+        while(conf_place > 1){//this is a place holder, but eventually it should transm
+            transmitNByteData(configuration[i]);
+            i++;
+            conf_place--;
+        }
+        transmitByteData(configuration[i]);
+        conf_place = temp;
+        i = 0;                                   //it the requested configuration data.
+    } else if(inst == (uint8_t) 130){ //request start x82
         //todo: locally request start of DAQ modules
-        transmitByteData((uint8_t) 255);
-    } else if(inst == (uint8_t) 132){ //request number of modules connected
+        transmitByteData((uint8_t) 130);
+    } else if(inst == (uint8_t) 131){//request control module status
+        transmitByteData((uint8_t) 131); //acknowledge
+        transmitByteData(status);
+    } else if(inst == (uint8_t) 132){ //request number of modules connected x84
         //todo: verify how many modules are connected
-        transmitByteData((uint8_t) 255); //send success byte
+        transmitByteData((uint8_t) 132); //send success byte
         int i;
         for(i = 0; i < 7; i++){
             transmitNByteData((uint8_t) modules_connected_code[i]);
         }
         transmitByteData((uint8_t) modules_connected_code[7]);
-    } else if(inst == (uint8_t) 136){ //set visualization module + channels
+    } else if(inst == (uint8_t) 134){ //instruction to send all the data last acquired
+        transmitByteData((uint8_t) 134); //send success byte
+        //code to send all the data
+        transmitStringData(all_data);
+        //end of data transmission
+        transmitNByteData((uint8_t) 255);
+        transmitNByteData((uint8_t) 255);
+        transmitNByteData((uint8_t) 255);
+        transmitNByteData((uint8_t) 255);
+        transmitNByteData((uint8_t) 255);
+        transmitByteData((uint8_t) 255);
+    } else if(inst == (uint8_t) 136){ //set visualization module + channels x88
         //todo: avilitate live passing of the data
-        transmitByteData((uint8_t) 255); //send success byte
-    } else if(inst == (uint8_t) 255){ //request cancel
+        transmitByteData((uint8_t) 136); //send success byte
+        transmitNByteData(live1[0]);
+        transmitNByteData(live1[1]);
+        transmitNByteData(live1[2]);
+        transmitNByteData(live2[0]);
+        transmitNByteData(live2[1]);
+        transmitByteData(live2[2]);
+    } else if(inst == (uint8_t) 141){ //send the live bytes to the application x87
+        transmitByteData((uint8_t) 141);
+        //send the live bytes. we should do a buffer array
+
+        //end of live stream by sending 255 255 255 255 255 255 \r\n
+
+    } else if(inst == (uint8_t) 137){ //send gps data request x89
+        transmitByteData((uint8_t) 137); //acknowledge
+        transmitStringData(gps_data); //actually send the GPS data
+    } else if(inst == (uint8_t) 138){//sync the RTC with the gps time x8A
+        transmitByteData((uint8_t) 138); //acknowledge
+        //todo:include code for internal sync of gps
+    } else if(inst == (uint8_t) 139){ //diagnose request, this hasn't been completely thought about
+        transmitByteData((uint8_t) 139); //acknowledge
+        //todo:we must figure this out
+        transmitByteData(diagnosis);
+    } else if(inst == (uint8_t) 140){ //request configuration validity
+        transmitByteData((uint8_t) 140); //acknowledge
+        transmitByteData(valid_conf);
+    } else if(inst == (uint8_t) 255){ //request cancel xff
         //todo: implement cancel process
         transmitByteData((uint8_t) 255);
     } else { //send a message stating that the function was a mistake
@@ -182,11 +259,14 @@ void decodeInstruction(){
 
 void transmitStringData(char *string){
     int i = 0;
+    trans_count = 0;
     while(*string){
         MAP_UART_transmitData(EUSCI_A1_BASE, (uint_fast8_t) *string++);
+        trans_count++;
     }
     MAP_UART_transmitData(EUSCI_A1_BASE, (uint_fast8_t) 0x0D);
     MAP_UART_transmitData(EUSCI_A1_BASE, (uint_fast8_t) 0x0A);
+    i = 0;
 }
 
 void transmitByteData(uint8_t byte){
