@@ -41,6 +41,7 @@ char format[6];
 short comma_counter = 0;
 short compare_value;
 short stop_rtc;
+char current_time[6];
 
 /* UART Configuration Parameter.
  * Operates with a 9600 baud rate at 12MHz.
@@ -118,6 +119,8 @@ int main(void)
     MAP_CS_initClockSignal(CS_ACLK, CS_LFXTCLK_SELECT, CS_CLOCK_DIVIDER_1);
     /* Initializing RTC with default time */
     MAP_RTC_C_initCalendar(&defaultTime, RTC_C_FORMAT_BINARY);
+    MAP_RTC_C_clearInterruptFlag(RTC_C_CLOCK_READ_READY_INTERRUPT);     //Clears Read Ready Interrupt Flag
+    MAP_RTC_C_enableInterrupt(RTC_C_CLOCK_READ_READY_INTERRUPT);        //Enables Read Ready Interupt Flag
     /* Configuring Timer_A1 for Up Mode */
     MAP_Timer_A_configureUpMode(TIMER_A1_BASE, &upConfig);
     /* Configuring UART Modules */
@@ -140,6 +143,18 @@ int main(void)
     }
 }
 
+void getCurrentTime(void)
+{
+    if(MAP_RTC_C_getEnabledInterruptStatus() & RTC_C_CLOCK_READ_READY_INTERRUPT)
+    {
+        RTC_C_Calendar currTime = RTC_C_getCalendarTime();    
+        int num = currTime.hours*10000 + currTime.minutes*100 + currTime.seconds;
+	sprintf(current_time, "%i", num);
+    }
+}
+        
+        
+
 /*
  * updateRTC function
  * updates the RTC with the time given to us
@@ -157,6 +172,8 @@ void updateRTC(void)
     currTime.minutes= minute;
     currTime.seconds = second;
     MAP_RTC_C_initCalendar(&currTime, RTC_C_FORMAT_BINARY);             //initializes RTC with updated struct
+    MAP_RTC_C_clearInterruptFlag(RTC_C_CLOCK_READ_READY_INTERRUPT);     //Clears Read Ready Interrupt Flag
+    MAP_RTC_C_enableInterrupt(RTC_C_CLOCK_READ_READY_INTERRUPT);        //Enables Read Ready Interupt Flag
     MAP_RTC_C_startClock();                                             //Starts Real Time Clock
 }
 
