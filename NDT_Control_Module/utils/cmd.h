@@ -10,7 +10,7 @@ extern uint8_t masterToSlaveByteCtr;
 extern uint8_t masterToSlaveIndex;
 extern char masterToSlavePacket[MASTER_TO_SLAVE_PACKET_SIZE];
 extern FILE *src, *dst;
-extern const char daq1[];
+extern const char daq1[], daq2[];
 
 //*****************************************************************************
 //
@@ -27,5 +27,7 @@ extern int CMD_pwup(int argc, char **argv);
 extern int CMD_getData(int argc, char ** argv);
 extern int CMD_setGain(int argc, char ** argv);
 extern int CMD_QuitProcess(int argc, char **argv);
+extern int CMD_create(int argc, char **argv);
 extern int CMD_read(int argc, char **argv);
+extern int CMD_write(int argc, char **argv);
 

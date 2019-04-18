@@ -32,16 +32,6 @@
 #define CONSOLE_UART_TX				GPIO_PIN3
 
 
-/* ESP32 UART Macros */
-/*
-#define ESP32_UART_BASE				EUSCI_A2_BASE
-#define ESP32_UART_GPIO_PORT		GPIO_PORT_P3
-#define ESP32_UART_INT				INT_EUSCIA2
-#define ESP32_UART_RX				GPIO_PIN2
-#define ESP32_UART_TX				GPIO_PIN3
-*/
-
-
 /* GPS UART Macros*/
 #define GPS_UART_BASE				EUSCI_A2_BASE
 #define GPS_UART_GPIO_PORT			GPIO_PORT_P3
@@ -59,11 +49,11 @@
 
 
 /* FTDI UART Macros */
-#define FTDI_UART_BASE				EUSCI_A3_BASE
-#define FTDI_UART_GPIO_PORT			GPIO_PORT_P9
-#define FTDI_UART_INT				INT_EUSCIA3
-#define FTDI_UART_RX				GPIO_PIN6
-#define FTDI_UART_TX				GPIO_PIN7
+#define FTDI_UART_BASE				EUSCI_A1_BASE
+#define FTDI_UART_GPIO_PORT			GPIO_PORT_P2
+#define FTDI_UART_INT				INT_EUSCIA1
+#define FTDI_UART_RX				GPIO_PIN2
+#define FTDI_UART_TX				GPIO_PIN3
 
 
 /* I2C Bus Macros */
@@ -104,7 +94,6 @@
 
 
 void configureConsoleUART(void);
-//void configureESPUART(void);
 void configureGPSUART(void);
 void configureGPSTimer(void);
 void configureFTDIUART(void);
@@ -113,7 +102,7 @@ void configureSDCard(void);
 void initializeSlaves(void);
 void processCommand(char *CommandText);
 void sendUARTString(uint32_t moduleInstance, char * msg);
-
+void decodeInstruction();
 
 /********************************/
 //		Global Variables		//
@@ -126,12 +115,10 @@ static char COMMAND[BUFFER_SIZE];
 char masterToSlavePacket[MASTER_TO_SLAVE_PACKET_SIZE];
 uint8_t masterToSlaveIndex = 0;
 uint8_t masterToSlaveByteCtr = 3;
-//static volatile uint8_t wifiIndex = 0;
 static volatile uint8_t inputIndex = 0;
 static volatile bool slavesInitialized = false;
 static volatile uint8_t slaveIndex = 0;
 static volatile uint8_t inputFlag = 0;
-//static volatile uint8_t wifiFlag = 0;
 static volatile uint8_t cardFlag = 0;
 const uint8_t DAQAddresses[] = {0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57};
 //static uint8_t activeDAQModules = 0;
@@ -182,22 +169,6 @@ const eUSCI_UART_Config consoleConfig =
 };
 
 
-//ESP32 Baudrate 9600bps
-/*
-const eUSCI_UART_Config espConfig =
-{
-        EUSCI_A_UART_CLOCKSOURCE_SMCLK,          // SMCLK Clock Source
-        78,                                     // BRDIV = 78
-        2,                                      // UCxBRF = 2
-        0,                                       // UCxBRS = 0
-        EUSCI_A_UART_NO_PARITY,                  // No Parity
-        EUSCI_A_UART_LSB_FIRST,                  // LSB First
-        EUSCI_A_UART_ONE_STOP_BIT,               // One stop bit
-        EUSCI_A_UART_MODE,                       // UART mode
-        EUSCI_A_UART_OVERSAMPLING_BAUDRATE_GENERATION  // Oversampling
-};
-*/
-
 //GPS Baudrate 9600bps
 const eUSCI_UART_Config gpsConfig =
 {
@@ -214,13 +185,13 @@ const eUSCI_UART_Config gpsConfig =
 
 
 
-//FTDI Baudrate 115200bps
+//FTDI Baudrate 230400bps
 const eUSCI_UART_Config ftdiConfig =
 {
         EUSCI_A_UART_CLOCKSOURCE_SMCLK,          // SMCLK Clock Source
-        6,                                     // BRDIV = 78
-        8,                                      // UCxBRF = 2
-        32,                                       // UCxBRS = 0
+        3,                                     // BRDIV = 3
+        4,                                      // UCxBRF = 4
+        0,                                       // UCxBRS = 0
         EUSCI_A_UART_NO_PARITY,                  // No Parity
         EUSCI_A_UART_LSB_FIRST,                  // LSB First
         EUSCI_A_UART_ONE_STOP_BIT,               // One stop bit
@@ -272,7 +243,25 @@ const char textarray[] = \
 
 ///////////////////////////////////////
 
+//////////////////
+uint8_t rxdata[1000];
+uint_fast8_t received_byte;
+char test_char;
+int rcount = 0;
+int modules_connected_code[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+char configuration[1000];
+int conf_place =  0;
+char *all_data = "this is all the data";
+int live1[3] = {1, 1, 1};
+int live2[3] = {1, 1, 1};
+char *gps_data = "gps data";
+int valid_conf = 0;
+int trans_count = 0;
+int status = 1;
+int diagnosis = 1;
 
+
+////////////
 
 /********************************/
 //		Main					//
@@ -289,8 +278,8 @@ int main(void)
     //unsigned int bytesWritten = 0;
     //unsigned int filesize;
     //unsigned int totalBytesCopied = 0;
-    strcpy(gps.nMEA_Record, "GPGGA");
-    gps.valid_Data = 0;
+//    strcpy(gps.nMEA_Record, "GPGGA");
+//    gps.valid_Data = 0;
 
     memset(consoleInput, 0x00, BUFFER_SIZE);
 
@@ -298,15 +287,14 @@ int main(void)
 
     //SD Card configuration changes MCLK, SMCLK, re-init to desired values
     CS_initClockSignal(CS_SMCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_1);
-    //CS_initClockSignal(CS_ACLK, CS_REFOCLK_SELECT, CS_CLOCK_DIVIDER_1);
 
     configureConsoleUART();
-    //configureESPUART(); //Currently not in use
 //    configureFTDIUART();
 //    configureGPSUART();
-    configureI2CBus();
+//    configureGPSTimer();
+//    configureI2CBus();
 
-    initializeSlaves();
+//    initializeSlaves();
 
 
 //	masterToSlavePacket[0] = 0xCA;
@@ -315,19 +303,8 @@ int main(void)
 
     while(true){
 
-//    	MAP_PCM_gotoLPM0();
-
         if(inputFlag){
         	inputFlag = 0;
-/*
-        	if(wifiFlag){
-        		wifiFlag = 0;
-        		processCommand(wifiInput);
-        		memset(wifiInput, 0x00, BUFFER_SIZE);
-        	}else{
-        		processCommand(consoleInput);
-        	}
-*/
         	processCommand(consoleInput);
             inputIndex = 0;
 
@@ -360,27 +337,6 @@ void configureConsoleUART(void){
 }
 
 
-/*
-void configureESPUART(void){
-    GPIO_setAsPeripheralModuleFunctionInputPin(ESP32_UART_GPIO_PORT,
-    		ESP32_UART_RX | ESP32_UART_TX, GPIO_PRIMARY_MODULE_FUNCTION);
-
-    CS_setDCOCenteredFrequency(SYSTEM_FREQ); //DCO Freq is used for MCLK, SMCLK upon reset
-
-    // Configuring UART Module
-    UART_initModule(ESP32_UART_BASE, &espConfig);
-
-    // Enable UART module
-    UART_enableModule(ESP32_UART_BASE);
-
-    // Enabling interrupts
-    UART_enableInterrupt(ESP32_UART_BASE, EUSCI_A_UART_RECEIVE_INTERRUPT);
-    Interrupt_enableInterrupt(ESP32_UART_INT);
-    //Interrupt_enableSleepOnIsrExit();
-
-}
-*/
-
 
 void configureGPSUART(void){
     GPIO_setAsPeripheralModuleFunctionInputPin(GPS_UART_GPIO_PORT,
@@ -392,8 +348,6 @@ void configureGPSUART(void){
 
     UART_enableModule(GPS_UART_BASE);
 
-    //UART_enableInterrupt(CONSOLE_UART_BASE, EUSCI_A_UART_RECEIVE_INTERRUPT);
-    //Interrupt_enableInterrupt(CONSOLE_UART_INT);
 }
 
 
@@ -529,12 +483,13 @@ void processCommand(char *CommandText){
 
 void sendUARTString(uint32_t moduleInstance, char * msg){
 
+	trans_count = 0;
 	while(UART_queryStatusFlags(moduleInstance, EUSCI_A_UART_BUSY));
 
 	//The null char is used to delimit strings in C
-	while(*msg != '\0')
-	{
+	while(*msg != '\0'){
 		UART_transmitData(moduleInstance, *msg++);
+		trans_count++;
 	}
 
 	//Return cursor to the start (left) of the screen
@@ -542,6 +497,30 @@ void sendUARTString(uint32_t moduleInstance, char * msg){
 	UART_transmitData(moduleInstance, '\n');
 
 }
+
+
+void transmitStringData(char *string){
+
+    trans_count = 0;
+    while(*string){
+        MAP_UART_transmitData(EUSCI_A1_BASE, (uint_fast8_t) *string++);
+        trans_count++;
+    }
+    MAP_UART_transmitData(EUSCI_A1_BASE, (uint_fast8_t) 0x0D);
+    MAP_UART_transmitData(EUSCI_A1_BASE, (uint_fast8_t) 0x0A);
+
+}
+
+void transmitByteData(uint8_t byte){
+    MAP_UART_transmitData(EUSCI_A1_BASE, (uint_fast8_t) byte);
+    MAP_UART_transmitData(EUSCI_A1_BASE, (uint_fast8_t) 0x0D);
+    MAP_UART_transmitData(EUSCI_A1_BASE, (uint_fast8_t) 0x0A);
+}
+
+void transmitNByteData(uint8_t byte){
+    MAP_UART_transmitData(EUSCI_A1_BASE, (uint_fast8_t) byte);
+}
+
 
 
 /********************************/
@@ -575,30 +554,27 @@ void EUSCIA0_IRQHandler(void){
 }
 
 
+void EUSCIA1_IRQHandler(void)
+{
+    uint32_t status = MAP_UART_getEnabledInterruptStatus(FTDI_UART_BASE);
 
+    UART_clearInterruptFlag(FTDI_UART_BASE, status);
 
-//ESP32 UART handler, lookup way to change function name without errors
-/*
-void EUSCIA2_IRQHandler(void){
-
-    uint32_t status = MAP_UART_getEnabledInterruptStatus(ESP32_UART_BASE);
-
-    MAP_UART_clearInterruptFlag(ESP32_UART_BASE, status);
-
-    if(status & EUSCI_A_UART_RECEIVE_INTERRUPT_FLAG){
-    	wifiInput[wifiIndex++] = MAP_UART_receiveData(ESP32_UART_BASE);
-    	MAP_UART_transmitData(CONSOLE_UART_BASE, wifiInput[wifiIndex - 1]);
-        if(wifiInput[wifiIndex - 1] == '\0'){
-        	inputFlag = 1;
-        	wifiFlag = 1;
-        	wifiIndex = 0;
-
-        }
-
-     }
+    if(status & EUSCI_A_UART_RECEIVE_INTERRUPT_FLAG)
+    {
+        received_byte = MAP_UART_receiveData(EUSCI_A1_BASE);
+        rxdata[rcount] = received_byte;
+    }
+    if(received_byte == (uint8_t) 13){
+        //if end of line, do something
+        decodeInstruction();
+        rcount = 0;
+    } else {
+        rcount++;
+    }
 
 }
-*/
+
 
 //GPS UART Handler
 void EUSCIA2_IRQHandler(void){
@@ -612,7 +588,7 @@ void EUSCIA2_IRQHandler(void){
 	        //Check to see if we are within a valid transmission. If we are not, enter if statement.
 	        if (record)
 	        {
-	            UARTprintf(CONSOLE_UART_BASE, "%c", receivedChar);
+	            UARTprintf(EUSCI_A0_BASE, "%c", receivedChar);
 	            if (receivedChar == ',')
 	            {
 	                comma_counter++;
@@ -623,11 +599,11 @@ void EUSCIA2_IRQHandler(void){
 	                    if (gps.valid_Data)
 	                    {
 	                        MAP_Interrupt_disableInterrupt(INT_EUSCIA2);
-	                        UARTprintf(CONSOLE_UART_BASE, "%s\r\n", "Data is Valid");
+	                        UARTprintf(EUSCI_A0_BASE, "%s\r\n", "Data is Valid");
 	                    }
 	                    else
 	                    {
-	                        UARTprintf(CONSOLE_UART_BASE, "%s\r\n", "Data is Invalid");
+	                        UARTprintf(EUSCI_A0_BASE, "%s\r\n", "Data is Invalid");
 	                        record = 0;
 	                        check_format = 0;
 	                        counter = 0;
@@ -635,7 +611,7 @@ void EUSCIA2_IRQHandler(void){
 	                        if(timeout == TIME_WAIT)
 	                        {
 	                            MAP_Interrupt_disableInterrupt(INT_EUSCIA2);
-	                            UARTprintf(CONSOLE_UART_BASE, "%s\r\n", "GPS has timed out, too many failed tries");
+	                            UARTprintf(EUSCI_A0_BASE, "%s\r\n", "GPS has timed out, too many failed tries");
 	                        }
 	                    }
 	                }
@@ -676,10 +652,10 @@ void EUSCIA2_IRQHandler(void){
 	        else if (check_format && counter < 5)
 	        {
 	            format[counter++] = receivedChar;
-	            UARTprintf(CONSOLE_UART_BASE, "%c", format[counter - 1]);
+	            UARTprintf(EUSCI_A0_BASE, "%c", format[counter - 1]);
 	            if (counter == 5)
 	            {
-	                UARTprintf(CONSOLE_UART_BASE, "\r\n");
+	                UARTprintf(EUSCI_A0_BASE, "\r\n");
 	                compare_value = strcmp(format, gps.nMEA_Record);
 	                if (!compare_value)
 	                {
@@ -697,44 +673,12 @@ void EUSCIA2_IRQHandler(void){
 	        }
 	        else if (receivedChar == '$' && !check_format)
 	        {
-	            UARTprintf(CONSOLE_UART_BASE, "%c", receivedChar);
+	            UARTprintf(EUSCI_A0_BASE, "%c", receivedChar);
 	            check_format = 1;
 	        }
 	    }
 
-
 }
-
-
-
-
-/*
- * FTDI UART handler, lookup way to change function name without errors
- */
-void EUSCIA3_IRQHandler(void){
-
-    uint32_t status = MAP_UART_getEnabledInterruptStatus(FTDI_UART_BASE);
-
-    MAP_UART_clearInterruptFlag(FTDI_UART_BASE, status);
-
-    if(status & EUSCI_A_UART_RECEIVE_INTERRUPT_FLAG){
-    	consoleInput[inputIndex++] = MAP_UART_receiveData(FTDI_UART_BASE);
-        if(consoleInput[inputIndex - 1] == '\r'){
-        	MAP_UART_transmitData(FTDI_UART_BASE, '\n');
-        	MAP_UART_transmitData(FTDI_UART_BASE, '\r');
-        	consoleInput[inputIndex - 1] = '\0';
-        	inputFlag = 1;
-
-        	inputIndex = 0;
-
-        }else{
-        	MAP_UART_transmitData(FTDI_UART_BASE, consoleInput[inputIndex - 1]);
-        }
-
-     }
-
-}
-
 
 
 /*
@@ -812,7 +756,8 @@ void TA1_0_IRQHandler(void)
         MAP_Interrupt_enableInterrupt(INT_EUSCIA2);
         MAP_Interrupt_disableInterrupt(INT_TA1_0);
     }
-    MAP_Timer_A_clearCaptureCompareInterrupt(TIMER_A1_BASE,TIMER_A_CAPTURECOMPARE_REGISTER_0);
+    MAP_Timer_A_clearCaptureCompareInterrupt(TIMER_A1_BASE,
+    TIMER_A_CAPTURECOMPARE_REGISTER_0);
 }
 
 
@@ -830,3 +775,93 @@ int32_t fatfs_getFatTime(void)
     return (0x4A210000);
 }
 
+//////////////////////////////////////////////////////////////////////////////////////
+void decodeInstruction(){
+    uint8_t inst = rxdata[0];
+    //set configuration
+    if(inst == (uint8_t) 128){ //x80
+        //todo: set configuration locally
+        transmitByteData((uint8_t) 128); //send success byte
+        int i = 1;
+        conf_place = 0;
+        while(rcount > 1){
+            configuration[i-1] = rxdata[i];
+            rcount--;
+            i++;
+            conf_place++;
+        }
+        i = 0;
+    } else if(inst == (uint8_t) 129){ //request configuration x81
+        //todo: transmit configuration to application
+        transmitByteData((uint8_t) 129);
+        int temp = conf_place;
+        int i = 0;
+        while(conf_place > 1){//this is a place holder, but eventually it should transm
+            transmitNByteData(configuration[i]);
+            i++;
+            conf_place--;
+        }
+        transmitByteData(configuration[i]);
+        conf_place = temp;
+        i = 0;                                   //it the requested configuration data.
+    } else if(inst == (uint8_t) 130){ //request start x82
+        //todo: locally request start of DAQ modules
+        transmitByteData((uint8_t) 130);
+    } else if(inst == (uint8_t) 131){//request control module status
+        transmitByteData((uint8_t) 131); //acknowledge
+        transmitByteData(status);
+    } else if(inst == (uint8_t) 132){ //request number of modules connected x84
+        //todo: verify how many modules are connected
+        transmitByteData((uint8_t) 132); //send success byte
+        int i;
+        for(i = 0; i < 7; i++){
+            transmitNByteData((uint8_t) modules_connected_code[i]);
+        }
+        transmitByteData((uint8_t) modules_connected_code[7]);
+    } else if(inst == (uint8_t) 134){ //instruction to send all the data last acquired
+        transmitByteData((uint8_t) 134); //send success byte
+        //code to send all the data
+        transmitStringData(all_data);
+        //end of data transmission
+        transmitNByteData((uint8_t) 255);
+        transmitNByteData((uint8_t) 255);
+        transmitNByteData((uint8_t) 255);
+        transmitNByteData((uint8_t) 255);
+        transmitNByteData((uint8_t) 255);
+        transmitByteData((uint8_t) 255);
+    } else if(inst == (uint8_t) 136){ //set visualization module + channels x88
+        //todo: avilitate live passing of the data
+        transmitByteData((uint8_t) 136); //send success byte
+        transmitNByteData(live1[0]);
+        transmitNByteData(live1[1]);
+        transmitNByteData(live1[2]);
+        transmitNByteData(live2[0]);
+        transmitNByteData(live2[1]);
+        transmitByteData(live2[2]);
+    } else if(inst == (uint8_t) 141){ //send the live bytes to the application x87
+        transmitByteData((uint8_t) 141);
+        //send the live bytes. we should do a buffer array
+
+        //end of live stream by sending 255 255 255 255 255 255 \r\n
+
+    } else if(inst == (uint8_t) 137){ //send gps data request x89
+        transmitByteData((uint8_t) 137); //acknowledge
+        transmitStringData(gps_data); //actually send the GPS data
+    } else if(inst == (uint8_t) 138){//sync the RTC with the gps time x8A
+        transmitByteData((uint8_t) 138); //acknowledge
+        //todo:include code for internal sync of gps
+    } else if(inst == (uint8_t) 139){ //diagnose request, this hasn't been completely thought about
+        transmitByteData((uint8_t) 139); //acknowledge
+        //todo:we must figure this out
+        transmitByteData(diagnosis);
+        //Set Select lines on muxes for voltage references
+    } else if(inst == (uint8_t) 140){ //request configuration validity
+        transmitByteData((uint8_t) 140); //acknowledge
+        transmitByteData(valid_conf);
+    } else if(inst == (uint8_t) 255){ //request cancel xff
+        //todo: implement cancel process
+        transmitByteData((uint8_t) 255);
+    } else { //send a message stating that the function was a mistake
+        transmitByteData((uint8_t) 254);
+    }
+}

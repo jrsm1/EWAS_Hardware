@@ -47,6 +47,9 @@ utils/cmd.obj: /opt/ti/ccsv6/tools/compiler/arm_15.12.3.LTS/include/stdarg.h
 utils/cmd.obj: /opt/ti/ccsv6/tools/compiler/arm_15.12.3.LTS/include/file.h
 utils/cmd.obj: /opt/ti/ccsv6/tools/compiler/arm_15.12.3.LTS/include/stdlib.h
 utils/cmd.obj: /opt/ti/ccsv6/tools/compiler/arm_15.12.3.LTS/include/string.h
+utils/cmd.obj: /opt/ti/simplelink_msp432p4_sdk_2_30_00_14/kernel/nortos/posix/unistd.h
+utils/cmd.obj: /opt/ti/simplelink_msp432p4_sdk_2_30_00_14/kernel/nortos/posix/sys/types.h
+utils/cmd.obj: /opt/ti/ccsv6/tools/compiler/arm_15.12.3.LTS/include/stddef.h
 utils/cmd.obj: /home/jrsm/ccs_workspace/NDT_Control_Module/utils/cmdline.h
 utils/cmd.obj: /home/jrsm/ccs_workspace/NDT_Control_Module/utils/cmd.h
 utils/cmd.obj: /home/jrsm/ccs_workspace/NDT_Control_Module/utils/printf.h
@@ -98,6 +101,9 @@ utils/cmd.obj: /home/jrsm/ccs_workspace/NDT_Control_Module/utils/printf.h
 /opt/ti/ccsv6/tools/compiler/arm_15.12.3.LTS/include/file.h: 
 /opt/ti/ccsv6/tools/compiler/arm_15.12.3.LTS/include/stdlib.h: 
 /opt/ti/ccsv6/tools/compiler/arm_15.12.3.LTS/include/string.h: 
+/opt/ti/simplelink_msp432p4_sdk_2_30_00_14/kernel/nortos/posix/unistd.h: 
+/opt/ti/simplelink_msp432p4_sdk_2_30_00_14/kernel/nortos/posix/sys/types.h: 
+/opt/ti/ccsv6/tools/compiler/arm_15.12.3.LTS/include/stddef.h: 
 /home/jrsm/ccs_workspace/NDT_Control_Module/utils/cmdline.h: 
 /home/jrsm/ccs_workspace/NDT_Control_Module/utils/cmd.h: 
 /home/jrsm/ccs_workspace/NDT_Control_Module/utils/printf.h: 

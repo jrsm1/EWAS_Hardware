@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <string.h>
+#include <unistd.h>
 #include "utils/cmdline.h"
 #include "utils/cmd.h"
 #include "utils/printf.h"
@@ -17,14 +18,28 @@
 //*****************************************************************************
 tCmdLineEntry g_psCmdTable[] =
 {
-    {"help",     CMD_help,      " : Display list of commands" },
+    {"help",     CMD_help, " : Display list of commands"},
 	{"mode", CMD_mode, " : Select ADC Operation Mode"},
 	{"diagnose", CMD_diagnose, " : Enable/Disable Diagnostic Mode"},
 	{"pwdn", CMD_pwdn, " : Power Down ADC Channel"},
 	{"pwup", CMD_pwup, " : Power Up ADC Channel"},
 	{"datareq", CMD_getData, " : Request Data from DAQ units"},
 	{"gain", CMD_setGain, " : Configure PGA Gain factor"},
-	{"save", CMD_read, " : Read data from DAQ file"},
+	{"create", CMD_create, " : Read data from DAQ file"},
+	{"read", CMD_read, " : Read data from DAQ file"},
+	{"write", CMD_write, " : Read data from DAQ file"},
+//	{"setconfig", CMD_setconfig, " : TODO"},
+//	{"requestconfig", CMD_requestconfig, " : TODO"},
+//	{"requeststart", CMD_requeststart, " : TODO"},
+//	{"requestdata", CMD_requestdata, " : TODO"},
+//	{"requestlivebytes", CMD_requestlivebytes, " : TODO"},
+//	{"cancelrequest", CMD_cancerequest, " : TODO"},
+//	{"gpsdatarequest", CMD_gpsdatarequest, " : TODO"},
+//	{"gpssyncrequest", CMD_gpssyncrequest, " : TODO"},
+//	{"requestnumberofmodules", CMD_requestnumberofmodules, " : TODO"},
+//	{"diagnoserequest", CMD_diagnoserequest, " : TODO"},
+//	{"requestconfigurationvalidity", CMD_requestconfigurationvalidity, " : TODO"},
+//	{"requeststatus", CMD_requeststatus, " : TODO"},
     { 0, 0, 0 }
 };
 
@@ -48,7 +63,6 @@ int CMD_help(int argc, char **argv)
 
       i32Index++;
     }
-//    printf(EUSCI_A0_BASE, "\n\r");
 
     return (0);
 }
@@ -203,31 +217,63 @@ int CMD_setGain(int argc, char ** argv){
 }
 
 
+int CMD_create(int argc, char ** argv){
+
+    if ((src = fopen(daq1, "r")))
+    {
+    	UARTprintf(EUSCI_A0_BASE, "File for DAQ1 already exists\r\n");
+    }else{
+    	UARTprintf(EUSCI_A0_BASE, "Creating File for DAQ1 module\r\n");
+    	src = fopen(daq1, "w+");
+
+    }
+
+
+    if ((src = fopen(daq2, "r")))
+    {
+    	UARTprintf(EUSCI_A0_BASE, "File for DAQ2 already exists\r\n");
+    }else{
+    	UARTprintf(EUSCI_A0_BASE, "Creating File for DAQ2 module\r\n");
+    	src = fopen(daq2, "w+");
+
+    }
+
+    	fclose(src);
+    	return 0;
+
+}
+
+
 int CMD_read(int argc, char ** argv){
 
 	unsigned int bytesRead = 0;
-    src = fopen(daq1, "r");
+	if(argc != 2){
+		UARTprintf(EUSCI_A0_BASE, "Incorrect number of arguments\n");
+		return -1;
+	}
+
+	if(atoi(argv[1]) == 1)
+		src = fopen(daq1, "r");
+	else if(atoi(argv[1]) == 2)
+		src = fopen(daq2, "r");
     if (!src) {
+    	UARTprintf(EUSCI_A0_BASE, "\nError opening file!\r\n");
 
-
-//        /* Open file for both reading and writing */
-//        src = fopen(daq1, "w+");
-        if (!src) {
-
-            while (1);
-        }
+//    if (!src) {
+//
+//    	while (1);
+//    }
 
         //bytesWritten = fwrite(textarray, 1, strlen(textarray), src);
         //fflush(src);
 
         /* Reset the internal file pointer */
-        rewind(src);
-
+//        rewind(src);
+    	return -1;
     }
 
     char cpy_buff[2048 + 1];
     memset(cpy_buff, 0x00, 2048 + 1);
-    /*  Copy the contents from the src to the dst */
 
     while (true) {
         /*  Read from source file */
@@ -236,27 +282,50 @@ int CMD_read(int argc, char ** argv){
             break; /* Error or EOF */
         }
         UARTprintf(EUSCI_A0_BASE, "%s", cpy_buff);
-        //sendUARTString(EUSCI_A0_BASE, cpy_buff);
-
 
 	}
 
-
-    /* Get the filesize of the source file */
-    fseek(src, 0, SEEK_END);
-    //filesize = ftell(src);
+//    /* Get the filesize of the source file */
+//    fseek(src, 0, SEEK_END);
+//    //filesize = ftell(src);
     rewind(src);
 
-    /* Close both inputfile[] and outputfile[] */
     fclose(src);
 
 	return 0;
 }
 
 
-//
-//int CMD_QuitProcess(int argc, char **argv)
-//{
-//	QuitProcess();
-//	return 0;
-//}
+int CMD_write(int argc, char ** argv){
+
+//	unsigned int bytesRead = 0;
+	if(argc != 3){
+		UARTprintf(EUSCI_A0_BASE, "Incorrect number of arguments\n");
+		return -1;
+	}
+
+	if(atoi(argv[2]) == 1)
+		src = fopen(daq1, "a");
+	else if(atoi(argv[2]) == 2)
+		src = fopen(daq2, "a");
+
+    if (!src) {
+    	UARTprintf(EUSCI_A0_BASE, "\nError opening file!\r\n");
+
+    	return -1;
+    }
+
+    fwrite(argv[1], 1, strlen(argv[1]), src);
+    UARTprintf(EUSCI_A0_BASE, "\nFile written!\r\n");
+
+    rewind(src);
+    fclose(src);
+
+	return 0;
+
+}
+
+
+
+
+
