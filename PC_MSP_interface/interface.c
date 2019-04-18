@@ -95,6 +95,21 @@ int trans_count = 0;
 int status = 1;
 int diagnosis = 1;
 
+// module sensor visualization
+int vis_mod1 = 0;
+int vis_sens1 = 0;
+int vis_mod2 = 0;
+int vis_sens2 = 0;
+
+//buffer for live data
+int live_buffer[100];
+
+// recording parameters
+int sample_rate;
+int cutoff;
+int gain;
+int duration;
+
 
 
 int main(void)
@@ -210,6 +225,20 @@ void decodeInstruction(){
             transmitNByteData((uint8_t) modules_connected_code[i]);
         }
         transmitByteData((uint8_t) modules_connected_code[7]);
+    } else if(inst == (uint8_t) 133){ //instruction to receive recording parameters
+        transmitByteData((uint8_t) 133);
+
+        sample_rate = (uint8_t) rxdata[1];
+        cutoff = (uint8_t) rxdata[2];
+        gain = (uint8_t) rxdata[3];
+
+        duration = ((uint8_t)rxdata[4])*1000 + ((uint8_t)rxdata[5])*100 + ((uint8_t)rxdata[6])*10 + ((uint8_t)rxdata[7]);
+
+        vis_mod1 = (uint8_t)rxdata[8];
+        vis_sens1 = (uint8_t)rxdata[9];
+        vis_mod2 = (uint8_t)rxdata[10];
+        vis_sens2 = (uint8_t)rxdata[11];
+
     } else if(inst == (uint8_t) 134){ //instruction to send all the data last acquired
         transmitByteData((uint8_t) 134); //send success byte
         //code to send all the data
