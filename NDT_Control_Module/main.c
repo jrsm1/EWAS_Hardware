@@ -41,9 +41,10 @@
 
 
 /* GPS Timer Macros*/
-#define MAX_FAILS 					10
+#define MAX_FAILS 					5
 #define TIMER_PERIOD    			0x8000
-#define TIME_WAIT 					30
+#define TIME_WAIT 					15
+#define MAX_RETRIES 				3
 #define GPS_TIMER_BASE				TIMER_A1_BASE
 #define GPS_TIMER_INT				INT_TA1_0
 
@@ -96,6 +97,7 @@
 void configureConsoleUART(void);
 void configureGPSUART(void);
 void configureGPSTimer(void);
+void configureRTC();
 void configureFTDIUART(void);
 void configureI2CBus(void);
 void configureSDCard(void);
@@ -110,7 +112,6 @@ void decodeInstruction();
 
 
 static char consoleInput[BUFFER_SIZE];
-//static char wifiInput[BUFFER_SIZE];
 static char COMMAND[BUFFER_SIZE];
 char masterToSlavePacket[MASTER_TO_SLAVE_PACKET_SIZE];
 uint8_t masterToSlaveIndex = 0;
@@ -135,6 +136,12 @@ short counter = 0;
 char format[6];
 short comma_counter = 0;
 short compare_value;
+short timeout_timeout = 0;
+char format[6];
+short compare_value;
+short stop_rtc;
+char current_time[6];
+
 
 typedef struct GPSformats
 {
@@ -145,9 +152,24 @@ typedef struct GPSformats
     char longtitude[11];
     char E_W;
     short valid_Data;
+    char transmission[36];
 } GPS;
 
 GPS gps;
+
+/*RTC Configuration
+ * Default is UNIX Epoch Time: Thursday, January 1st 1970 00:00:00 AM */
+const RTC_C_Calendar defaultTime = {
+        0x00,                        //seconds
+        0x00,                        //minutes
+        0x00,                        //hours
+        0x04,                        //Day of the Week
+        0x01,                        //Day of the Month
+        0x01,                        //Month
+        0x7B2                        //Year
+};
+
+RTC_C_Calendar newTime;
 
 //
 
@@ -236,9 +258,7 @@ const char daq2[] = "fat:"STR(DRIVE_NUM)":DAQ2.txt";
 char fatfsPrefix[] = "fat";
 
 unsigned char cpy_buff[CPY_BUFF_SIZE + 1];
-const char textarray[] = \
-		"***********************************************************************\n"
-		"0         1         2         3         4         5         6         7\n";
+const char textarray[] = "For Testing Only";
 
 
 ///////////////////////////////////////
@@ -273,25 +293,19 @@ int main(void)
 	//Stop Watchdog Timer
     WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;
 
-//    /* Variables to keep track of the file copy progress */
-    //unsigned int bytesRead = 0;
-    //unsigned int bytesWritten = 0;
-    //unsigned int filesize;
-    //unsigned int totalBytesCopied = 0;
-//    strcpy(gps.nMEA_Record, "GPGGA");
-//    gps.valid_Data = 0;
-
     memset(consoleInput, 0x00, BUFFER_SIZE);
 
     configureSDCard();
 
     //SD Card configuration changes MCLK, SMCLK, re-init to desired values
     CS_initClockSignal(CS_SMCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_1);
+    CS_initClockSignal(CS_ACLK, CS_LFXTCLK_SELECT, CS_CLOCK_DIVIDER_1);
 
     configureConsoleUART();
-//    configureFTDIUART();
-//    configureGPSUART();
-//    configureGPSTimer();
+    configureFTDIUART();
+    configureGPSUART();
+    configureRTC();
+    configureGPSTimer();
 //    configureI2CBus();
 
 //    initializeSlaves();
@@ -337,7 +351,6 @@ void configureConsoleUART(void){
 }
 
 
-
 void configureGPSUART(void){
     GPIO_setAsPeripheralModuleFunctionInputPin(GPS_UART_GPIO_PORT,
     		CONSOLE_UART_RX | CONSOLE_UART_TX, GPIO_PRIMARY_MODULE_FUNCTION);
@@ -347,6 +360,9 @@ void configureGPSUART(void){
     UART_initModule(GPS_UART_BASE, &gpsConfig);
 
     UART_enableModule(GPS_UART_BASE);
+
+    strcpy(gps.nMEA_Record, "GPGGA");
+    gps.valid_Data = 0;
 
 }
 
@@ -396,7 +412,6 @@ void configureSDCard(void){
 
 void configureI2CBus(void){
 
-	//TODO SD Card now uses these pins, switch I2C to UCB1!!!
 	GPIO_setAsPeripheralModuleFunctionInputPin(I2C_BUS_GPIO_PORT,
 			I2C_BUS_SCL + I2C_BUS_SDA, GPIO_PRIMARY_MODULE_FUNCTION);
 
@@ -417,6 +432,21 @@ void configureI2CBus(void){
 	I2C_clearInterruptFlag(I2C_BUS_BASE,EUSCI_B_I2C_TRANSMIT_INTERRUPT0 +
 			EUSCI_B_I2C_NAK_INTERRUPT + EUSCI_B_I2C_RECEIVE_INTERRUPT0);
 
+}
+
+
+void configureRTC(){
+	GPIO_setAsPeripheralModuleFunctionOutputPin(GPIO_PORT_PJ,
+	        GPIO_PIN0 | GPIO_PIN1,GPIO_PRIMARY_MODULE_FUNCTION);
+
+	CS_setExternalClockSourceFrequency(32000, 48000000);
+	CS_startLFXT(CS_LFXT_DRIVE3);
+
+	/* Initializing RTC with default time */
+	RTC_C_initCalendar(&defaultTime, RTC_C_FORMAT_BINARY);
+	RTC_C_clearInterruptFlag(RTC_C_CLOCK_READ_READY_INTERRUPT);     //Clears Read Ready Interrupt Flag
+	RTC_C_enableInterrupt(RTC_C_CLOCK_READ_READY_INTERRUPT);        //Enables Read Ready Interupt Flag
+	RTC_C_startClock();
 }
 
 
@@ -488,13 +518,13 @@ void sendUARTString(uint32_t moduleInstance, char * msg){
 
 	//The null char is used to delimit strings in C
 	while(*msg != '\0'){
-		UART_transmitData(moduleInstance, *msg++);
+		UART_transmitData(moduleInstance, (uint_fast8_t) *msg++);
 		trans_count++;
 	}
 
 	//Return cursor to the start (left) of the screen
-	UART_transmitData(moduleInstance, '\r');
-	UART_transmitData(moduleInstance, '\n');
+	UART_transmitData(moduleInstance, (uint_fast8_t) '\r');
+	UART_transmitData(moduleInstance, (uint_fast8_t) '\n');
 
 }
 
@@ -519,6 +549,34 @@ void transmitByteData(uint8_t byte){
 
 void transmitNByteData(uint8_t byte){
     MAP_UART_transmitData(EUSCI_A1_BASE, (uint_fast8_t) byte);
+}
+
+void getCurrentTime(void)
+{
+    if(MAP_RTC_C_getEnabledInterruptStatus() & RTC_C_CLOCK_READ_READY_INTERRUPT)
+    {
+        RTC_C_Calendar currTime = RTC_C_getCalendarTime();
+        int num = currTime.hours*10000 + currTime.minutes*100 + currTime.seconds;
+	sprintf(current_time, "%i", num);
+    }
+}
+
+
+void updateRTC(void)
+{
+    MAP_RTC_C_holdClock();                                              //Disables RTC functionality to modify registers
+//    printRTCCurrentTime();                                                 //Displays current time in terminal
+    RTC_C_Calendar currTime = RTC_C_getCalendarTime();                  //Gets the current calendar date
+    uint_fast8_t hour = (gps.transmission[0] - 0x30)*10 + (gps.transmission[1] - 0x30);           //constructs decimal value from separate ascii characters
+    uint_fast8_t minute = (gps.transmission[2] - 0x30)*10 + (gps.transmission[3] - 0x30);
+    uint_fast8_t second = (gps.transmission[4] - 0x30)*10 + (gps.transmission[5] - 0x30);
+    currTime.hours = hour;                                              //Updates struct hour, minute, and second with GPS acquired time
+    currTime.minutes= minute;
+    currTime.seconds = second;
+    MAP_RTC_C_initCalendar(&currTime, RTC_C_FORMAT_BINARY);             //initializes RTC with updated struct
+    MAP_RTC_C_clearInterruptFlag(RTC_C_CLOCK_READ_READY_INTERRUPT);     //Clears Read Ready Interrupt Flag
+    MAP_RTC_C_enableInterrupt(RTC_C_CLOCK_READ_READY_INTERRUPT);        //Enables Read Ready Interupt Flag
+    MAP_RTC_C_startClock();                                             //Starts Real Time Clock
 }
 
 
@@ -578,106 +636,84 @@ void EUSCIA1_IRQHandler(void)
 
 //GPS UART Handler
 void EUSCIA2_IRQHandler(void){
-	uint32_t status = MAP_UART_getEnabledInterruptStatus(EUSCI_A2_BASE);
+    uint32_t status = MAP_UART_getEnabledInterruptStatus(EUSCI_A2_BASE);
+    MAP_UART_clearInterruptFlag(EUSCI_A2_BASE, status);
+    if (status & EUSCI_A_UART_RECEIVE_INTERRUPT_FLAG)
+    {
+        char receivedChar = MAP_UART_receiveData(EUSCI_A2_BASE);        //Stores the received character
+        if (record)                                                     //State C, store incoming data
+        {
+            if (receivedChar == ',')
+            {
+                if(comma_counter)
+                    gps.transmission[counter++] = receivedChar;
+                comma_counter++;                                        //Increase comma_counter, tells us which parameter is next
+                if (comma_counter == 7)                                 //If comma_counter equals seven, We have stored all of the revelant data
+                {
+                    comma_counter = 0;
+                    if (gps.valid_Data)                                 //Verify if the data is valid
+                    {
+                        MAP_Interrupt_disableInterrupt(INT_EUSCIA2);
+                        updateRTC();                                    //Data is valid, update RTC
 
-	    MAP_UART_clearInterruptFlag(EUSCI_A2_BASE, status);
-
-	    if (status & EUSCI_A_UART_RECEIVE_INTERRUPT_FLAG)
-	    {
-	        char receivedChar = MAP_UART_receiveData(EUSCI_A2_BASE);
-	        //Check to see if we are within a valid transmission. If we are not, enter if statement.
-	        if (record)
-	        {
-	            UARTprintf(EUSCI_A0_BASE, "%c", receivedChar);
-	            if (receivedChar == ',')
-	            {
-	                comma_counter++;
-	                counter = 0;
-	                if (comma_counter == 7)
-	                {
-	                    comma_counter = 0;
-	                    if (gps.valid_Data)
-	                    {
-	                        MAP_Interrupt_disableInterrupt(INT_EUSCIA2);
-	                        UARTprintf(EUSCI_A0_BASE, "%s\r\n", "Data is Valid");
-	                    }
-	                    else
-	                    {
-	                        UARTprintf(EUSCI_A0_BASE, "%s\r\n", "Data is Invalid");
-	                        record = 0;
-	                        check_format = 0;
-	                        counter = 0;
-	                        timeout++;
-	                        if(timeout == TIME_WAIT)
-	                        {
-	                            MAP_Interrupt_disableInterrupt(INT_EUSCIA2);
-	                            UARTprintf(EUSCI_A0_BASE, "%s\r\n", "GPS has timed out, too many failed tries");
-	                        }
-	                    }
-	                }
-	            }
-	            else if (receivedChar == ' ')
-	            {
-	                //ignore this
-	            }
-	            else
-	            {
-	                switch (comma_counter)
-	                {
-	                case 1:                        //utc time
-	                    gps.utc[counter++] = receivedChar;
-	                    break;
-	                case 2:                        //latitude
-	                    gps.latitude[counter++] = receivedChar;
-	                    break;
-	                case 3:                        //N/S
-	                    gps.N_S = receivedChar;
-	                    break;
-	                case 4:                        //longitude
-	                    gps.longtitude[counter++] = receivedChar;
-	                    break;
-	                case 5:
-	                    gps.E_W = receivedChar;
-	                    break;
-	                case 6:
-	                    if (receivedChar == '1' || receivedChar == '2'
-	                            || receivedChar == '3')
-	                        gps.valid_Data = 1;
-	                    else
-	                        gps.valid_Data = 0;
-	                    break;
-	                }
-	            }
-	        }
-	        else if (check_format && counter < 5)
-	        {
-	            format[counter++] = receivedChar;
-	            UARTprintf(EUSCI_A0_BASE, "%c", format[counter - 1]);
-	            if (counter == 5)
-	            {
-	                UARTprintf(EUSCI_A0_BASE, "\r\n");
-	                compare_value = strcmp(format, gps.nMEA_Record);
-	                if (!compare_value)
-	                {
-	                    record = 1;
-	                    check_format = 0;
-	                    counter = 0;
-	                }
-	                else
-	                {
-	                    check_format = 0;
-	                    counter = 0;
-	                    record = 0;
-	                }
-	            }
-	        }
-	        else if (receivedChar == '$' && !check_format)
-	        {
-	            UARTprintf(EUSCI_A0_BASE, "%c", receivedChar);
-	            check_format = 1;
-	        }
-	    }
-
+                    }
+                    else                                                //Data is invalid, reset variables to wait for next message
+                    {
+                        record = 0;
+                        check_format = 0;
+                        counter = 0;
+                        timeout++;                                      //Variable to limit the amount of tries the gps gets to sync
+                        if (timeout == MAX_FAILS)                       //If we reach the maximum amount of tries, restart with the timer count
+                        {
+                            MAP_Interrupt_disableInterrupt(INT_EUSCIA2);
+                            timeout_timeout++;                          //Variable to limit the amount of resets the gps has
+                            seconds = 0;
+                            timeout = 0;
+                            if (!(timeout_timeout == MAX_RETRIES))         //If we reach the maximum amount of tries, stop
+                            {
+                                MAP_Interrupt_enableInterrupt(INT_TA1_0);
+                            }
+                        }
+                    }
+                }
+            }
+            else if (receivedChar == ' ')                               //Ignore space characters
+            {
+                //ignore this
+            }
+            else
+            {
+                if(comma_counter == 6)
+                {
+                    if (receivedChar == '1' || receivedChar == '2'
+                            || receivedChar == '3')
+                        gps.valid_Data = 1;
+                    else
+                        gps.valid_Data = 0;
+                }
+                else
+                    gps.transmission[counter++] = receivedChar;
+            }
+        }
+        else if (check_format && counter < 5)                           //If statement that handles the verification of the message format
+        {
+            format[counter++] = receivedChar;                           //Adds character to an array to form the five character format
+            UARTprintf(EUSCI_A0_BASE, "%c", format[counter - 1]);
+            if (counter == 5)                                           //If we have all five characters, compare
+            {
+                UARTprintf(EUSCI_A0_BASE, "\r\n");
+                compare_value = strcmp(format, gps.nMEA_Record);        //Compares message format with desired format(GPGGA)
+                check_format = 0;
+                counter = 0;
+                if (!compare_value)                                     //If it is the desired format, start storing the incoming data.
+                    record = 1;
+                else                                                    //Else restart the check
+                    record = 0;
+            }
+        }
+        else if (receivedChar == '$' && !check_format)                  //Checks if the character is the start delimiter
+            check_format = 1;                                           //Next five characters is the message format, check those.
+    }
 }
 
 
@@ -747,14 +783,15 @@ void EUSCIB0_IRQHandler(void)
 
 void TA1_0_IRQHandler(void)
 {
-    seconds++;
+    seconds++;                                                          //Increases seconds by one
     UARTprintf(EUSCI_A0_BASE, "Time until we check GPS: %i\r\n",
-    TIME_WAIT - seconds);
-    if (seconds == TIME_WAIT)
+           TIME_WAIT - seconds);                                        //Displays how much time is left before checking
+    if (seconds >= TIME_WAIT)                                               //Checks if we reached or gone past TIME_WAIT
     {
-        MAP_UART_enableInterrupt(EUSCI_A2_BASE, EUSCI_A_UART_RECEIVE_INTERRUPT);
-        MAP_Interrupt_enableInterrupt(INT_EUSCIA2);
-        MAP_Interrupt_disableInterrupt(INT_TA1_0);
+        MAP_UART_enableInterrupt(EUSCI_A2_BASE,
+                                 EUSCI_A_UART_RECEIVE_INTERRUPT);       //Enables GPS UART receive interrupt
+        MAP_Interrupt_enableInterrupt(INT_EUSCIA2);                     //Enables interrupts for GPS UART
+        MAP_Interrupt_disableInterrupt(INT_TA1_0);                      //Disables timer interrupt
     }
     MAP_Timer_A_clearCaptureCompareInterrupt(TIMER_A1_BASE,
     TIMER_A_CAPTURECOMPARE_REGISTER_0);
@@ -818,7 +855,12 @@ void decodeInstruction(){
             transmitNByteData((uint8_t) modules_connected_code[i]);
         }
         transmitByteData((uint8_t) modules_connected_code[7]);
-    } else if(inst == (uint8_t) 134){ //instruction to send all the data last acquired
+    }else if(inst == (uint8_t) 133){
+    	transmitByteData((uint8_t) 133);
+        int testvar = 0;
+        testvar++;
+    }
+    else if(inst == (uint8_t) 134){ //instruction to send all the data last acquired
         transmitByteData((uint8_t) 134); //send success byte
         //code to send all the data
         transmitStringData(all_data);
@@ -849,6 +891,7 @@ void decodeInstruction(){
         transmitStringData(gps_data); //actually send the GPS data
     } else if(inst == (uint8_t) 138){//sync the RTC with the gps time x8A
         transmitByteData((uint8_t) 138); //acknowledge
+
         //todo:include code for internal sync of gps
     } else if(inst == (uint8_t) 139){ //diagnose request, this hasn't been completely thought about
         transmitByteData((uint8_t) 139); //acknowledge
@@ -865,3 +908,5 @@ void decodeInstruction(){
         transmitByteData((uint8_t) 254);
     }
 }
+
+
