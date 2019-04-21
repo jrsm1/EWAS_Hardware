@@ -109,8 +109,22 @@ int sample_rate;
 int cutoff;
 int gain;
 int duration;
+int start_delay;
 
+//experiment name
+char experiment_name[20];
 
+//localization identifier
+char localization_name[20];
+
+//testers
+int test1;
+int test_count;
+
+//status variables
+uint8_t recorded = 1;
+uint8_t stored = 0;
+uint8_t gps_synched = 1;
 
 int main(void)
 {
@@ -216,7 +230,10 @@ void decodeInstruction(){
         transmitByteData((uint8_t) 130);
     } else if(inst == (uint8_t) 131){//request control module status
         transmitByteData((uint8_t) 131); //acknowledge
-        transmitByteData(status);
+        transmitNByteData(recorded);
+        transmitNByteData(stored);
+        transmitByteData(gps_synched);
+
     } else if(inst == (uint8_t) 132){ //request number of modules connected x84
         //todo: verify how many modules are connected
         transmitByteData((uint8_t) 132); //send success byte
@@ -234,10 +251,41 @@ void decodeInstruction(){
 
         duration = ((uint8_t)rxdata[4])*1000 + ((uint8_t)rxdata[5])*100 + ((uint8_t)rxdata[6])*10 + ((uint8_t)rxdata[7]);
 
-        vis_mod1 = (uint8_t)rxdata[8];
-        vis_sens1 = (uint8_t)rxdata[9];
-        vis_mod2 = (uint8_t)rxdata[10];
-        vis_sens2 = (uint8_t)rxdata[11];
+        start_delay = ((uint8_t)rxdata[8])*1000 + ((uint8_t)rxdata[9])*100 + ((uint8_t)rxdata[10])*10 + ((uint8_t)rxdata[11]);
+
+        vis_mod1 = (uint8_t)rxdata[12];
+        vis_sens1 = (uint8_t)rxdata[13];
+        vis_mod2 = (uint8_t)rxdata[14];
+        vis_sens2 = (uint8_t)rxdata[15];
+
+        int hold_initial = 16;
+        char a = rxdata[hold_initial];
+        int count = 0;
+
+        test1 = (int)(a!=',');
+        test1 = (int)(a!=",");
+
+        while(a != ',' && count < 20){
+            experiment_name[count] = a;
+            a = rxdata[count + hold_initial + 1];
+            count++;
+        }
+
+        //treating edge case of being sent blanks
+        if(count == 0) count ++;
+
+        int hold_place = count + hold_initial + 1;
+        test_count = hold_place;
+        count = 0;
+
+        a = rxdata[hold_place];
+
+        while(a != ',' && count < 20 ){
+            localization_name[count] = a;
+            a = rxdata[hold_place + count + 1];
+            count++;
+        }
+        count = 0;
 
     } else if(inst == (uint8_t) 134){ //instruction to send all the data last acquired
         transmitByteData((uint8_t) 134); //send success byte
