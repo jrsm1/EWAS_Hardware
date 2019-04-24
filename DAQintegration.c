@@ -1,12 +1,83 @@
-#include <ti/devices/msp432p4xx/driverlib/driverlib.h>
-//#include "msp.h"
+//#include <ti/devices/msp432p4xx/driverlib/driverlib.h>
+#include "msp.h"
 #include <stdint.h>
+
+//make reading boolean checks easier
+typedef enum boolean {false, true} bool;
 
 /* Globals */
 uint8_t TXData = 0;
 uint8_t pwm_divider = 0x00;
 short ignore_sample = 0;
 short ignore_sample_counter = 0;
+bool initialized = false;
+
+//variables for dealing with instructions coming in
+char instructions[20];
+char count = 0;
+
+/***************************************************
+ *                    GENERAL                      *
+ **************************************************/
+
+void clockSystem(short mode)
+{
+    //mode = 0 sets system to 16MHz, mode = 1 sets to 24
+    if (mode == 1)
+    {
+        PCM->CTL0 = (uint32_t) 0x695A0001;      //active mode request VCORE1
+        while (PCM->CTL1 & BIT8);
+        CS->KEY = CS_KEY_VAL;            // Unlock CS module for register access
+        CS->CTL0 = (uint32_t) 0x08040000;       // Reset tuning parameters
+        CS->CTL1 = (uint32_t) 0x10100033;
+        CS->KEY = 0;                  // Lock CS module from unintended accesses
+    }
+//    else{
+//        PCM_setPowerState(PCM_AM_LF_VCORE0);
+//        CS_setDCOFrequency(16777216);                           // Lock CS module from unintended accesses
+//    }
+}
+
+//Multiplexers
+void MuxSelectors(char channels)
+{
+    //least significant 4 bits are used as the selectors for channels 4, 3, 2, and 1 respectively
+    P8OUT = (channels & 0x0F) << 2;
+}
+
+void GPIOinit()
+{
+    //multiplexer selectors
+    P8DIR = (uint8_t) 0x3C;
+
+    //pga
+    P2DIR = (uint8_t) 0x0B;
+    SPIport();
+
+    //TIMER_A2 OUT1
+    P5DIR |= BIT6;
+    P5SEL1 &= ~BIT6;
+    P5SEL0 |= BIT6;
+
+    //TIMER_A1 OUT1
+//    GPIO_setAsPeripheralModuleFunctionOutputPin(GPIO_PORT_P2, GPIO_PIN4,
+//                GPIO_PRIMARY_MODULE_FUNCTION);
+
+    //DRDY
+    P5->IES |= BIT1;                            // Enable Interrupt on Falling Edge of DRDY
+    P5->IE |= BIT1;                             // Port Interrupt Enable
+    P5->IFG = 0;                                // Clear Port Interrupt Flag
+    P5->DIR &= ~BIT1;                           // Set Pin as Input
+    NVIC->ISER[1] |= 1 << ((PORT5_IRQn) & 31);  // Enable PORT5 interrupt in NVIC module
+
+    //I2C initialization
+    P5DIR &= ~BIT0;
+    P5IE |= BIT0;
+    P5IFG = 0;
+
+    //ADC powerdown selectors
+    P5DIR |= BIT4 | BIT5 | BIT6 | BIT7;
+}
 
 /***************************************************
  *                   DIAGNOSTICS                   *
@@ -19,7 +90,7 @@ char sramtest(){
     uint8_t readback[200];
     uint8_t readback2[100];
     uint8_t readback3[280];
-    char testpassed 0x00;
+    char testpassed = 0x00;
     volatile int i;
     for(i=0;i<200;i++){
         storethis[i] = i;
@@ -146,85 +217,85 @@ void ADC_SPI_Config(uint16_t divider)
     EUSCI_B0->CTLW0 &= ~EUSCI_B_CTLW0_SWRST;        // Initialize USCI state machine
 }
 
-void freq_Config(int freq, Timer_A_PWMConfig *pwmConfig)
-{
-    ignore_sample = 0;
-    ignore_sample_counter = 0;
-    switch(freq)
-    {
-    case 256:                                           //sampling rate of 256Hz
-        clockSystem(0);                                //Set DCO frequency to 16MHz
-        pwm_divider = TIMER_A_CLOCKSOURCE_DIVIDER_64;   // 8,388,608 / 64 = 131,072Hz
-        ADC_SPI_Config(0x80);                               // 16,777,216/ 128= 131,072Hz
-        break;
-    case 512:                                           //sampling rate of 512Hz
-        clockSystem(0);                                //Set DCO frequency to 16MHz
-        pwm_divider = TIMER_A_CLOCKSOURCE_DIVIDER_32;   // 8,388,608 / 16 = 262,144Hz
-        ADC_SPI_Config(0x40);                               // 16,777,216/ 64 = 262,144Hz
-        break;
-    case 1024:                                          //sampling rate of 1,024Hz
-        clockSystem(0);                                //Set DCO frequency to 16MHz
-        pwm_divider = TIMER_A_CLOCKSOURCE_DIVIDER_16;   // 8,388,608 / 16 = 524,288Hz
-        ADC_SPI_Config(0x20);                               // 16,777,216/ 32 = 524,288Hz
-        break;
-    case 2048:                                          //sampling rate of 2,048Hz
-        clockSystem(0);                                //Set DCO frequency to 16MHz
-        pwm_divider = TIMER_A_CLOCKSOURCE_DIVIDER_8;    // 8,388,608 / 8 = 1,048,576Hz
-        ADC_SPI_Config(0x10);                               // 16,777,216/ 16= 1,048,576Hz
-        break;
-    case 4096:                                          //sampling rate of 4,096Hz
-        clockSystem(0);                                //Set DCO frequency to 16MHz
-        pwm_divider = TIMER_A_CLOCKSOURCE_DIVIDER_4;    // 8,388,608 / 4 = 2,097,152Hz
-        ADC_SPI_Config(0x08);                               // 16,777,216/ 8 = 2,097,152Hz
-        break;
-    case 8192:                                          //sampling rate of 8,192Hz
-        clockSystem(0);                                //Set DCO frequency to 16MHz
-        pwm_divider = TIMER_A_CLOCKSOURCE_DIVIDER_2;    // 8,388,608 / 2 = 4,194,304Hz
-        ADC_SPI_Config(0x04);                               // 16,777,216/ 128=4,194,304Hz
-        break;
-    case 16384:                                         //sampling rate of 16,384Hz
-        clockSystem(0);                                //Set DCO frequency to 16MHz
-        pwm_divider = TIMER_A_CLOCKSOURCE_DIVIDER_1;    // 8,388,608 / 1 = 8,388,608Hz
-        ADC_SPI_Config(0x02);                               // 16,777,216/ 2 = 8,388,608Hz
-        break;
-    case 20000:                                         //sampling rate of 20,000Hz
-        clockSystem(1);                                //Set DCO frequency to 24MHz
-        pwm_divider = TIMER_A_CLOCKSOURCE_DIVIDER_1;    // 12MHz / 1 = 12MHz
-        ADC_SPI_Config(0x02);                               // 24MHz / 2 = 12MHz
-        break;
-    default:                                            // sampling rate of 2-4-8-16-32-64-128Hz
-        clockSystem(0);                                //Set DCO frequency to 16MHz
-        pwm_divider = TIMER_A_CLOCKSOURCE_DIVIDER_64;   // 8,388,608 / 64 = 131,072Hz
-        ADC_SPI_Config(0x80);                               // 16,777,216/ 128= 131,072Hz
-        switch(freq)
-        {
-        case 2:
-            ignore_sample = 127;
-            break;
-        case 4:
-            ignore_sample = 63;
-            break;
-        case 8:
-            ignore_sample = 31;
-            break;
-        case 16:
-            ignore_sample = 15;
-            break;
-        case 32:
-            ignore_sample = 7;
-            break;
-        case 64:
-            ignore_sample = 3;
-            break;
-        case 128:
-            ignore_sample = 1;
-            break;
-        default:
-            ignore_sample = 0;
-        }
-    }
-    *pwmConfig = (Timer_A_PWMConfig) {TIMER_A_CLOCKSOURCE_SMCLK, pwm_divider, 1, TIMER_A_CAPTURECOMPARE_REGISTER_1, TIMER_A_OUTPUTMODE_RESET_SET, 1};
-}
+//void freq_Config(int freq, Timer_A_PWMConfig *pwmConfig)
+//{
+//    ignore_sample = 0;
+//    ignore_sample_counter = 0;
+//    switch(freq)
+//    {
+//    case 256:                                           //sampling rate of 256Hz
+//        clockSystem(0);                                //Set DCO frequency to 16MHz
+//        pwm_divider = TIMER_A_CLOCKSOURCE_DIVIDER_64;   // 8,388,608 / 64 = 131,072Hz
+//        ADC_SPI_Config(0x80);                               // 16,777,216/ 128= 131,072Hz
+//        break;
+//    case 512:                                           //sampling rate of 512Hz
+//        clockSystem(0);                                //Set DCO frequency to 16MHz
+//        pwm_divider = TIMER_A_CLOCKSOURCE_DIVIDER_32;   // 8,388,608 / 16 = 262,144Hz
+//        ADC_SPI_Config(0x40);                               // 16,777,216/ 64 = 262,144Hz
+//        break;
+//    case 1024:                                          //sampling rate of 1,024Hz
+//        clockSystem(0);                                //Set DCO frequency to 16MHz
+//        pwm_divider = TIMER_A_CLOCKSOURCE_DIVIDER_16;   // 8,388,608 / 16 = 524,288Hz
+//        ADC_SPI_Config(0x20);                               // 16,777,216/ 32 = 524,288Hz
+//        break;
+//    case 2048:                                          //sampling rate of 2,048Hz
+//        clockSystem(0);                                //Set DCO frequency to 16MHz
+//        pwm_divider = TIMER_A_CLOCKSOURCE_DIVIDER_8;    // 8,388,608 / 8 = 1,048,576Hz
+//        ADC_SPI_Config(0x10);                               // 16,777,216/ 16= 1,048,576Hz
+//        break;
+//    case 4096:                                          //sampling rate of 4,096Hz
+//        clockSystem(0);                                //Set DCO frequency to 16MHz
+//        pwm_divider = TIMER_A_CLOCKSOURCE_DIVIDER_4;    // 8,388,608 / 4 = 2,097,152Hz
+//        ADC_SPI_Config(0x08);                               // 16,777,216/ 8 = 2,097,152Hz
+//        break;
+//    case 8192:                                          //sampling rate of 8,192Hz
+//        clockSystem(0);                                //Set DCO frequency to 16MHz
+//        pwm_divider = TIMER_A_CLOCKSOURCE_DIVIDER_2;    // 8,388,608 / 2 = 4,194,304Hz
+//        ADC_SPI_Config(0x04);                               // 16,777,216/ 128=4,194,304Hz
+//        break;
+//    case 16384:                                         //sampling rate of 16,384Hz
+//        clockSystem(0);                                //Set DCO frequency to 16MHz
+//        pwm_divider = TIMER_A_CLOCKSOURCE_DIVIDER_1;    // 8,388,608 / 1 = 8,388,608Hz
+//        ADC_SPI_Config(0x02);                               // 16,777,216/ 2 = 8,388,608Hz
+//        break;
+//    case 20000:                                         //sampling rate of 20,000Hz
+//        clockSystem(1);                                //Set DCO frequency to 24MHz
+//        pwm_divider = TIMER_A_CLOCKSOURCE_DIVIDER_1;    // 12MHz / 1 = 12MHz
+//        ADC_SPI_Config(0x02);                               // 24MHz / 2 = 12MHz
+//        break;
+//    default:                                            // sampling rate of 2-4-8-16-32-64-128Hz
+//        clockSystem(0);                                //Set DCO frequency to 16MHz
+//        pwm_divider = TIMER_A_CLOCKSOURCE_DIVIDER_64;   // 8,388,608 / 64 = 131,072Hz
+//        ADC_SPI_Config(0x80);                               // 16,777,216/ 128= 131,072Hz
+//        switch(freq)
+//        {
+//        case 2:
+//            ignore_sample = 127;
+//            break;
+//        case 4:
+//            ignore_sample = 63;
+//            break;
+//        case 8:
+//            ignore_sample = 31;
+//            break;
+//        case 16:
+//            ignore_sample = 15;
+//            break;
+//        case 32:
+//            ignore_sample = 7;
+//            break;
+//        case 64:
+//            ignore_sample = 3;
+//            break;
+//        case 128:
+//            ignore_sample = 1;
+//            break;
+//        default:
+//            ignore_sample = 0;
+//        }
+//    }
+//    *pwmConfig = (Timer_A_PWMConfig) {TIMER_A_CLOCKSOURCE_SMCLK, pwm_divider, 1, TIMER_A_CAPTURECOMPARE_REGISTER_1, TIMER_A_OUTPUTMODE_RESET_SET, 1};
+//}
 
 
 //last 4 bits of input are the power selectors for channels 4, 3, 2, and 1
@@ -393,7 +464,7 @@ void SRAMdir(char mode, int address){
     P4OUT = (mode == 'S') ? P4OUT = 0x06 : 0x0A;
 }
 
-void storeByte((uint8_t) data){
+void storeByte(uint8_t data){
     P2OUT = data;
     P3OUT = 0x01;           //enable to write
     P3OUT = 0x00;           //disable to prepare next byte
@@ -425,34 +496,30 @@ void i2cinit(){
 
     EUSCI_B2->CTLW0 &= (uint16_t) 0xFFFE;               //UCSWRST = 0
 
-    EUSCI_B2->IE = 0x000F;                                //interrupts enabled
+    EUSCI_B2->IE = 0x000B;                                //interrupts enabled
     NVIC->ISER[0] = 1 << (EUSCIB2_IRQn);
 
     //master's I2C address
     EUSCI_B2->I2CSA = (uint16_t) 0x58;
 }
 
-//void interpretInstruction(char* instruction){
-//    short i; //for loop counter
-//    if(instruction[0] == 0xCA){         //check header
-//        for(i = 1; i<count; i++){
-//            switch(instruction[i]){
+void interpretInstruction(char* instruction){
+    short i; //for loop counter
+    if(instruction[0] == 0xCA){         //check header
+        for(i = 1; i<count; i++){
+            switch(instruction[i]){
 //            case 0x61:
 //                setSamplingPeriod(instruction[++i]);        //sample period
 //                break;
-//            case 0x62:                                      //gain select
-//                setGainFactor(instruction[++i]);
-//                changePGAAMP(settings.gain);
-//                break;
-//            case 0x63:                                      //diagnostics
-//                muxstate = (int) instruction[++i];
-//                changeMUX(muxstate);
-//                SRAMinit();
-//                break;
-//            case 0x64:                                      //sync
-//                sync = true;
-//                i++;
-//                break;
+            case 0x62:                                      //gain select
+                GainSelect(instruction[++i]);
+                break;
+            case 0x63:                                      //selecting mux and adc channels
+                MuxSelectors(instruction[++i]);
+                break;
+            case 0x64:                                      //cutoff frequency selection
+                FilterFreq(instruction[++i]);
+                break;
 //            case 0x65:                                      //power down
 //                toggleChannels(down, instruction[++i]);
 //                break;
@@ -478,77 +545,11 @@ void i2cinit(){
 //                request = true;
 //                i++;
 //                break;
-//            default:
-//                i++;
-//            }
-//        }
-//    }
-//}
-
-
-/***************************************************
- *                    GENERAL                      *
- **************************************************/
-
-void clockSystem(short mode)
-{
-    //mode = 0 sets system to 16MHz, mode = 1 sets to 24
-    if (mode == 1)
-    {
-        PCM->CTL0 = (uint32_t) 0x695A0001;      //active mode request VCORE1
-        while (PCM->CTL1 & BIT8 )
-            ;
-        CS->KEY = CS_KEY_VAL;            // Unlock CS module for register access
-        CS->CTL0 = (uint32_t) 0x08040000;       // Reset tuning parameters
-        CS->CTL1 = (uint32_t) 0x10100033;
-        CS->KEY = 0;                  // Lock CS module from unintended accesses
+            default:
+                i++;
+            }
+        }
     }
-    else{
-        PCM_setPowerState(PCM_AM_LF_VCORE0);
-        CS_setDCOFrequency(16777216);                           // Lock CS module from unintended accesses
-    }
-}
-
-//Multiplexers
-void MuxSelectors(char channels)
-{
-    //least significant 4 bits are used as the selectors for channels 4, 3, 2, and 1 respectively
-    P8OUT = (channels & 0x0F) << 2;
-}
-
-void GPIOinit()
-{
-    //multiplexer selectors
-    P8DIR = (uint8_t) 0x3C;
-
-    //pga
-    P2DIR = (uint8_t) 0x0B;
-    SPIport();
-
-    //TIMER_A2 OUT1
-    P5DIR |= BIT6;
-    P5SEL1 &= ~BIT6;
-    P5SEL0 |= BIT6;
-
-    //TIMER_A1 OUT1
-    GPIO_setAsPeripheralModuleFunctionOutputPin(GPIO_PORT_P2, GPIO_PIN4,
-                GPIO_PRIMARY_MODULE_FUNCTION);
-
-    //DRDY
-    P5->IES |= BIT1;                            // Enable Interrupt on Falling Edge of DRDY
-    P5->IE |= BIT1;                             // Port Interrupt Enable
-    P5->IFG = 0;                                // Clear Port Interrupt Flag
-    P5->DIR &= ~BIT1;                           // Set Pin as Input
-    NVIC->ISER[1] |= 1 << ((PORT5_IRQn) & 31);  // Enable PORT5 interrupt in NVIC module
-
-    //I2C initialization
-    P8DIR &= ~BIT7;
-    P8IE |= BIT7;
-    P8IFG = 0;
-    NVIC->ISER[1] |= 1 << ((PORT8_IRQn) & 31);
-
-    //ADC powerdown selectors
-    P5DIR |= BIT4 | BIT5 | BIT6 | BIT7;
 }
 
 
@@ -559,10 +560,15 @@ void GPIOinit()
 void main(void)
 {
     GPIOinit();
-    channelselect(0x01);
+    filtertimersetup();
+    FilterFreq(8);
+//    MuxSelectors(0x0E);
+//    channelselect(0x01);
 //    Timer_A_PWMConfig pwmConfig;
 //    freq_Config(256, &pwmConfig);                                                 // Transmission Dummy Data to generate bit clock
 //    Timer_A_generatePWM(TIMER_A0_BASE, &pwmConfig);
+
+    for(;;);
 }
 
 /***************************************************
@@ -624,10 +630,47 @@ void PORT5_IRQHandler(void)
                 ignore_sample_counter++;
         }
     }
+    //initialize i2c module when receiving interrupt from master
+    else if(P5IFG & BIT0){
+        if(!initialized)
+            i2cinit();
+    }
     P5->IFG = 0;                                // Clear Port Interrupt Flag
 }
 
-//initializing i2c module
-void PORT8_IRQHandler(void){
-    i2cinit();
+int sentdata = 0;
+void EUSCIB2_IRQHandler(void){
+    //something has been received
+//    if(EUSCI_B2->CTLW0 & BIT4){
+//        EUSCI_B2->TXBUF = mastersend[sentdata++];
+//        if(sentdata == 600){
+//            sentdata = 0;
+//            EUSCI_B2->IFG &= ~BIT1;
+//        }
+//    }
+    /*else */if(EUSCI_B2->IFG & BIT0){
+        char received;
+        received = EUSCI_B2->RXBUF;
+        EUSCI_B2->IFG &= ~BIT0;
+        if(initialized == false && ((received & 0xF0) == 0x50)){                               //set new address if not initialized yet
+            EUSCI_B2->I2COA0 = 0x8400 + received;
+            initialized =  true;
+//            EUSCI_B2->IFG &= ~BIT3;         //turning this flag off to make sure it doesn't try to interpret instructions
+        }
+        else{                                           //storing instruction byte
+            instructions[count++] = received;
+        }
+        EUSCI_B2->IFG &= ~BIT0;
+    }
+    if(EUSCI_B2->IFG & BIT3 && initialized){           //after instructions have all been stored
+        interpretInstruction(instructions);
+        count = 0;
+        EUSCI_B2->IFG &= ~BIT3;
+    }
+
+    //status is being requested
+//    else if(EUSCI_B2->IFG & BIT1){
+//        EUSCI_B2->TXBUF = message;
+//        EUSCI_B2->IFG &= ~BIT1;
+//    }
 }
