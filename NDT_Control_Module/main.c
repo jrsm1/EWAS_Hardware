@@ -42,12 +42,16 @@
 
 /* GPS Timer Macros*/
 #define MAX_FAILS 					5
-#define TIMER_PERIOD    			0x8000
+#define GPS_TIMER_PERIOD    			0x8000
 #define TIME_WAIT 					15
 #define MAX_RETRIES 				3
 #define GPS_TIMER_BASE				TIMER_A1_BASE
 #define GPS_TIMER_INT				INT_TA1_0
 
+/* Solenoid Macros */
+#define SOLENOID_TIMER_PERIOD    	0x4000
+#define SOLENOID_TIMER_BASE			TIMER_A0_BASE
+#define SOLENOID_TIMER_INT			INT_TA0_0
 
 /* FTDI UART Macros */
 #define FTDI_UART_BASE				EUSCI_A1_BASE
@@ -97,6 +101,7 @@
 void configureConsoleUART(void);
 void configureGPSUART(void);
 void configureGPSTimer(void);
+void configureSolenoidTimer(void);
 void configureRTC();
 void configureFTDIUART(void);
 void configureI2CBus(void);
@@ -234,15 +239,24 @@ const eUSCI_I2C_MasterConfig i2cBusConfig =
 
 
 //GPS Timer Configuration
-const Timer_A_UpModeConfig upConfig = {
+const Timer_A_UpModeConfig gpsTimerConfig = {
 		TIMER_A_CLOCKSOURCE_ACLK,              // ACLK Clock Source
         TIMER_A_CLOCKSOURCE_DIVIDER_1,          // ACLK/1 = 32.768kHz
-        TIMER_PERIOD,                           // 32768 ticks
+        GPS_TIMER_PERIOD,                           // 32768 ticks
         TIMER_A_TAIE_INTERRUPT_DISABLE,         // Disable Timer interrupt
         TIMER_A_CCIE_CCR0_INTERRUPT_ENABLE,    // Enable CCR0 interrupt
         TIMER_A_DO_CLEAR                        // Clear value
 };
 
+//Solenoid Timer Configuration
+const Timer_A_UpModeConfig solenoidTimerConfig = {
+        TIMER_A_CLOCKSOURCE_ACLK,              // ACLK Clock Source
+        TIMER_A_CLOCKSOURCE_DIVIDER_1,          // ACLK/1 = 32.768kHz
+        SOLENOID_TIMER_PERIOD,                           // 32768 ticks
+        TIMER_A_TAIE_INTERRUPT_DISABLE,         // Disable Timer interrupt
+        TIMER_A_CCIE_CCR0_INTERRUPT_ENABLE ,    // Enable CCR0 interrupt
+        TIMER_A_DO_CLEAR                        // Clear value
+};
 
 ////////////////////////////////////////
 
@@ -280,6 +294,36 @@ int trans_count = 0;
 int status = 1;
 int diagnosis = 1;
 
+// module sensor visualization
+int vis_mod1 = 0;
+int vis_sens1 = 0;
+int vis_mod2 = 0;
+int vis_sens2 = 0;
+
+//buffer for live data
+int live_buffer[100];
+
+// recording parameters
+int sample_rate;
+int cutoff;
+int gain;
+int duration;
+int start_delay;
+
+//experiment name
+char experiment_name[20];
+
+//localization identifier
+char localization_name[20];
+
+//testers
+int test1;
+int test_count;
+
+//status variables
+uint8_t recorded = 1;
+uint8_t stored = 0;
+uint8_t gps_synched = 1;
 
 ////////////
 
@@ -368,12 +412,20 @@ void configureGPSUART(void){
 
 
 void configureGPSTimer(void){
-	Timer_A_configureUpMode(GPS_TIMER_BASE, &upConfig);
+	Timer_A_configureUpMode(GPS_TIMER_BASE, &gpsTimerConfig);
 	Interrupt_enableInterrupt(GPS_TIMER_INT);
 
 	Timer_A_startCounter(GPS_TIMER_BASE, TIMER_A_UP_MODE);
 }
 
+void configureSolenoidTimer(void){
+//	Timer_A_configureUpMode(GPS_TIMER_BASE, &gpsTimerConfig);
+//	Interrupt_enableInterrupt(GPS_TIMER_INT);
+//
+//	Timer_A_startCounter(GPS_TIMER_BASE, TIMER_A_UP_MODE);
+//    MAP_GPIO_setAsOutputPin(GPIO_PORT_P2, GPIO_PIN4);
+//    MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P2, GPIO_PIN4);
+}
 
 void configureFTDIUART(void){
     GPIO_setAsPeripheralModuleFunctionInputPin(FTDI_UART_GPIO_PORT,
@@ -781,6 +833,21 @@ void EUSCIB0_IRQHandler(void)
 }
 
 
+void TA0_0_IRQHandler(void)
+{
+	//Start Command
+//	MAP_GPIO_setOutputHighOnPin(GPIO_PORT_P2, GPIO_PIN4);
+//	MAP_Interrupt_enableInterrupt(INT_TA1_0);
+//	MAP_Timer_A_startCounter(TIMER_A1_BASE, TIMER_A_UP_MODE);
+
+	//ISR Code
+    MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P2, GPIO_PIN4);
+    MAP_Timer_A_clearCaptureCompareInterrupt(TIMER_A0_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_0);
+    MAP_Interrupt_disableInterrupt(INT_TA0_0);
+    MAP_Timer_A_stopTimer(TIMER_A0_BASE);
+}
+
+
 void TA1_0_IRQHandler(void)
 {
     seconds++;                                                          //Increases seconds by one
@@ -846,7 +913,9 @@ void decodeInstruction(){
         transmitByteData((uint8_t) 130);
     } else if(inst == (uint8_t) 131){//request control module status
         transmitByteData((uint8_t) 131); //acknowledge
-        transmitByteData(status);
+        transmitNByteData(recorded);
+        transmitNByteData(stored);
+        transmitByteData(gps_synched);
     } else if(inst == (uint8_t) 132){ //request number of modules connected x84
         //todo: verify how many modules are connected
         transmitByteData((uint8_t) 132); //send success byte
@@ -857,8 +926,49 @@ void decodeInstruction(){
         transmitByteData((uint8_t) modules_connected_code[7]);
     }else if(inst == (uint8_t) 133){
     	transmitByteData((uint8_t) 133);
-        int testvar = 0;
-        testvar++;
+
+    	        sample_rate = (uint8_t) rxdata[1];
+    	        cutoff = (uint8_t) rxdata[2];
+    	        gain = (uint8_t) rxdata[3];
+
+    	        duration = ((uint8_t)rxdata[4])*1000 + ((uint8_t)rxdata[5])*100 + ((uint8_t)rxdata[6])*10 + ((uint8_t)rxdata[7]);
+
+    	        start_delay = ((uint8_t)rxdata[8])*1000 + ((uint8_t)rxdata[9])*100 + ((uint8_t)rxdata[10])*10 + ((uint8_t)rxdata[11]);
+
+    	        vis_mod1 = (uint8_t)rxdata[12];
+    	        vis_sens1 = (uint8_t)rxdata[13];
+    	        vis_mod2 = (uint8_t)rxdata[14];
+    	        vis_sens2 = (uint8_t)rxdata[15];
+
+    	        int hold_initial = 16;
+    	        char a = rxdata[hold_initial];
+    	        int count = 0;
+
+    	        test1 = (int)(a!=',');
+    	        test1 = (int)(a!=",");
+
+    	        while(a != ',' && count < 20){
+    	            experiment_name[count] = a;
+    	            a = rxdata[count + hold_initial + 1];
+    	            count++;
+    	        }
+
+    	        //treating edge case of being sent blanks
+    	        if(count == 0) count ++;
+
+    	        int hold_place = count + hold_initial + 1;
+    	        test_count = hold_place;
+    	        count = 0;
+
+    	        a = rxdata[hold_place];
+
+    	        while(a != ',' && count < 20 ){
+    	            localization_name[count] = a;
+    	            a = rxdata[hold_place + count + 1];
+    	            count++;
+    	        }
+    	        count = 0;
+
     }
     else if(inst == (uint8_t) 134){ //instruction to send all the data last acquired
         transmitByteData((uint8_t) 134); //send success byte
