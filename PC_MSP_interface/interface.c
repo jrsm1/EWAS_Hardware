@@ -83,7 +83,7 @@ uint8_t rxdata[1000];
 uint_fast8_t received_byte;
 char test_char;
 int rcount = 0;
-int modules_connected_code[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+int modules_connected_code[8] = {1, 0, 1, 0, 0, 0, 0, 0};
 char configuration[1000];
 int conf_place =  0;
 char *all_data = "this is all the data";
@@ -124,7 +124,11 @@ int test_count;
 //status variables
 uint8_t recorded = 1;
 uint8_t stored = 0;
-uint8_t gps_synched = 1;
+uint8_t gps_synched = 0;
+
+//sensors connected
+int sensors_enabled[32];
+
 
 int main(void)
 {
@@ -258,9 +262,16 @@ void decodeInstruction(){
         vis_mod2 = (uint8_t)rxdata[14];
         vis_sens2 = (uint8_t)rxdata[15];
 
-        int hold_initial = 16;
+        int count = 16;
+        int i = 0;
+        for(i = 0; i<32; i++){
+            sensors_enabled[i] = rxdata[count];
+            count++;
+        }
+
+        int hold_initial = 49;
         char a = rxdata[hold_initial];
-        int count = 0;
+        count = 0;
 
         test1 = (int)(a!=',');
         test1 = (int)(a!=",");
