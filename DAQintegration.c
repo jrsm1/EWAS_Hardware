@@ -48,7 +48,7 @@ void FilterFreq(short mode){
     else
         clockSystem(0);
     //format: timer output - cutoff frequency
-    switch(mode)
+    switch(mode){
     case 0:     //100Hz - 1Hz
         TIMER_A2->CCR[0] = (uint16_t) 4095;
         TIMER_A2->CCR[1] = (uint16_t) 2048;
@@ -89,6 +89,7 @@ void FilterFreq(short mode){
         TIMER_A2->CCR[0] = (uint16_t) 511;
         TIMER_A2->CCR[1] = (uint16_t) 256;
         break;
+    }
 }
 
 //Multiplexers
@@ -168,5 +169,5 @@ void main(void){
 //   MuxSelectors(0x00);
 //   GainSelect(1);
    timersetup();
-   FilterFreq();
+   FilterFreq(8);
 }
