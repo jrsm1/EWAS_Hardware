@@ -2,12 +2,132 @@
 //#include "msp.h"
 #include <stdint.h>
 
-/* Statics */
+/* Globals */
 uint8_t TXData = 0;
 uint8_t pwm_divider = 0x00;
-uint8_t data_in[4][3];
 short ignore_sample = 0;
 short ignore_sample_counter = 0;
+
+/***************************************************
+ *                   DIAGNOSTICS                   *
+ **************************************************/
+
+char sramtest(){
+
+    //creating array of 200 bytes
+    uint8_t storethis[200];
+    uint8_t readback[200];
+    uint8_t readback2[100];
+    uint8_t readback3[280];
+    char testpassed 0x00;
+    volatile int i;
+    for(i=0;i<200;i++){
+        storethis[i] = i;
+    }
+
+    //storing in SRAM
+    SRAMdir('S', 0);            //store mode, address 0
+    for(i=0;i<200;i++){
+        P2OUT = storethis[i];
+        P3OUT = 0x01;           //enable to write
+        P3OUT = 0x00;           //disable to prepare next byte
+        if(++P7OUT == 0)        //increment address
+            if(++P9OUT == 0)
+                P10OUT++;
+    }
+
+    //Reading the data back from SRAM
+    SRAMdir('R', 0);            //read mode, address 0
+    P3OUT = 0x01;               //enabling chip
+    for(i=0;i<200;i++){
+        readback[i] = (uint8_t) P2IN;
+        if(++P7OUT == 0)
+            if(++P9OUT == 0)
+                P10OUT++;
+    }
+    P3OUT = 0x00;   //disable chip after finished
+
+    //Test if data was stored correctly
+    testpassed |= BIT0;
+    for(i=0;i<200;i++)
+        if(readback[i] != i){
+            testpassed &= ~BIT0;
+            break;
+        }
+
+    SRAMdir('S', 131015);   //131015 = 0x1FFC7
+    for(i=0;i<100;i++){
+        P2OUT = (uint8_t) 0xAA;
+        P3OUT = 0x01;       //enable to write
+        P3OUT = 0x00;       //disable to prepare next byte
+        if(++P7OUT == 0)    //increment address
+            if(++P9OUT == 0)
+                P10OUT++;
+    }
+
+    SRAMdir('R', 131015);        //read mode, address 0
+    P3OUT = 0x01;   //enabling chip
+    for(i=0;i<100;i++){
+        readback2[i] = (uint8_t) P2IN;
+        if(++P7OUT == 0)
+            if(++P9OUT == 0)
+                P10OUT++;
+    }
+    P3OUT = 0x00;   //disable chip after finished
+
+
+    //Test if data was stored correctly
+    testpassed |= BIT1;
+    for(i=0;i<100;i++)
+        if(readback2[i] != 0xAA){
+            testpassed &= ~BIT1;
+            break;
+        }
+    //Test if address was incremented appropriately
+    if(P9OUT > 0)
+        testpassed &= ~BIT1;
+    if(P10OUT < 2)
+        testpassed &= ~BIT1;
+
+    SRAMdir('S', 180);
+    for(i=0;i<100;i++){
+        P2OUT = (uint8_t) 0xFF;
+        P3OUT = 0x01;       //enable to write
+        P3OUT = 0x00;       //disable to prepare next byte
+        if(++P7OUT == 0)    //increment address
+            if(++P9OUT == 0)
+                P10OUT++;
+    }
+
+    SRAMdir('R', 0);        //read mode, address 0
+    P3OUT = 0x01;           //enabling chip
+    for(i=0;i<280;i++){
+        readback3[i] = (uint8_t) P2IN;
+        if(++P7OUT == 0)
+            if(++P9OUT == 0)
+                P10OUT++;
+    }
+    P3OUT = 0x00;   //disable chip after finished
+
+    //Test if data from previous tests has remained
+    testpassed |= BIT2;
+    for(i=0;i<180;i++)
+        if(readback3[i] != i){
+            testpassed &= ~BIT2;
+            break;
+        }
+    for(i=180;i<280;i++)
+        if(readback3[i] != 0xFF){
+            testpassed &= ~BIT2;
+            break;
+        }
+
+   return testpassed;
+}
+
+/***************************************************
+ *                       ADC                       *
+ **************************************************/
 /*
  * Configure ADC SPI with the given divider value
  */
@@ -26,30 +146,10 @@ void ADC_SPI_Config(uint16_t divider)
     EUSCI_B0->CTLW0 &= ~EUSCI_B_CTLW0_SWRST;        // Initialize USCI state machine
 }
 
-void clockSystem(short mode)
-{
-    //mode = 0 sets system to 16MHz, mode = 1 sets to 24
-    if (mode == 1)
-    {
-        PCM->CTL0 = (uint32_t) 0x695A0001;      //active mode request VCORE1
-        while (PCM->CTL1 & BIT8 )
-            ;
-        CS->KEY = CS_KEY_VAL;            // Unlock CS module for register access
-        CS->CTL0 = (uint32_t) 0x08040000;       // Reset tuning parameters
-        CS->CTL1 = (uint32_t) 0x10100033;
-        CS->KEY = 0;                  // Lock CS module from unintended accesses
-    }
-    else{
-        PCM_setPowerState(PCM_AM_LF_VCORE0);
-        CS_setDCOFrequency(16777216);                           // Lock CS module from unintended accesses
-    }
-}
-
 void freq_Config(int freq, Timer_A_PWMConfig *pwmConfig)
 {
     ignore_sample = 0;
     ignore_sample_counter = 0;
-    *pwmConfig = (Timer_A_PWMConfig) {TIMER_A_CLOCKSOURCE_SMCLK, pwm_divider, 1, TIMER_A_CAPTURECOMPARE_REGISTER_1, TIMER_A_OUTPUTMODE_RESET_SET, 1};
     switch(freq)
     {
     case 256:                                           //sampling rate of 256Hz
@@ -123,32 +223,24 @@ void freq_Config(int freq, Timer_A_PWMConfig *pwmConfig)
             ignore_sample = 0;
         }
     }
-
+    *pwmConfig = (Timer_A_PWMConfig) {TIMER_A_CLOCKSOURCE_SMCLK, pwm_divider, 1, TIMER_A_CAPTURECOMPARE_REGISTER_1, TIMER_A_OUTPUTMODE_RESET_SET, 1};
 }
 
-void setDRDYPin(void)
-{
-    P5->IES |= BIT1;                            // Enable Interrupt on Falling Edge of DRDY
-    P5->IE |= BIT1;                             // Port Interrupt Enable
-    P5->IFG = 0;                                // Clear Port Interrupt Flag
-    P5->DIR &= ~BIT1;                           // Set Pin as Input
-    NVIC->ISER[1] |= 1 << ((PORT5_IRQn) & 31);  // Enable PORT5 interrupt in NVIC module
+
+//last 4 bits of input are the power selectors for channels 4, 3, 2, and 1
+void channelselect(char channels){
+    P5OUT &= ~BIT2 & ~BIT4 & ~BIT5 & ~BIT7;
+    P5OUT |= (channels & 0x01) << 2;
+    P5OUT |= (channels & 0x06) << 3;
+    P5OUT |= (channels & 0x08) << 4;
 }
 
-void timersetup()
-{
-//    //Timer_A0
-//    TIMER_A0->CTL |= (uint16_t) 0x0200;             //CTL[9:8]=TASSEL=01b - TA takes input from SCLK
-//    TIMER_A0->CTL |= (uint16_t) 0x0010;             //CTL[5:4]=MC=01b - timer in count up mode (resets when it reaches CCR0 value)
-//    TIMER_A0->CCTL[1] &= (uint16_t) 0xFEFF;         //CCTL1[8]=CAP=0b set CCTL1 to compare mode
-//    TIMER_A0->CCTL[1] |= (uint16_t) 0x00E0;         //CCTL1[7:5]=OUTMOD=111b OUT1 is reset when counter reaches CCR1, it is set after reaching CCR0;
-//
-//    //TA0 OUT1 exits through P5.6 (device specified)
-//    //this puts CCR1's output on a pin so we can measure it easily
-//    P2DIR |= BIT4;                                  //P2.4 set to output
-//    P2SEL1 &= ~BIT4;                                //P2.4 SEL = 01B
-//    P2SEL0 |= BIT4;
+/***************************************************
+ *                     FILTER                      *
+ **************************************************/
 
+void filtertimersetup()
+{
     //Timer_A2
     TIMER_A2->CTL |= (uint16_t) 0x0200; //CTL[9:8]=TASSEL=10b - TA takes input from SCLK
     TIMER_A2->CTL |= (uint16_t) 0x0010; //CTL[5:4]=MC=01b - timer in count up mode (resets when it reaches CCR0 value)
@@ -209,14 +301,10 @@ void FilterFreq(short mode)
     }
 }
 
-//Multiplexers
-void MuxSelectors(char channels)
-{
-    //least significant 4 bits are used as the selectors for channels 4, 3, 2, and 1 respectively
-    P8OUT = (channels & 0x0F) << 2;
-}
+/***************************************************
+ *                       PGA                       *
+ **************************************************/
 
-//PGA
 void GainSelect(short gain)
 {
     uint8_t option = 0x01;
@@ -270,6 +358,164 @@ void SPIport()
     UCA1CTLW0 &= ~UCSWRST;             // **Initialize USCI state machine**
 }
 
+/***************************************************
+ *                      SRAM                       *
+ **************************************************/
+
+//Set SRAM operation mode
+//S for storing, R for reading
+void SRAMdir(char mode, int address){
+    //I/O: port 2       //single byte io mode
+    if(mode == 'S'){
+        P2DIR = 0xFF;
+        P2OUT = 0x00;
+    }
+    else{
+        P2OUT = 0x00;
+        P2DIR = 0x00;
+    }
+
+    //address ports
+    P10DIR = 0xFF; //MSB
+    P9DIR = 0xFF;
+    P7DIR = 0xFF;   //LSB
+
+    P7OUT = (uint8_t) address & 0xFF;
+    P9OUT = (uint8_t) (address >> 8) & 0xFF;
+    P10OUT = (uint8_t) (address >> 16) & 0xFF;
+
+    //chip select CE2 (CE1 goes to ground since we only have 1 IC)
+    P3DIR |= 0x01;
+    P3OUT &= 0x00;
+
+    //write, output, byte high, and byte low enable signals
+    P4DIR |= 0x0F;
+    P4OUT = (mode == 'S') ? P4OUT = 0x06 : 0x0A;
+}
+
+void storeByte((uint8_t) data){
+    P2OUT = data;
+    P3OUT = 0x01;           //enable to write
+    P3OUT = 0x00;           //disable to prepare next byte
+    if(++P7OUT == 0)        //increment address
+        if(++P9OUT == 0)
+            P10OUT++;
+}
+
+/***************************************************
+ *            CONTROL UNIT <-> DAQ                 *
+ **************************************************/
+
+//i2c setup instructions
+void i2cinit(){
+    EUSCI_B2->CTLW0 = (uint16_t) 0x0001;                //CTLW0[0] = UCSWRST = 1b       /set so we can modify the rest of the register
+    EUSCI_B2->CTLW0 &= (uint16_t) 0x7FFF;               //CTLW0[15] = UCA10 = 0b        /set own address to 7bit
+    EUSCI_B2->CTLW0 &= (uint16_t) 0xF7FF;               //CTLW0[11] = UCMST = 0b        /slave
+    EUSCI_B2->CTLW0 |= (uint16_t) 0x0600;               //CLTW0[10:9] = UCMODE = 11b    /I2C mode
+//    EUSCI_B2->BRW |= (uint16_t) 0xFF;                    //(int) clk/baud rate
+
+    //EUSCI_B2 SDA
+    P3SEL1 &= ~BIT6;
+    P3SEL0 |= BIT6;
+    //EUSCI_B2 SCL
+    P3SEL1 &= ~BIT7;
+    P3SEL0 |= BIT7;
+
+    EUSCI_B2->I2COA0 |= 0x0460;                         //address enabled + slave module address = 110 0000
+
+    EUSCI_B2->CTLW0 &= (uint16_t) 0xFFFE;               //UCSWRST = 0
+
+    EUSCI_B2->IE = 0x000F;                                //interrupts enabled
+    NVIC->ISER[0] = 1 << (EUSCIB2_IRQn);
+
+    //master's I2C address
+    EUSCI_B2->I2CSA = (uint16_t) 0x58;
+}
+
+//void interpretInstruction(char* instruction){
+//    short i; //for loop counter
+//    if(instruction[0] == 0xCA){         //check header
+//        for(i = 1; i<count; i++){
+//            switch(instruction[i]){
+//            case 0x61:
+//                setSamplingPeriod(instruction[++i]);        //sample period
+//                break;
+//            case 0x62:                                      //gain select
+//                setGainFactor(instruction[++i]);
+//                changePGAAMP(settings.gain);
+//                break;
+//            case 0x63:                                      //diagnostics
+//                muxstate = (int) instruction[++i];
+//                changeMUX(muxstate);
+//                SRAMinit();
+//                break;
+//            case 0x64:                                      //sync
+//                sync = true;
+//                i++;
+//                break;
+//            case 0x65:                                      //power down
+//                toggleChannels(down, instruction[++i]);
+//                break;
+//            case 0x66:                                      //power up
+//                toggleChannels(up, instruction[++i]);
+//                break;
+//            case 0x68:                                      //set output format
+//                i++;
+//                break;
+//            case 0x9A:                                      //begin sampling
+//                startSampling();
+//                break;
+//            case 0x9B:
+//                SRAMtesting();                              //test ram write;
+//                break;
+//            case 0x6C:                                      //set clock frequency
+//                i++;
+//                break;
+//            case 0x6E:                                      //set SClock ratio
+//                i++;
+//                break;
+//            case 0x6F:                                      //data request
+//                request = true;
+//                i++;
+//                break;
+//            default:
+//                i++;
+//            }
+//        }
+//    }
+//}
+
+
+/***************************************************
+ *                    GENERAL                      *
+ **************************************************/
+
+void clockSystem(short mode)
+{
+    //mode = 0 sets system to 16MHz, mode = 1 sets to 24
+    if (mode == 1)
+    {
+        PCM->CTL0 = (uint32_t) 0x695A0001;      //active mode request VCORE1
+        while (PCM->CTL1 & BIT8 )
+            ;
+        CS->KEY = CS_KEY_VAL;            // Unlock CS module for register access
+        CS->CTL0 = (uint32_t) 0x08040000;       // Reset tuning parameters
+        CS->CTL1 = (uint32_t) 0x10100033;
+        CS->KEY = 0;                  // Lock CS module from unintended accesses
+    }
+    else{
+        PCM_setPowerState(PCM_AM_LF_VCORE0);
+        CS_setDCOFrequency(16777216);                           // Lock CS module from unintended accesses
+    }
+}
+
+//Multiplexers
+void MuxSelectors(char channels)
+{
+    //least significant 4 bits are used as the selectors for channels 4, 3, 2, and 1 respectively
+    P8OUT = (channels & 0x0F) << 2;
+}
+
 void GPIOinit()
 {
     //multiplexer selectors
@@ -284,43 +530,48 @@ void GPIOinit()
     P5SEL1 &= ~BIT6;
     P5SEL0 |= BIT6;
 
+    //TIMER_A1 OUT1
     GPIO_setAsPeripheralModuleFunctionOutputPin(GPIO_PORT_P2, GPIO_PIN4,
                 GPIO_PRIMARY_MODULE_FUNCTION);
-    setDRDYPin();
+
+    //DRDY
+    P5->IES |= BIT1;                            // Enable Interrupt on Falling Edge of DRDY
+    P5->IE |= BIT1;                             // Port Interrupt Enable
+    P5->IFG = 0;                                // Clear Port Interrupt Flag
+    P5->DIR &= ~BIT1;                           // Set Pin as Input
+    NVIC->ISER[1] |= 1 << ((PORT5_IRQn) & 31);  // Enable PORT5 interrupt in NVIC module
+
+    //I2C initialization
+    P8DIR &= ~BIT7;
+    P8IE |= BIT7;
+    P8IFG = 0;
+    NVIC->ISER[1] |= 1 << ((PORT8_IRQn) & 31);
+
+    //ADC powerdown selectors
+    P5DIR |= BIT4 | BIT5 | BIT6 | BIT7;
 }
 
 
+/***************************************************
+ *                      MAIN                       *
+ **************************************************/
 
 void main(void)
 {
-//    clockSystem(1);
-//    GPIOinit();
-//   MuxSelectors(0x00);
-//   GainSelect(1);
-//    timersetup();
-//    FilterFreq(8);
-
-    /* Configures Clock System, timer PWM divider, and SPI
-     * divider according to the sampling rate specified by
-     * the user. */
-//    freq_Config(20000);
-    /* Configures PWM to pin 2.4 */
-    Timer_A_PWMConfig pwmConfig;// =
-//    {
-//        TIMER_A_CLOCKSOURCE_SMCLK,
-//        pwm_divider,
-//        1,
-//        TIMER_A_CAPTURECOMPARE_REGISTER_1,
-//        TIMER_A_OUTPUTMODE_RESET_SET,
-//        1
-//    };
-
-    freq_Config(256, &pwmConfig);
-//    TXData = 0x00;                                                      // Transmission Dummy Data to generate bit clock
-    Timer_A_generatePWM(TIMER_A0_BASE, &pwmConfig);
-    //setDRDYPin();
+    GPIOinit();
+    channelselect(0x01);
+//    Timer_A_PWMConfig pwmConfig;
+//    freq_Config(256, &pwmConfig);                                                 // Transmission Dummy Data to generate bit clock
+//    Timer_A_generatePWM(TIMER_A0_BASE, &pwmConfig);
 }
 
+/***************************************************
+ *              INTERRUPT HANDLERS                 *
+ **************************************************/
+
+
+///////TODO figure out where to increment samplecount variable
+//Read sample from ADC
 void PORT5_IRQHandler(void)
 {
     if (P5IFG & BIT1)
@@ -331,40 +582,40 @@ void PORT5_IRQHandler(void)
                 ignore_sample_counter++;
             EUSCI_B0->TXBUF = TXData;                   // Transmit dummy data to generate bit clock
             while(!(EUSCI_B0->IFG & EUSCI_B_IFG_RXIFG));// Wait until we receive entire byte to read
-            data_in[0][0] = EUSCI_B0->RXBUF;            // Store first byte of channel 1 in the array
+            storeByte(EUSCI_B0->RXBUF);                 // Store first byte of channel 1 in the array
             EUSCI_B0->TXBUF = TXData;                   // Transmit dummy data to generate bit clock
             while(!(EUSCI_B0->IFG & EUSCI_B_IFG_RXIFG));// Wait until we receive entire byte to read
-            data_in[0][1] = EUSCI_B0->RXBUF;            // Store second byte of channel 1 in the array
+            storeByte(EUSCI_B0->RXBUF);                 // Store second byte of channel 1 in the array
             EUSCI_B0->TXBUF = TXData;                   // Transmit dummy data to generate bit clock
             while(!(EUSCI_B0->IFG & EUSCI_B_IFG_RXIFG));// Wait until we receive entire byte to read
-            data_in[0][2] = EUSCI_B0->RXBUF;            // Store third byte of channel 1 in the array
+            storeByte(EUSCI_B0->RXBUF);                 // Store third byte of channel 1 in the array
             EUSCI_B0->TXBUF = TXData;                   // Transmit dummy data to generate bit clock
             while(!(EUSCI_B0->IFG & EUSCI_B_IFG_RXIFG));// Wait until we receive entire byte to read
-            data_in[1][0] = EUSCI_B0->RXBUF;            // Store first byte of channel 2 in the array
+            storeByte(EUSCI_B0->RXBUF);                 // Store first byte of channel 2 in the array
             EUSCI_B0->TXBUF = TXData;                   // Transmit dummy data to generate bit clock
             while(!(EUSCI_B0->IFG & EUSCI_B_IFG_RXIFG));// Wait until we receive entire byte to read
-            data_in[1][1] = EUSCI_B0->RXBUF;            // Store second byte of channel 2 in the array
+            storeByte(EUSCI_B0->RXBUF);                 // Store second byte of channel 2 in the array
             EUSCI_B0->TXBUF = TXData;                   // Transmit dummy data to generate bit clock
             while(!(EUSCI_B0->IFG & EUSCI_B_IFG_RXIFG));// Wait until we receive entire byte to read
-            data_in[1][2] = EUSCI_B0->RXBUF;            // Store third byte of channel 2 in the array
+            storeByte(EUSCI_B0->RXBUF);                 // Store third byte of channel 2 in the array
             EUSCI_B0->TXBUF = TXData;                   // Transmit dummy data to generate bit clock
             while(!(EUSCI_B0->IFG & EUSCI_B_IFG_RXIFG));// Wait until we receive entire byte to read
-            data_in[2][0] = EUSCI_B0->RXBUF;            // Store first byte of channel 3 in the array
+            storeByte(EUSCI_B0->RXBUF);                 // Store first byte of channel 3 in the array
             EUSCI_B0->TXBUF = TXData;                   // Transmit dummy data to generate bit clock
             while(!(EUSCI_B0->IFG & EUSCI_B_IFG_RXIFG));// Wait until we receive entire byte to read
-            data_in[2][1] = EUSCI_B0->RXBUF;            // Store second byte of channel 3 in the array
+            storeByte(EUSCI_B0->RXBUF);                 // Store second byte of channel 3 in the array
             EUSCI_B0->TXBUF = TXData;                   // Transmit dummy data to generate bit clock
             while(!(EUSCI_B0->IFG & EUSCI_B_IFG_RXIFG));// Wait until we receive entire byte to read
-            data_in[2][2] = EUSCI_B0->RXBUF;            // Store third byte of channel 3 in the array
+            storeByte(EUSCI_B0->RXBUF);                 // Store third byte of channel 3 in the array
             EUSCI_B0->TXBUF = TXData;                   // Transmit dummy data to generate bit clock
             while(!(EUSCI_B0->IFG & EUSCI_B_IFG_RXIFG));// Wait until we receive entire byte to read
-            data_in[3][0] = EUSCI_B0->RXBUF;            // Store first byte of channel 4 in the array
+            storeByte(EUSCI_B0->RXBUF);                 // Store first byte of channel 4 in the array
             EUSCI_B0->TXBUF = TXData;                   // Transmit dummy data to generate bit clock
             while(!(EUSCI_B0->IFG & EUSCI_B_IFG_RXIFG));// Wait until we receive entire byte to read
-            data_in[3][1] = EUSCI_B0->RXBUF;            // Store second byte of channel 4 in the array
+            storeByte(EUSCI_B0->RXBUF);                 // Store second byte of channel 4 in the array
             EUSCI_B0->TXBUF = TXData;                   // Transmit dummy data to generate bit clock
             while(!(EUSCI_B0->IFG & EUSCI_B_IFG_RXIFG));// Wait until we receive entire byte to read
-            data_in[3][2] = EUSCI_B0->RXBUF;            // Store third byte of channel 4 in the array
+            storeByte(EUSCI_B0->RXBUF);                 // Store third byte of channel 4 in the array
         }
         else{
             if(ignore_sample_counter == ignore_sample)
@@ -374,4 +625,9 @@ void PORT5_IRQHandler(void)
         }
     }
     P5->IFG = 0;                                // Clear Port Interrupt Flag
+}
+
+//initializing i2c module
+void PORT8_IRQHandler(void){
+    i2cinit();
 }
