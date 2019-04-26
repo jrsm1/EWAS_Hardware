@@ -23,7 +23,6 @@
 //		Defines					//
 /********************************/
 
-
 /* Console UART Macros */
 #define CONSOLE_UART_BASE 			EUSCI_A0_BASE
 #define CONSOLE_UART_GPIO_PORT		GPIO_PORT_P1
@@ -42,7 +41,7 @@
 
 /* GPS Timer Macros*/
 #define MAX_FAILS 					5
-#define GPS_TIMER_PERIOD    			0x8000
+#define GPS_TIMER_PERIOD    		0x8000
 #define TIME_WAIT 					15
 #define MAX_RETRIES 				3
 #define GPS_TIMER_BASE				TIMER_A1_BASE
@@ -52,6 +51,8 @@
 #define SOLENOID_TIMER_PERIOD    	0x4000
 #define SOLENOID_TIMER_BASE			TIMER_A0_BASE
 #define SOLENOID_TIMER_INT			INT_TA0_0
+#define SOLENOID_GPIO_PORT			GPIO_PORT_P2
+#define SOLENOID_GPIO_PIN			GPIO_PIN4
 
 /* FTDI UART Macros */
 #define FTDI_UART_BASE				EUSCI_A1_BASE
@@ -69,6 +70,12 @@
 #define I2C_BUS_SCL					GPIO_PIN6
 #define I2C_BUS_SDA					GPIO_PIN7
 #define I2C_BUS_MAX_DAQS			8
+#define I2C_DAQ1_GPIO_PORT			GPIO_PORT_P4
+#define I2C_DAQ1_GPIO_PIN			GPIO_PIN1
+#define I2C_DAQ2_GPIO_PORT			GPIO_PORT_P5
+#define I2C_DAQ2_GPIO_PIN			GPIO_PIN0
+
+
 #define MASTER_TO_SLAVE_PACKET_SIZE 3
 #define NUM_OF_REC_BYTES			600
 
@@ -80,7 +87,7 @@
 
 /* Buffer size used for the file copy process */
 #ifndef CPY_BUFF_SIZE
-#define CPY_BUFF_SIZE       		2048
+#define CPY_BUFF_SIZE       		4096
 #endif
 
 
@@ -97,7 +104,6 @@
 //		Function Prototypes		//
 /********************************/
 
-
 void configureConsoleUART(void);
 void configureGPSUART(void);
 void configureGPSTimer(void);
@@ -111,10 +117,10 @@ void processCommand(char *CommandText);
 void sendUARTString(uint32_t moduleInstance, char * msg);
 void decodeInstruction();
 
+
 /********************************/
 //		Global Variables		//
 /********************************/
-
 
 static char consoleInput[BUFFER_SIZE];
 static char COMMAND[BUFFER_SIZE];
@@ -126,8 +132,9 @@ static volatile bool slavesInitialized = false;
 static volatile uint8_t slaveIndex = 0;
 static volatile uint8_t inputFlag = 0;
 static volatile uint8_t cardFlag = 0;
+static volatile uint8_t appFlag = 0;
 const uint8_t DAQAddresses[] = {0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57};
-//static uint8_t activeDAQModules = 0;
+static uint8_t activeDAQModules = 0;
 static uint8_t RXData[NUM_OF_REC_BYTES];
 static volatile uint32_t xferIndex;
 
@@ -176,8 +183,76 @@ const RTC_C_Calendar defaultTime = {
 
 RTC_C_Calendar newTime;
 
-//
 
+SDFatFS_Handle sdfatfsHandle;
+FILE *src, *dst;
+/* File name prefix for this filesystem for use with TI C RTS */
+char fatfsPrefix[] = "fat";
+
+const char daq1[] = "fat:"STR(DRIVE_NUM)":DAQ1.txt";
+const char daq2[] = "fat:"STR(DRIVE_NUM)":DAQ2.txt";
+const char daq3[] = "fat:"STR(DRIVE_NUM)":DAQ3.txt";
+const char daq4[] = "fat:"STR(DRIVE_NUM)":DAQ4.txt";
+const char daq5[] = "fat:"STR(DRIVE_NUM)":DAQ5.txt";
+const char daq6[] = "fat:"STR(DRIVE_NUM)":DAQ6.txt";
+const char daq7[] = "fat:"STR(DRIVE_NUM)":DAQ7.txt";
+const char daq8[] = "fat:"STR(DRIVE_NUM)":DAQ8.txt";
+
+unsigned char cpy_buff[CPY_BUFF_SIZE + 1];
+
+
+//////////////////
+uint8_t rxdata[1000];
+uint_fast8_t received_byte;
+char test_char;
+int rcount = 0;
+int modules_connected_code[8] = {1, 0, 0, 0, 0, 0, 0, 0};
+char configuration[4500];
+int conf_place =  0;
+char *all_data = "this is all the data";
+int live1[3] = {1, 1, 1};
+int live2[3] = {1, 1, 1};
+char *gps_data = "gps data";
+int valid_conf = 0;
+int trans_count = 0;
+int status = 1;
+int diagnosis = 1;
+
+// module sensor visualization
+int store_enable = 0; //Flag for determining if DAta shall be stored in sd card
+int vis_sens1 = 0;
+int vis_mod2 = 0;
+int vis_sens2 = 0;
+
+//buffer for live data
+int live_buffer[100];
+
+//sensor enable
+int sensors_enabled[32];
+
+// recording parameters
+int sample_rate;
+int cutoff;
+int gain;
+int duration;
+int start_delay;
+
+//experiment name
+char experiment_name[20];
+
+//localization identifier
+char localization_name[20];
+
+//testers
+int test1;
+int test_count;
+
+//status variables
+uint8_t recorded = 0;
+uint8_t stored = 0;
+uint8_t gps_synched = 0;
+
+////////////
 
 /* Module Configuration Global Variables */
 
@@ -185,8 +260,8 @@ RTC_C_Calendar newTime;
 const eUSCI_UART_Config consoleConfig =
 {
         EUSCI_A_UART_CLOCKSOURCE_SMCLK,          // SMCLK Clock Source
-        78,                                     // BRDIV = 78
-        2,                                       // UCxBRF = 2
+        3,                                     // BRDIV = 78
+        4,                                       // UCxBRF = 2
         0,                                       // UCxBRS = 0
         EUSCI_A_UART_NO_PARITY,                  // No Parity
         EUSCI_A_UART_LSB_FIRST,                  // LSB First
@@ -232,7 +307,7 @@ const eUSCI_I2C_MasterConfig i2cBusConfig =
 {
         EUSCI_B_I2C_CLOCKSOURCE_SMCLK,          // SMCLK Clock Source
         12000000,                                // SMCLK = 12MHz
-        EUSCI_B_I2C_SET_DATA_RATE_400KBPS,      // Desired I2C Clock of 100khz
+        EUSCI_B_I2C_SET_DATA_RATE_100KBPS,      // Desired I2C Clock of 100khz
         0,                                      // No byte counter threshold
         EUSCI_B_I2C_NO_AUTO_STOP                // No Autostop
 };
@@ -258,74 +333,6 @@ const Timer_A_UpModeConfig solenoidTimerConfig = {
         TIMER_A_DO_CLEAR                        // Clear value
 };
 
-////////////////////////////////////////
-
-//TODO
-
-SDFatFS_Handle sdfatfsHandle;
-FILE *src, *dst;
-const char inputfile[] = "fat:"STR(DRIVE_NUM)":input.txt";
-const char daq1[] = "fat:"STR(DRIVE_NUM)":DAQ1.txt";
-const char daq2[] = "fat:"STR(DRIVE_NUM)":DAQ2.txt";
-
-/* File name prefix for this filesystem for use with TI C RTS */
-char fatfsPrefix[] = "fat";
-
-unsigned char cpy_buff[CPY_BUFF_SIZE + 1];
-const char textarray[] = "For Testing Only";
-
-
-///////////////////////////////////////
-
-//////////////////
-uint8_t rxdata[1000];
-uint_fast8_t received_byte;
-char test_char;
-int rcount = 0;
-int modules_connected_code[8] = {0, 0, 0, 0, 0, 0, 0, 0};
-char configuration[1000];
-int conf_place =  0;
-char *all_data = "this is all the data";
-int live1[3] = {1, 1, 1};
-int live2[3] = {1, 1, 1};
-char *gps_data = "gps data";
-int valid_conf = 0;
-int trans_count = 0;
-int status = 1;
-int diagnosis = 1;
-
-// module sensor visualization
-int vis_mod1 = 0;
-int vis_sens1 = 0;
-int vis_mod2 = 0;
-int vis_sens2 = 0;
-
-//buffer for live data
-int live_buffer[100];
-
-// recording parameters
-int sample_rate;
-int cutoff;
-int gain;
-int duration;
-int start_delay;
-
-//experiment name
-char experiment_name[20];
-
-//localization identifier
-char localization_name[20];
-
-//testers
-int test1;
-int test_count;
-
-//status variables
-uint8_t recorded = 1;
-uint8_t stored = 0;
-uint8_t gps_synched = 1;
-
-////////////
 
 /********************************/
 //		Main					//
@@ -342,20 +349,19 @@ int main(void)
     configureSDCard();
 
     //SD Card configuration changes MCLK, SMCLK, re-init to desired values
-    CS_initClockSignal(CS_SMCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_1);
-    CS_initClockSignal(CS_ACLK, CS_LFXTCLK_SELECT, CS_CLOCK_DIVIDER_1);
+    CS_initClockSignal(CS_SMCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_1); //DCO at 12MHz
+    CS_initClockSignal(CS_ACLK, CS_LFXTCLK_SELECT, CS_CLOCK_DIVIDER_1); //ACLK at 32.768kHz
 
     configureConsoleUART();
     configureFTDIUART();
-    configureGPSUART();
-    configureRTC();
-    configureGPSTimer();
-//    configureI2CBus();
+//    configureGPSUART();
+//    configureRTC();
+//    configureGPSTimer();
+    configureSolenoidTimer();
+    configureI2CBus();
 
-//    initializeSlaves();
+    initializeSlaves();
 
-
-//	masterToSlavePacket[0] = 0xCA;
     Interrupt_enableMaster();
 
 
@@ -366,9 +372,33 @@ int main(void)
         	processCommand(consoleInput);
             inputIndex = 0;
 
+        }else if(appFlag){
+        	appFlag = 0;
+        	decodeInstruction();
+
+        }else if(cardFlag){
+        	cardFlag = 0;
+//        	if(atoi(argv[2]) == 1)
+//        		src = fopen(daq1, "a");
+//        	else if(atoi(argv[2]) == 2)
+//		    int converter[200];
+//		    int converter[NUM_OF_REC_BYTES / 3];
+//        	int i, j = 0;
+
+//        	for(i = 0; i < NUM_OF_REC_BYTES; i+=3){
+////        			converter[j++] = (RXData[i] << 16 | RXData[i + 1] << 8 | RXData[i + 2]);
+//        			converter[j++] = (RXData[i] << 16 | RXData[i + 1] << 8 | RXData[i + 2]);
+//        	}
+        	xferIndex = 0;
+
+        	src = fopen(daq2, "w");
+
+//            fwrite(converter, 1, (NUM_OF_REC_BYTES / 3), src);
+            fwrite(RXData, 1, NUM_OF_REC_BYTES, src);
+            //Flush RXData afterwards
+            rewind(src);
+            fclose(src);
         }
-
-
     }
 
 
@@ -418,14 +448,15 @@ void configureGPSTimer(void){
 	Timer_A_startCounter(GPS_TIMER_BASE, TIMER_A_UP_MODE);
 }
 
+
 void configureSolenoidTimer(void){
-//	Timer_A_configureUpMode(GPS_TIMER_BASE, &gpsTimerConfig);
-//	Interrupt_enableInterrupt(GPS_TIMER_INT);
-//
-//	Timer_A_startCounter(GPS_TIMER_BASE, TIMER_A_UP_MODE);
-//    MAP_GPIO_setAsOutputPin(GPIO_PORT_P2, GPIO_PIN4);
-//    MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P2, GPIO_PIN4);
+	Timer_A_configureUpMode(SOLENOID_TIMER_BASE, &solenoidTimerConfig);
+    GPIO_setAsOutputPin(SOLENOID_GPIO_PORT, SOLENOID_GPIO_PIN);
+
+    GPIO_setOutputLowOnPin(SOLENOID_GPIO_PORT, SOLENOID_GPIO_PIN);
+
 }
+
 
 void configureFTDIUART(void){
     GPIO_setAsPeripheralModuleFunctionInputPin(FTDI_UART_GPIO_PORT,
@@ -467,6 +498,12 @@ void configureI2CBus(void){
 	GPIO_setAsPeripheralModuleFunctionInputPin(I2C_BUS_GPIO_PORT,
 			I2C_BUS_SCL + I2C_BUS_SDA, GPIO_PRIMARY_MODULE_FUNCTION);
 
+	//GPIO Pins for I2C Slave Enable
+    GPIO_setAsOutputPin(I2C_DAQ1_GPIO_PORT, I2C_DAQ1_GPIO_PIN);
+    GPIO_setOutputLowOnPin(I2C_DAQ1_GPIO_PORT, I2C_DAQ1_GPIO_PIN);
+
+    GPIO_setAsOutputPin(I2C_DAQ2_GPIO_PORT, I2C_DAQ2_GPIO_PIN);
+    GPIO_setOutputLowOnPin(I2C_DAQ2_GPIO_PORT, I2C_DAQ2_GPIO_PIN);
 
 	/* Initializing I2C Master to SMCLK at 400khz with no autostop */
 	I2C_initMaster(I2C_BUS_BASE, &i2cBusConfig);
@@ -483,6 +520,9 @@ void configureI2CBus(void){
 	/* Enable and clear the interrupt flag */
 	I2C_clearInterruptFlag(I2C_BUS_BASE,EUSCI_B_I2C_TRANSMIT_INTERRUPT0 +
 			EUSCI_B_I2C_NAK_INTERRUPT + EUSCI_B_I2C_RECEIVE_INTERRUPT0);
+
+	I2C_clearInterruptFlag(I2C_BUS_BASE,EUSCI_B_I2C_TRANSMIT_INTERRUPT2 +
+			EUSCI_B_I2C_NAK_INTERRUPT + EUSCI_B_I2C_RECEIVE_INTERRUPT2);
 
 }
 
@@ -505,6 +545,8 @@ void configureRTC(){
 void initializeSlaves(void){
 
     int ii;
+    	masterToSlavePacket[0] = 0xCA;
+
     while(!slavesInitialized){
 
 	      /* Delay between Transmissions */
@@ -515,12 +557,55 @@ void initializeSlaves(void){
 
 	      /* Send only a Start condition and the address byte */
 	      if(slaveIndex < I2C_BUS_MAX_DAQS){
+
+	    	  if(slaveIndex == 0){
+	    		  GPIO_setOutputHighOnPin(I2C_DAQ1_GPIO_PORT, I2C_DAQ1_GPIO_PIN);
+	    	  }else if(slaveIndex == 1){
+	    		  GPIO_setOutputHighOnPin(I2C_DAQ2_GPIO_PORT, I2C_DAQ2_GPIO_PIN);
+	    	  }else if(slaveIndex == 2){
+	    		  	 //TODO
+	    	  }else if(slaveIndex == 3){
+	    		  	 //TODO
+	    	  }else if(slaveIndex == 4){
+	    		  	 //TODO
+	    	  }else if(slaveIndex == 5){
+	    		  	  //TODO
+	    	  }else if(slaveIndex == 6){
+	    		  	  //TODO
+	    	  }else if(slaveIndex == 7){
+	    		  	  //TODO
+	    	  }
+
 	    	  I2C_masterSendMultiByteStartWithTimeout(I2C_BUS_BASE,
-	        		  DAQAddresses[slaveIndex++], 0x0000FFFF);
+	        		  DAQAddresses[slaveIndex], 0x0000FFFF);
+
 	    	  //TODO
+//	    	  if(I2C_masterSendMultiByteStartWithTimeout(I2C_BUS_BASE,
+//    		  DAQAddresses[slaveIndex], 0x0000FFFF)){
+//	    		  modules_connected_code[slaveIndex] = 1;
+//	    	  }
 	    	  	 /*
 	    	  	  * If DAQ responds, add 1 to DAQ counter, else continue
 	    	  	  */
+
+	    	  if(slaveIndex == 0){
+	    		  GPIO_setOutputLowOnPin(I2C_DAQ1_GPIO_PORT, I2C_DAQ1_GPIO_PIN);
+	    	  }else if(slaveIndex == 1){
+	    		  GPIO_setOutputLowOnPin(I2C_DAQ2_GPIO_PORT, I2C_DAQ2_GPIO_PIN);
+	    	  }else if(slaveIndex == 2){
+	    		  	 //TODO
+	    	  }else if(slaveIndex == 3){
+	    		  	 //TODO
+	    	  }else if(slaveIndex == 4){
+	    		  	 //TODO
+	    	  }else if(slaveIndex == 5){
+	    		  	  //TODO
+	    	  }else if(slaveIndex == 6){
+	    		  	  //TODO
+	    	  }else if(slaveIndex == 7){
+	    		  	  //TODO
+	    	  }
+	    	  slaveIndex++;
 
 	      }else{
 	    	  slavesInitialized = true;
@@ -528,10 +613,10 @@ void initializeSlaves(void){
 	//          MAP_Interrupt_enableSleepOnIsrExit();
     }
     //Only one slave, for demo purposes only
-    //I2C_setSlaveAddress(I2C_BUS_BASE, 0x50);
+    I2C_setSlaveAddress(I2C_BUS_BASE, 0x51);
     //Enable Interrupts after initialization
-    I2C_enableInterrupt(I2C_BUS_BASE, EUSCI_B_I2C_TRANSMIT_INTERRUPT0 +
-    			EUSCI_B_I2C_NAK_INTERRUPT + EUSCI_B_I2C_RECEIVE_INTERRUPT0);
+    I2C_enableInterrupt(I2C_BUS_BASE, EUSCI_B_I2C_RECEIVE_INTERRUPT0 | EUSCI_B_I2C_RECEIVE_INTERRUPT2);
+//    EUSCI_B_I2C_TRANSMIT_INTERRUPT0 + EUSCI_B_I2C_NAK_INTERRUPT +
     Interrupt_enableInterrupt(I2C_BUS_INT);
 }
 
@@ -551,14 +636,14 @@ void processCommand(char *CommandText){
 	memset(COMMAND, 0, sizeof(COMMAND));
 	strncpy(COMMAND, array[0], (strlen(array[0])));
 
-	UARTprintf(FTDI_UART_BASE, "CMD->%s\n\r",COMMAND);
+//	UARTprintf(FTDI_UART_BASE, "CMD->%s\n\r",COMMAND);
 
 
 	Status = CmdLineProcess(COMMAND);
 
 	if(Status == CMDLINE_BAD_CMD)
 	{
-		UARTprintf(FTDI_UART_BASE, "Bad command!\n\r");
+//		UARTprintf(FTDI_UART_BASE, "Bad command!\n\r");
 	}
 }
 
@@ -585,22 +670,33 @@ void transmitStringData(char *string){
 
     trans_count = 0;
     while(*string){
-        MAP_UART_transmitData(EUSCI_A1_BASE, (uint_fast8_t) *string++);
+        MAP_UART_transmitData(FTDI_UART_BASE, (uint_fast8_t) *string++);
         trans_count++;
     }
-    MAP_UART_transmitData(EUSCI_A1_BASE, (uint_fast8_t) 0x0D);
-    MAP_UART_transmitData(EUSCI_A1_BASE, (uint_fast8_t) 0x0A);
+    MAP_UART_transmitData(FTDI_UART_BASE, (uint_fast8_t) 0x0D);
+    MAP_UART_transmitData(FTDI_UART_BASE, (uint_fast8_t) 0x0A);
 
 }
 
 void transmitByteData(uint8_t byte){
-    MAP_UART_transmitData(EUSCI_A1_BASE, (uint_fast8_t) byte);
-    MAP_UART_transmitData(EUSCI_A1_BASE, (uint_fast8_t) 0x0D);
-    MAP_UART_transmitData(EUSCI_A1_BASE, (uint_fast8_t) 0x0A);
+    MAP_UART_transmitData(FTDI_UART_BASE, (uint_fast8_t) byte);
+    MAP_UART_transmitData(FTDI_UART_BASE, (uint_fast8_t) 0x0D);
+    MAP_UART_transmitData(FTDI_UART_BASE, (uint_fast8_t) 0x0A);
 }
 
 void transmitNByteData(uint8_t byte){
-    MAP_UART_transmitData(EUSCI_A1_BASE, (uint_fast8_t) byte);
+    MAP_UART_transmitData(FTDI_UART_BASE, (uint_fast8_t) byte);
+}
+
+
+void transmitTerminationSequence(){
+
+    MAP_UART_transmitData(FTDI_UART_BASE, 0xAA);
+    MAP_UART_transmitData(FTDI_UART_BASE, 0xBB);
+    MAP_UART_transmitData(FTDI_UART_BASE, 0xAA);
+    MAP_UART_transmitData(FTDI_UART_BASE, 0xBB);
+    MAP_UART_transmitData(FTDI_UART_BASE, 0x0D);
+    MAP_UART_transmitData(FTDI_UART_BASE, 0x0A);
 }
 
 void getCurrentTime(void)
@@ -627,7 +723,7 @@ void updateRTC(void)
     currTime.seconds = second;
     MAP_RTC_C_initCalendar(&currTime, RTC_C_FORMAT_BINARY);             //initializes RTC with updated struct
     MAP_RTC_C_clearInterruptFlag(RTC_C_CLOCK_READ_READY_INTERRUPT);     //Clears Read Ready Interrupt Flag
-    MAP_RTC_C_enableInterrupt(RTC_C_CLOCK_READ_READY_INTERRUPT);        //Enables Read Ready Interupt Flag
+//    MAP_RTC_C_enableInterrupt(RTC_C_CLOCK_READ_READY_INTERRUPT);        //Enables Read Ready Interupt Flag
     MAP_RTC_C_startClock();                                             //Starts Real Time Clock
 }
 
@@ -677,7 +773,8 @@ void EUSCIA1_IRQHandler(void)
     }
     if(received_byte == (uint8_t) 13){
         //if end of line, do something
-        decodeInstruction();
+    	appFlag = 1;
+//        decodeInstruction();
         rcount = 0;
     } else {
         rcount++;
@@ -707,7 +804,7 @@ void EUSCIA2_IRQHandler(void){
                     {
                         MAP_Interrupt_disableInterrupt(INT_EUSCIA2);
                         updateRTC();                                    //Data is valid, update RTC
-
+                        gps_synched = 1;
                     }
                     else                                                //Data is invalid, reset variables to wait for next message
                     {
@@ -772,7 +869,7 @@ void EUSCIA2_IRQHandler(void){
 /*
  * I2C Bus handler
  */
-void EUSCIB0_IRQHandler(void)
+void EUSCIB2_IRQHandler(void)
 {
     uint_fast16_t status;
 
@@ -780,27 +877,27 @@ void EUSCIB0_IRQHandler(void)
     MAP_I2C_clearInterruptFlag(I2C_BUS_BASE, status);
 
 
-    if (status & EUSCI_B_I2C_NAK_INTERRUPT){
+//    if (status & EUSCI_B_I2C_NAK_INTERRUPT){
+//
+//        MAP_I2C_masterSendStart(I2C_BUS_BASE);
+//    }
 
-        MAP_I2C_masterSendStart(I2C_BUS_BASE);
-    }
-
-    if (status & EUSCI_B_I2C_TRANSMIT_INTERRUPT0){
-        /* Check the byte counter */
-        if (masterToSlaveByteCtr){
-            /* Send the next data and decrement the byte counter */
-            if(I2C_masterSendMultiByteNextWithTimeout(I2C_BUS_BASE,
-            		masterToSlavePacket[masterToSlaveIndex++], 0xFFFFFFFF)){
-            	masterToSlaveByteCtr--;
-            }
-            //Decrement masterToSlaveIndex??
-        }else{
-
-            MAP_I2C_masterSendMultiByteStop(I2C_BUS_BASE);
-            masterToSlaveIndex = 0;
-
-        }
-    }
+//    if (status & EUSCI_B_I2C_TRANSMIT_INTERRUPT0){
+//        /* Check the byte counter */
+//        if (masterToSlaveByteCtr){
+//            /* Send the next data and decrement the byte counter */
+//            if(I2C_masterSendMultiByteNextWithTimeout(I2C_BUS_BASE,
+//            		masterToSlavePacket[masterToSlaveIndex++], 0x0000FFFF)){
+//            	masterToSlaveByteCtr--;
+//            }
+//            //Decrement masterToSlaveIndex??
+//        }else{
+//
+//            MAP_I2C_masterSendMultiByteStop(I2C_BUS_BASE);
+//            masterToSlaveIndex = 0;
+//
+//        }
+//    }
 
     /* Receives bytes into the receive buffer. If we have received all bytes,
      * send a STOP condition */
@@ -819,6 +916,10 @@ void EUSCIB0_IRQHandler(void)
             RXData[xferIndex++] = MAP_I2C_masterReceiveMultiByteNext(
             		I2C_BUS_BASE);
             cardFlag = true;
+//            if(xferIndex == NUM_OF_REC_BYTES){
+//
+//            }
+
         } else
         {
             RXData[xferIndex++] = MAP_I2C_masterReceiveMultiByteNext(I2C_BUS_BASE);
@@ -835,16 +936,12 @@ void EUSCIB0_IRQHandler(void)
 
 void TA0_0_IRQHandler(void)
 {
-	//Start Command
-//	MAP_GPIO_setOutputHighOnPin(GPIO_PORT_P2, GPIO_PIN4);
-//	MAP_Interrupt_enableInterrupt(INT_TA1_0);
-//	MAP_Timer_A_startCounter(TIMER_A1_BASE, TIMER_A_UP_MODE);
 
 	//ISR Code
-    MAP_GPIO_setOutputLowOnPin(GPIO_PORT_P2, GPIO_PIN4);
-    MAP_Timer_A_clearCaptureCompareInterrupt(TIMER_A0_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_0);
-    MAP_Interrupt_disableInterrupt(INT_TA0_0);
-    MAP_Timer_A_stopTimer(TIMER_A0_BASE);
+    GPIO_setOutputLowOnPin(SOLENOID_GPIO_PORT, SOLENOID_GPIO_PIN);
+    Timer_A_clearCaptureCompareInterrupt(TIMER_A1_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_0);
+    Interrupt_disableInterrupt(INT_TA1_0);
+    Timer_A_stopTimer(TIMER_A1_BASE);
 }
 
 
@@ -911,6 +1008,13 @@ void decodeInstruction(){
     } else if(inst == (uint8_t) 130){ //request start x82
         //todo: locally request start of DAQ modules
         transmitByteData((uint8_t) 130);
+        recorded = 0;
+        stored = 0;
+    	//Start Command
+//    	MAP_GPIO_setOutputHighOnPin(GPIO_PORT_P2, GPIO_PIN4);
+//    	MAP_Interrupt_enableInterrupt(INT_TA1_0);
+//    	MAP_Timer_A_startCounter(TIMER_A1_BASE, TIMER_A_UP_MODE);
+    	processCommand("start");
     } else if(inst == (uint8_t) 131){//request control module status
         transmitByteData((uint8_t) 131); //acknowledge
         transmitNByteData(recorded);
@@ -927,6 +1031,8 @@ void decodeInstruction(){
     }else if(inst == (uint8_t) 133){
     	transmitByteData((uint8_t) 133);
 
+    	transmitByteData((uint8_t) 133);
+
     	        sample_rate = (uint8_t) rxdata[1];
     	        cutoff = (uint8_t) rxdata[2];
     	        gain = (uint8_t) rxdata[3];
@@ -935,14 +1041,21 @@ void decodeInstruction(){
 
     	        start_delay = ((uint8_t)rxdata[8])*1000 + ((uint8_t)rxdata[9])*100 + ((uint8_t)rxdata[10])*10 + ((uint8_t)rxdata[11]);
 
-    	        vis_mod1 = (uint8_t)rxdata[12];
+    	        store_enable = (uint8_t)rxdata[12];
     	        vis_sens1 = (uint8_t)rxdata[13];
     	        vis_mod2 = (uint8_t)rxdata[14];
     	        vis_sens2 = (uint8_t)rxdata[15];
 
-    	        int hold_initial = 16;
+    	        int count = 16;
+    	        int i = 0;
+    	        for(i = 0; i<32; i++){
+    	            sensors_enabled[i] = rxdata[count];
+    	            count++;
+    	        }
+
+    	        int hold_initial = 49;
     	        char a = rxdata[hold_initial];
-    	        int count = 0;
+    	        count = 0;
 
     	        test1 = (int)(a!=',');
     	        test1 = (int)(a!=",");
@@ -969,19 +1082,113 @@ void decodeInstruction(){
     	        }
     	        count = 0;
 
+
+
     }
     else if(inst == (uint8_t) 134){ //instruction to send all the data last acquired
-        transmitByteData((uint8_t) 134); //send success byte
+//        transmitByteData((uint8_t) 134); //send success byte
         //code to send all the data
-        transmitStringData(all_data);
+//        transmitStringData(all_data);
         //end of data transmission
-        transmitNByteData((uint8_t) 255);
-        transmitNByteData((uint8_t) 255);
-        transmitNByteData((uint8_t) 255);
-        transmitNByteData((uint8_t) 255);
-        transmitNByteData((uint8_t) 255);
-        transmitByteData((uint8_t) 255);
-    } else if(inst == (uint8_t) 136){ //set visualization module + channels x88
+//        processCommand("read 1");
+
+    	if(recorded){
+
+    	}
+
+
+    	unsigned int bytesRead = 0;
+
+    	src = fopen(daq2, "r");
+
+
+        char cpy_buff[2048 + 1];
+        memset(cpy_buff, 0x00, 2048 + 1);
+
+
+        int i;
+        while (true) {
+        	i = 0;
+            /*  Read from source file */
+            bytesRead = fread(cpy_buff, 1, 2048, src);
+            if (bytesRead == 0) {
+                break; /* Error or EOF */
+            }
+            cpy_buff[bytesRead] = '\0';
+
+            while(cpy_buff[i] != '\0'){
+                MAP_UART_transmitData(EUSCI_A1_BASE, (uint_fast8_t) cpy_buff[i++]);
+//                MAP_UART_transmitData(EUSCI_A0_BASE, (uint_fast8_t) cpy_buff[i++]);
+            }
+
+//            UARTprintf(EUSCI_A0_BASE, "Data sent to Application!");
+
+    	}
+
+        transmitTerminationSequence();
+
+        rewind(src);
+
+        fclose(src);
+
+
+    }else if(inst == (uint8_t) 135){ //Request data for one module
+
+    	transmitByteData((uint8_t) 135); //send success byte
+    	if(rxdata[1] == 0x01){
+    		src = fopen(daq1, "r");
+    	}else if(rxdata[1] == 0x02){
+    		src = fopen(daq2, "r");
+    	}else if(rxdata[1] == 0x03){
+    		src = fopen(daq3, "r");
+    	}else if(rxdata[1] == 0x04){
+    		src = fopen(daq4, "r");
+    	}else if(rxdata[1] == 0x05){
+    		src = fopen(daq5, "r");
+    	}else if(rxdata[1] == 0x06){
+    		src = fopen(daq6, "r");
+    	}else if(rxdata[1] == 0x07){
+    		src = fopen(daq7, "r");
+    	}else if(rxdata[1] == 0x08){
+    		src = fopen(daq8, "r");
+    	}
+
+
+    	unsigned int bytesRead = 0;
+        char cpy_buff[2048 + 1];
+        memset(cpy_buff, 0x00, 2048 + 1);
+
+
+        int i;
+        while (true) {
+        	i = 0;
+            /*  Read from source file */
+            bytesRead = fread(cpy_buff, 1, 2048, src);
+            if (bytesRead == 0) {
+                break; /* Error or EOF */
+            }
+            cpy_buff[bytesRead] = '\0';
+
+            while(cpy_buff[i] != '\0'){
+                MAP_UART_transmitData(EUSCI_A1_BASE, (uint_fast8_t) cpy_buff[i]);
+                MAP_UART_transmitData(EUSCI_A0_BASE, (uint_fast8_t) cpy_buff[i++]);
+            }
+
+
+            UARTprintf(EUSCI_A0_BASE, "Data sent to Application!");
+
+    	}
+
+        transmitTerminationSequence();
+
+        rewind(src);
+
+        fclose(src);
+
+
+
+    }
+    else if(inst == (uint8_t) 136){ //set visualization module + channels x88
         //todo: avilitate live passing of the data
         transmitByteData((uint8_t) 136); //send success byte
         transmitNByteData(live1[0]);
@@ -998,10 +1205,17 @@ void decodeInstruction(){
 
     } else if(inst == (uint8_t) 137){ //send gps data request x89
         transmitByteData((uint8_t) 137); //acknowledge
-        transmitStringData(gps_data); //actually send the GPS data
+        transmitStringData(gps.transmission); //actually send the GPS data
     } else if(inst == (uint8_t) 138){//sync the RTC with the gps time x8A
-        transmitByteData((uint8_t) 138); //acknowledge
 
+        gps_synched = 0;
+        gps.valid_Data = 0;
+        check_format = 0;
+        record = 0;
+        counter = 0;
+        comma_counter = 0;
+        Timer_A_startCounter(GPS_TIMER_BASE, TIMER_A_UP_MODE);
+        transmitByteData((uint8_t) 138); //acknowledge
         //todo:include code for internal sync of gps
     } else if(inst == (uint8_t) 139){ //diagnose request, this hasn't been completely thought about
         transmitByteData((uint8_t) 139); //acknowledge
