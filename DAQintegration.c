@@ -88,7 +88,7 @@ void GPIOinit()
     P5IFG = 0;
 
     //ADC powerdown selectors
-    P5DIR |= BIT4 | BIT5 | BIT6 | BIT7;
+    P5DIR |= BIT2 | BIT4 | BIT5 | BIT7;
 
     //ADC sync signal
     P3DIR |= BIT2;
@@ -98,9 +98,9 @@ void GPIOinit()
 //last 4 bits of input are the power selectors for channels 4, 3, 2, and 1
 void ADCchannelselect(char channels){
     P5OUT &= ~BIT2 & ~BIT4 & ~BIT5 & ~BIT7;
-    P5OUT |= (channels & 0x01) << 2;
-    P5OUT |= (channels & 0x06) << 3;
-    P5OUT |= (channels & 0x08) << 4;
+    P5OUT |= (channels & 0x10) >> 2;
+    P5OUT |= (channels & 0x60) >> 1;
+    P5OUT |= (channels & 0x80);
 }
 
 /***************************************************
@@ -631,7 +631,7 @@ void main(void)
 //    i2cinit();
     filtertimersetup();
 //    count = 9;
-//    char setup[] = {0xCA, 0x63, 0xEE, 0x62, 0x01, 0x64, 0x08, 0x61, 0x08};
+//    char setup[] = {0xCA, 0x63, 0x30, 0x62, 0x00, 0x64, 0x08, 0x61, 0x0A};
 //    interpretInstruction(setup);
 
     for(;;);
@@ -675,16 +675,19 @@ void PORT5_IRQHandler(void)
             //storebyte(eusci_B0->RXBUF);                 // Store first byte of channel 2 in the array
             //testarray[testcount++] = EUSCI_B0->RXBUF;
 //            data = EUSCI_B0->RXBUF;
+            rec1 = EUSCI_B0->RXBUF;
             EUSCI_B0->TXBUF = TXData;                   // Transmit dummy data to generate bit clock
             while(!(EUSCI_B0->IFG & EUSCI_B_IFG_RXIFG));// Wait until we receive entire byte to read
             //storebyte(eusci_B0->RXBUF);                 // Store second byte of channel 2 in the array
             //testarray[testcount++] = EUSCI_B0->RXBUF;
 //            data = EUSCI_B0->RXBUF;
+            rec2 = EUSCI_B0->RXBUF;
             EUSCI_B0->TXBUF = TXData;                   // Transmit dummy data to generate bit clock
             while(!(EUSCI_B0->IFG & EUSCI_B_IFG_RXIFG));// Wait until we receive entire byte to read
             //storebyte(eusci_B0->RXBUF);                 // Store third byte of channel 2 in the array
             //testarray[testcount++] = EUSCI_B0->RXBUF;
-            data = EUSCI_B0->RXBUF;
+//            data = EUSCI_B0->RXBUF;
+            rec3 = EUSCI_B0->RXBUF;
             EUSCI_B0->TXBUF = TXData;                   // Transmit dummy data to generate bit clock
             while(!(EUSCI_B0->IFG & EUSCI_B_IFG_RXIFG));// Wait until we receive entire byte to read
             //storebyte(eusci_B0->RXBUF);                 // Store first byte of channel 3 in the array
@@ -726,11 +729,21 @@ void PORT5_IRQHandler(void)
         storeByte(rec1);
         storeByte(rec2);
         storeByte(rec3);
+        testarray2[testcount] = (int) rec1<<16 | rec2<<8 | rec3;
         testcount++;
 
         if(testcount == 200){
             P3OUT &= ~BIT2;
             SRAMdir('R', 0);
+            //quick test
+            int i = 0;
+            for(i=0;i<200;i++){
+                testarray[i] = readByte()<<16;
+                testarray[i] |= readByte()<<8;
+                testarray[i] |= readByte();
+            }
+            SRAMdir('R',0);
+            ////////////////
             P4DIR |= BIT4; //signal master data has been collected
             P4OUT |= BIT4;
 //            P3OUT = 0x01;           //enabling chip
