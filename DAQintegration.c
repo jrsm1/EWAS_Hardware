@@ -151,7 +151,8 @@ void GPIOinit()
     P5IFG = 0;
 
     //ADC powerdown selectors
-    P3DIR |= BIT3 | BIT5 | BIT6 | BIT7;
+    P3DIR |= BIT3;              //channel 1
+    P5DIR |= BIT4 | BIT5 | BIT7;//channels 2, 3, and 4 respectively
 
     //ADC sync signal
     P3DIR |= BIT2;
@@ -163,9 +164,11 @@ void GPIOinit()
 
 //last 4 bits of input are the power selectors for channels 4, 3, 2, and 1
 void ADCchannelselect(char channels){
-    P3OUT &= ~BIT3 & ~BIT5 & ~BIT6 & ~BIT7;
-    P3OUT |= (channels & 0x10) >> 1;
-    P3OUT |= (channels & 0xE0);
+    P3OUT &= ~BIT3;
+    P5OUT &= ~BIT4 & ~BIT5 & ~BIT7;
+    P3OUT |= (channels & 0x10) >> 1;    //channel 1 on P3.3
+    P5OUT |= (channels & 0x60) >> 1;    //channel 2 and 3 on P5.4 and P5.5 respectively
+    P5OUT |= (channels & 0x80);         //channel 4 on P5.7
 }
 
 /***************************************************
@@ -650,14 +653,14 @@ void main(void)
     GPIOinit();
     filtertimersetup();
 
-    //simulate master comms
-    initialized = true;
-    i2cinit();
-    EUSCI_B2->I2COA0 = (uint16_t) 0x0451;
-    count = 9;
-    char setup[] = {0xCA, 0x63, 0x10, 0x62, 0x00, 0x64, 0x08, 0x61, 0x08};
-    interpretInstruction(setup);
-    count = 0;
+//    simulate master comms
+//    initialized = true;
+//    i2cinit();
+//    EUSCI_B2->I2COA0 = (uint16_t) 0x0460;
+//    count = 9;
+//    char setup[] = {0xCA, 0x63, 0x10, 0x62, 0x00, 0x64, 0x08, 0x61, 0x08};
+//    interpretInstruction(setup);
+//    count = 0;
     /////////////////
 
     for(;;);
