@@ -1,16 +1,19 @@
 #define CMDLINE_MAX_ARGS 				3
 #define MASTER_TO_SLAVE_PACKET_SIZE 	3
+#define I2C_PACKET_HEADER				0xCA
+#define CMD_SET_SAMPLING_FREQ			0x61
 #define CMD_GAIN_DEFINITION				0x62
 #define CMD_DIAGNOSE_DEFINITION			0x63
-#define CMD_PWDN_DEFINITION				0x65
-#define CMD_PWUP_DEFINITION				0x66
+#define CMD_SET_CUTOFF_FREQ_DEFINITION	0x64
+#define CMD_DURATION_DEFINITION			0x65
+
 
 
 extern uint8_t masterToSlaveByteCtr;
 extern uint8_t masterToSlaveIndex;
 extern char masterToSlavePacket[MASTER_TO_SLAVE_PACKET_SIZE];
 extern FILE *src, *dst;
-extern const char daq1[], daq2[];
+extern const char daq1[], daq2[], daq3[], daq4[], daq5[], daq6[], daq7[], daq8[];
 
 //*****************************************************************************
 //
@@ -20,14 +23,16 @@ extern const char daq1[], daq2[];
 //
 //*****************************************************************************
 extern int CMD_help(int argc, char **argv);
-extern int CMD_mode(int argc, char **argv);
 extern int CMD_diagnose(int argc, char **argv);
-extern int CMD_pwdn(int argc, char **argv);
-extern int CMD_pwup(int argc, char **argv);
 extern int CMD_getData(int argc, char ** argv);
 extern int CMD_setGain(int argc, char ** argv);
-extern int CMD_QuitProcess(int argc, char **argv);
+extern int CMD_setCutoffFreq(int argc, char ** argv);
+extern int CMD_start(int argc, char ** argv);
+extern int CMD_setSamplingFreq(int argc, char **argv);
+extern int CMD_initCard(int argc, char ** argv);
 extern int CMD_create(int argc, char **argv);
 extern int CMD_read(int argc, char **argv);
 extern int CMD_write(int argc, char **argv);
+extern int CMD_reset(int argc, char **argv);
+extern int CMD_duration(int argc, char **argv);
 
