@@ -130,6 +130,7 @@ void GPIOinit()
     SPIport();
 
     //TIMER_A2 OUT1
+    P5OUT &= ~BIT6;
     P5DIR |= BIT6;
     P5SEL1 &= ~BIT6;
     P5SEL0 |= BIT6;
@@ -146,6 +147,7 @@ void GPIOinit()
     NVIC->ISER[1] |= 1 << ((PORT5_IRQn) & 31);  // Enable PORT5 interrupt in NVIC module
 
     //I2C initialization or Sampling start signal
+    P5OUT &= ~BIT0;
     P5DIR &= ~BIT0;
     P5IE |= BIT0;
     P5IFG = 0;
@@ -168,7 +170,7 @@ void ADCchannelselect(char channels){
     P5OUT &= ~BIT4 & ~BIT5 & ~BIT7;
     P3OUT |= (channels & 0x10) >> 1;    //channel 1 on P3.3
     P5OUT |= (channels & 0x60) >> 1;    //channel 2 and 3 on P5.4 and P5.5 respectively
-    P5OUT |= (channels & 0x80);         //channel 4 on P5.7
+//    P5OUT |= (channels & 0x80);         //channel 4 on P5.7
 }
 
 /***************************************************
@@ -426,6 +428,7 @@ uint8_t readByte(){
     if(++P7OUT == 0)        //increment address
         if(++P9OUT == 0)
             P10OUT++;
+    P3OUT &= ~BIT0;
     return ret;
 }
 
@@ -571,7 +574,7 @@ void i2cinit(){
     P3SEL1 &= ~BIT7;
     P3SEL0 |= BIT7;
 
-    EUSCI_B2->I2COA0 |= 0x0460;                         //address enabled + slave module address = 110 0000
+    EUSCI_B2->I2COA0 |= 0x0460;                         //address enabled + slave module address = 101 0000
 
     EUSCI_B2->CTLW0 &= (uint16_t) 0xFFFE;               //UCSWRST = 0
 
@@ -613,6 +616,7 @@ void interpretInstruction(char* instruction){
             case 0x65:                                      //setting test duration
                 duration = instruction[++i] << 8;
                 duration |= instruction[++i];
+                samplecount = duration * samplfreq;
                 break;
 //            case 0x66:                                      //power up
 //                toggleChannels(up, instruction[++i]);
@@ -654,9 +658,10 @@ void main(void)
     filtertimersetup();
 
 //    simulate master comms
-//    initialized = true;
-//    i2cinit();
-//    EUSCI_B2->I2COA0 = (uint16_t) 0x0460;
+    sramtest();
+    initialized = true;
+    i2cinit();
+    EUSCI_B2->I2COA0 = (uint16_t) 0x0450;
 //    count = 9;
 //    char setup[] = {0xCA, 0x63, 0x10, 0x62, 0x00, 0x64, 0x08, 0x61, 0x08};
 //    interpretInstruction(setup);
@@ -853,25 +858,25 @@ void PORT5_IRQHandler(void)
             ////////////////
             P4OUT |= BIT4;
             P4OUT &= ~BIT4;
-            P3OUT |= BIT0;           //enabling chip
-            int i, j=0;
-            for(i=0;i<testcount*12;i++){
-                if(i%3==0) rec1 = P6IN;
-                else if(i%3 == 1) rec2 = P6IN;
-                else {
-                    rec3 = P6IN;
-                    if(i%12==2){
-                        testarray2[j++] = (int) rec1<<16 | rec2<<8 | rec3;
-                        if(testarray2[j-1] & 0x00800000) testarray2[j-1] |= 0xFF000000;
-                    }
-                }
-                if(++P7OUT == 0)
-                    if(++P9OUT == 0)
-                        P10OUT++;
-            }
-            P3OUT &= ~BIT0;
-            testcount = 0;
-            SRAMdir('R',0);
+//            P3OUT |= BIT0;           //enabling chip
+//            int i, j=0;
+//            for(i=0;i<testcount*12;i++){
+//                if(i%3==0) rec1 = P6IN;
+//                else if(i%3 == 1) rec2 = P6IN;
+//                else {
+//                    rec3 = P6IN;
+//                    if(i%12==2){
+//                        testarray2[j++] = (int) rec1<<16 | rec2<<8 | rec3;
+//                        if(testarray2[j-1] & 0x00800000) testarray2[j-1] |= 0xFF000000;
+//                    }
+//                }
+//                if(++P7OUT == 0)
+//                    if(++P9OUT == 0)
+//                        P10OUT++;
+//            }
+//            P3OUT &= ~BIT0;
+//            testcount = 0;
+//            SRAMdir('R',0);
         }
 
     }
@@ -914,7 +919,7 @@ void EUSCIB2_IRQHandler(void){
         count = 0;
         EUSCI_B2->IFG &= ~BIT3;
     }
-    else EUSCI_B2->IFG = 0;
+//    else EUSCI_B2->IFG = 0;
 
     //status is being requested
 //    else if(EUSCI_B2->IFG & BIT1){
