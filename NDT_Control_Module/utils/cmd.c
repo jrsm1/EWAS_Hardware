@@ -66,7 +66,7 @@ int CMD_diagnose(int argc, char **argv){
 
 	uint8_t p = atoi(argv[1]);
 
-	while (MAP_I2C_masterIsStopSent(EUSCI_B2_BASE) == EUSCI_B_I2C_SENDING_STOP);
+//	while (MAP_I2C_masterIsStopSent(EUSCI_B2_BASE) == EUSCI_B_I2C_SENDING_STOP);
 
 	/* Sending the initial start condition */
 	MAP_I2C_masterSendMultiByteStart(EUSCI_B2_BASE, I2C_PACKET_HEADER);
@@ -80,7 +80,7 @@ int CMD_diagnose(int argc, char **argv){
 int CMD_setCutoffFreq(int argc, char **argv){
 	uint8_t p = atoi(argv[1]);
 
-	while (MAP_I2C_masterIsStopSent(EUSCI_B2_BASE) == EUSCI_B_I2C_SENDING_STOP);
+//	while (MAP_I2C_masterIsStopSent(EUSCI_B2_BASE) == EUSCI_B_I2C_SENDING_STOP);
 
 	/* Sending the initial start condition */
 	MAP_I2C_masterSendMultiByteStart(EUSCI_B2_BASE, I2C_PACKET_HEADER);
@@ -98,7 +98,7 @@ int CMD_setSamplingFreq(int argc, char **argv){
 
 	uint8_t p = atoi(argv[1]);
 
-	while (MAP_I2C_masterIsStopSent(EUSCI_B2_BASE) == EUSCI_B_I2C_SENDING_STOP);
+//	while (MAP_I2C_masterIsStopSent(EUSCI_B2_BASE) == EUSCI_B_I2C_SENDING_STOP);
 
 	/* Sending the initial start condition */
 	MAP_I2C_masterSendMultiByteStart(EUSCI_B2_BASE, I2C_PACKET_HEADER);
@@ -131,10 +131,10 @@ int CMD_start(int argc, char ** argv){
 
 int CMD_getData(int argc, char ** argv){
 
-    while (MAP_I2C_masterIsStopSent(EUSCI_B2_BASE));
+	I2C_enableInterrupt(EUSCI_B2_BASE, EUSCI_B_I2C_RECEIVE_INTERRUPT0);
+    EUSCI_B2->CTLW0 &= ~BIT4;
+    EUSCI_B2->CTLW0 |= BIT1;
 
-
-    MAP_I2C_masterReceiveStart(EUSCI_B2_BASE);
 	return (0);
 }
 
@@ -144,7 +144,7 @@ int CMD_setGain(int argc, char ** argv){
 	uint8_t p = atoi(argv[1]);
 
 	/* Making sure the last transaction has been completely sent out */
-	while (MAP_I2C_masterIsStopSent(EUSCI_B2_BASE) == EUSCI_B_I2C_SENDING_STOP);
+//	while (MAP_I2C_masterIsStopSent(EUSCI_B2_BASE) == EUSCI_B_I2C_SENDING_STOP);
 
 	/* Sending the initial start condition */
 	MAP_I2C_masterSendMultiByteStart(EUSCI_B2_BASE, I2C_PACKET_HEADER);
@@ -192,28 +192,28 @@ int CMD_read(int argc, char ** argv){
 
 	if(atoi(argv[1]) == 1)
 		src = fopen(daq1, "rb");
-	else if(atoi(argv[1]) == 2)
-
-		src = fopen(daq2, "rb");
-
-	else if(atoi(argv[1]) == 3){
-		src = fopen(daq3, "rb");
-
-	}else if(atoi(argv[1]) == 4){
-		src = fopen(daq4, "rb");
-
-	}else if(atoi(argv[1]) == 5){
-		src = fopen(daq5, "rb");
-
-	}else if(atoi(argv[1]) == 6){
-		src = fopen(daq6, "rb");
-
-	}else if(atoi(argv[1]) == 7){
-		src = fopen(daq7, "rb");
-
-	}else if(atoi(argv[1]) == 8){
-		src = fopen(daq8, "rb");
-	}
+//	else if(atoi(argv[1]) == 2)
+//
+//		src = fopen(daq2, "rb");
+//
+//	else if(atoi(argv[1]) == 3){
+//		src = fopen(daq3, "rb");
+//
+//	}else if(atoi(argv[1]) == 4){
+//		src = fopen(daq4, "rb");
+//
+//	}else if(atoi(argv[1]) == 5){
+//		src = fopen(daq5, "rb");
+//
+//	}else if(atoi(argv[1]) == 6){
+//		src = fopen(daq6, "rb");
+//
+//	}else if(atoi(argv[1]) == 7){
+//		src = fopen(daq7, "rb");
+//
+//	}else if(atoi(argv[1]) == 8){
+//		src = fopen(daq8, "rb");
+//	}
 
     if (!src) {
     	UARTprintf(EUSCI_A0_BASE, "\nError opening file!\r\n");
