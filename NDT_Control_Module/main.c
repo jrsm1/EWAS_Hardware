@@ -1,4 +1,4 @@
-/*******************************
+/*******************************/
 //		Includes				//
 /********************************/
 
@@ -98,8 +98,8 @@
 #define I2C_DAQ7_DRDY_PIN			GPIO_PIN6
 #define I2C_DAQ8_DRDY_PIN			GPIO_PIN7
 
-#define NUM_OF_REC_BYTES			600
-#define DATA_BUF_SIZE				300	//TODO Decide on value
+#define NUM_OF_REC_BYTES			245760	//TODO replace with
+#define DATA_BUF_SIZE				600
 
 
 /* General System Macros */
@@ -110,7 +110,7 @@
 
 /* Buffer size used for the file copy process */
 #ifndef CPY_BUFF_SIZE
-#define CPY_BUFF_SIZE       		2048
+#define CPY_BUFF_SIZE       		4096
 #endif
 
 
@@ -152,13 +152,14 @@ static char COMMAND[BUFFER_SIZE];
 static volatile uint8_t inputIndex = 0;
 static volatile uint8_t slaveIndex = 0;
 static volatile uint32_t bytesToRecCounter = 0;
+uint32_t bytesToRec = 0;
 static volatile uint8_t inputFlag = 0;
-static volatile uint8_t cardFlag = 0;
 static volatile uint8_t appFlag = 0;
 static volatile uint8_t dreadyFlag = 0;
 const uint8_t DAQAddresses[] = {0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57};
 const uint16_t samplingRates[] = {2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 20000};
-static unsigned char ADCData[DATA_BUF_SIZE];
+
+static uint8_t ADCData[DATA_BUF_SIZE];
 static volatile uint16_t xferIndex = 0;
 static volatile uint8_t bufferFull = 0;
 static volatile uint16_t bytesToWrite = 0;
@@ -259,7 +260,6 @@ uint8_t cutoff;
 uint8_t gain;
 short duration;
 uint8_t start_delay;
-uint32_t bytesToRec = 0;
 
 //experiment name
 char experiment_name[20];
@@ -349,14 +349,13 @@ const Timer_A_UpModeConfig gpsTimerConfig = {
 //		Main					//
 /********************************/
 
-int main(void)
-{
+int main(void){
 
 	//Stop Watchdog Timer
     WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;
 
     memset(consoleInput, 0x00, BUFFER_SIZE);
-    memset(ADCData, 0x00, sizeof(ADCData));
+    memset((char *)ADCData, 0x00, sizeof(ADCData));
 
     configureSDCard();
 
@@ -378,7 +377,9 @@ int main(void)
     initializeSlaves();
     Interrupt_enableMaster();
 
-    processCommand("datareq"); //HARDWIRED for testing
+    src = fopen(daq1, "w");
+    fclose(src);
+
     while(true){
 
         if(inputFlag){
@@ -390,58 +391,38 @@ int main(void)
         	appFlag = 0;
         	decodeInstruction();
 
-        }else if(cardFlag){
-        	xferIndex = 0;
-        	cardFlag = 0;
-        	src = fopen(daq1, "w"); //HARDWIRED
-
-        	uint16_t bytesWritten = fwrite(ADCData, sizeof(char), bytesToWrite, src);
-            //Flush ADCData afterwards
-            memset(ADCData, 0x00, sizeof(ADCData));	//Flush ADCData
-
-            fclose(src);
-
-
-            if(bytesToRecCounter == NUM_OF_REC_BYTES){ //All data was received
-            	stored = 1;
-            	bytesToRecCounter = 0;
-            }else{ //More Data still left
-            	processCommand("datareq");
-            }
-
         }else if(dreadyFlag){
         	dreadyFlag = 0;
         	processCommand("datareq");
         }
         else if(bufferFull){
-
 			bufferFull = 0;
 
-//			bytesToRecCounter++;
+	       	src = fopen(daq1, "a"); //TODO HARDWIRED
 
-	       	src = fopen(daq1, "a"); //HARDWIRED
+	        int i = 0;
+	        for(; i < bytesToWrite; i++){
+	        	putc(ADCData[i], src);
+	        }
 
-	        	uint16_t bytesWritten = fwrite(ADCData, sizeof(char), bytesToWrite, src);
-	            //Flush ADCData afterwards
-	            memset(ADCData, 0x00, sizeof(ADCData));	//Flush ADCData
-//
-	            fclose(src);
+	        memset(ADCData, 0x00, sizeof(ADCData));	//Flush ADCData
 
-				xferIndex = 0;
-				memset(ADCData, 0x00, bytesToWrite);
-				ADCData[xferIndex++] = EUSCI_B2->RXBUF;
+	        fclose(src);
 
-//				I2C_enableInterrupt(I2C_BUS_BASE, EUSCI_B_I2C_RECEIVE_INTERRUPT0);
-	            if(bytesToRecCounter == NUM_OF_REC_BYTES - 1){ //All data was received
-	            	stored = 1;
-	            	bytesToRecCounter = 0;
-
-	            }else{ //More Data still left
-	            	processCommand("datareq");
-	            }
+	        xferIndex = 0;
+			memset(ADCData, 0x00, bytesToWrite);
+			ADCData[xferIndex++] = EUSCI_B2->RXBUF;
 
 
-//			processCommand("datareq");
+			if(bytesToRecCounter == bytesToRec - 1){ //All data was received, Replace bytesToRec with NUM_OF_REC_BYTES
+				stored = 1;
+				bytesToRecCounter = 0;
+				EUSCI_B2->IE &= ~BIT0;
+
+			}else{ //More Data still left
+				processCommand("datareq");
+			}
+
         }
 
     }
@@ -707,8 +688,8 @@ void initializeSlaves(void){
 
     }
     //Only one slave, for demo purposes only
-    I2C_setSlaveAddress(I2C_BUS_BASE, 0x50); //HARDWIRED
-    modules_connected_code[0] = 1; //HARDWIRED
+    I2C_setSlaveAddress(I2C_BUS_BASE, 0x50); //TODO HARDWIRED
+    modules_connected_code[0] = 1; //TODO HARDWIRED
 
     //Enable Interrupts after initialization
 //    I2C_enableInterrupt(I2C_BUS_BASE, EUSCI_B_I2C_RECEIVE_INTERRUPT0);
@@ -1002,27 +983,27 @@ void EUSCIB2_IRQHandler(void)
      * send a STOP condition */
     if (status & EUSCI_B_I2C_RECEIVE_INTERRUPT0){
 
-    	if(bytesToRecCounter == NUM_OF_REC_BYTES - 1){
+    	if(bytesToRecCounter == bytesToRec - 2){
 
     		EUSCI_B2->CTLW0 |= BIT2; //Send Stop Bit
             ADCData[xferIndex++] = EUSCI_B2->RXBUF; //Read from RX buf
 
             bytesToRecCounter++;
             bytesToWrite = xferIndex;
-//            cardFlag = 1;
             bufferFull = 1;
-            I2C_disableInterrupt(I2C_BUS_BASE, EUSCI_B_I2C_RECEIVE_INTERRUPT0);
+            EUSCI_B2->IE &= ~BIT0;
+
     	}
-    	else if(xferIndex == DATA_BUF_SIZE - 1){ //Changed from -2 to -1 (24 is NUM_OF_REC_BYTES / 2)
+    	else if(xferIndex == DATA_BUF_SIZE - 1){ //Changed from -2 to -1
 
 //    		EUSCI_B2->CTLW0 |= BIT2; //Send Stop Bit
             ADCData[xferIndex++] = EUSCI_B2->RXBUF;
 
             bytesToRecCounter++;
             bytesToWrite = xferIndex;
-//            cardFlag = 1;
             bufferFull = 1;
-            I2C_disableInterrupt(I2C_BUS_BASE, EUSCI_B_I2C_RECEIVE_INTERRUPT0);
+            EUSCI_B2->IE &= ~BIT0;
+
     	}
     	else
         {
@@ -1172,6 +1153,10 @@ void decodeInstruction(){
     	        count = 0;
 
     	    	char instruction[20];
+
+    	    	//TODO verify
+    	    	src = fopen(daq1, "w");
+    	    	fclose(src);
 
     	    	sprintf(instruction, "duration %d", duration);
     	    	processCommand(instruction);

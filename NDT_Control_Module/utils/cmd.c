@@ -131,7 +131,7 @@ int CMD_start(int argc, char ** argv){
 
 int CMD_getData(int argc, char ** argv){
 
-	I2C_enableInterrupt(EUSCI_B2_BASE, EUSCI_B_I2C_RECEIVE_INTERRUPT0);
+	EUSCI_B2->IE |= BIT0;
     EUSCI_B2->CTLW0 &= ~BIT4;
     EUSCI_B2->CTLW0 |= BIT1;
 
@@ -227,7 +227,7 @@ int CMD_read(int argc, char ** argv){
     while (true) {
     	i = 0;
         /*  Read from source file */
-        bytesRead = fread(cpy_buff, sizeof(char), 2048, src);
+        bytesRead = fread(cpy_buff, 1, 2048, src);
         if (bytesRead == 0) {
             break; /* Error or EOF */
         }
@@ -235,7 +235,7 @@ int CMD_read(int argc, char ** argv){
 
     	while(i != bytesRead){
     		 MAP_UART_transmitData(EUSCI_A1_BASE, (char) cpy_buff[i++]);
-//    		 MAP_UART_transmitData(EUSCI_A0_BASE, (char) cpy_buff[i++]);
+
     	}
 
         MAP_UART_transmitData(EUSCI_A1_BASE, 0xAA);
@@ -244,7 +244,6 @@ int CMD_read(int argc, char ** argv){
         MAP_UART_transmitData(EUSCI_A1_BASE, 0xBB);
         MAP_UART_transmitData(EUSCI_A1_BASE, 0x0D);
         MAP_UART_transmitData(EUSCI_A1_BASE, 0x0A);
-
 
 
 	}
@@ -279,7 +278,7 @@ int CMD_write(int argc, char ** argv){
     	return -1;
     }
 
-    fwrite(argv[1], sizeof(char), strlen(argv[1]), src);
+    fwrite(argv[1], 1, strlen(argv[1]), src);
     UARTprintf(EUSCI_A0_BASE, "\nFile written!\r\n");
 
     rewind(src);
