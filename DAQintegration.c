@@ -18,6 +18,7 @@ bool initialized = false;
 bool datarequested = false;
 bool samplingStandby = false;
 bool clockhigh = false;
+bool debug = false;
 
 //test variables
 int testarray[600];
@@ -31,6 +32,8 @@ char count = 0;
 int duration = 0;
 int samplfreq = 0;
 int samplecount = 0;
+uint8_t outBuf[600];
+uint8_t sendthis;
 
 /***************************************************
  *                       PGA                       *
@@ -41,34 +44,34 @@ void GainSelect(short gain)
     uint8_t option = 0x01;
     switch (gain)
     {
-    case 0:     //x1
+    case 1:     //x1
         option = 0x01;
         break;
-    case 1:     //x10
+    case 2:     //x10
         option = 0x03;
         break;
-    case 2:     //x20
+    case 3:     //x20
         option = 0x05;
         break;
-    case 3:     //x30
+    case 4:     //x30
         option = 0x07;
         break;
-    case 4:     //x40
+    case 5:     //x40
         option = 0x09;
         break;
-    case 5:     //x60
+    case 6:     //x60
         option = 0x0B;
         break;
-    case 6:     //x80
+    case 7:     //x80
         option = 0x0D;
         break;
-    case 7:     //x120
+    case 8:     //x120
         option = 0x0F;
         break;
-    case 8:     //x157
+    case 9:     //x157
         option = 0x11;
         break;
-    case 9:     //x0.2
+    case 0:     //x0.2
         option = 0x13;
         break;
     }
@@ -161,6 +164,7 @@ void GPIOinit()
     P3OUT |= BIT2;
 
     //signal master data has been collected
+    P4OUT &= ~BIT4;
     P4DIR |= BIT4;
 }
 
@@ -409,7 +413,7 @@ void SRAMdir(char mode, unsigned int address){
     //write, output, byte high, and byte low enable signals
     P4DIR |= 0x0F;
     P4OUT &= 0xF0;
-    P4OUT = (mode == 'S') ? P4OUT = 0x06 : 0x0A;
+    P4OUT = (mode == 'S') ? P4OUT |= 0x06 : 0x0A;
 }
 
 void storeByte(uint8_t data){
@@ -425,11 +429,26 @@ uint8_t readByte(){
     char ret;
     P3OUT |= BIT0;
     ret = P6IN;
+    P3OUT &= ~BIT0;
     if(++P7OUT == 0)        //increment address
         if(++P9OUT == 0)
             P10OUT++;
-    P3OUT &= ~BIT0;
     return ret;
+}
+
+void fillBuffer(){
+    SRAMdir('R', 0);
+//    P3OUT |= BIT0;
+    int i;
+    for(i=0;i<600;i++){
+        outBuf[i] = readByte();
+//        readByte();
+//        if(++P7OUT == 0)        //increment address
+//            if(++P9OUT == 0)
+//                P10OUT++;
+    }
+//    P3OUT &= ~BIT0;
+    SRAMdir('R',0);
 }
 
 
@@ -658,12 +677,13 @@ void main(void)
     filtertimersetup();
 
 //    simulate master comms
-    sramtest();
+    debug = true;
+//    sramtest();
     initialized = true;
     i2cinit();
     EUSCI_B2->I2COA0 = (uint16_t) 0x0450;
-//    count = 9;
-//    char setup[] = {0xCA, 0x63, 0x10, 0x62, 0x00, 0x64, 0x08, 0x61, 0x08};
+//    count = 12;
+//    char setup[] = {0xCA, 0x63, 0x10, 0x62, 0x01, 0x64, 0x09, 0x65, 0x00, 0x02, 0x61, 0x0B};        //channel 1 on, gain x1, filter 512Hz, duration 1s, sampling at 2kHz
 //    interpretInstruction(setup);
 //    count = 0;
     /////////////////
@@ -675,16 +695,22 @@ void main(void)
  *              INTERRUPT HANDLERS                 *
  **************************************************/
 
-char rec[12];
+//char rec[12];
 char rec1;
 char rec2;
 char rec3;
-//char rec4;
-//char rec5;
-//char rec6;
+char rec4;
+char rec5;
+char rec6;
+char rec7;
+char rec8;
+char rec9;
+char rec10;
+char rec11;
+char rec12;
 char data;
 //Read sample from ADC
-int testarray2[200];
+int testarray2[300];
 //int datacount = 0;
 void PORT5_IRQHandler(void)
 {
@@ -725,17 +751,17 @@ void PORT5_IRQHandler(void)
             while(!(EUSCI_B0->IFG & EUSCI_B_IFG_RXIFG));// Wait until we receive entire byte to read
             //storebyte(eusci_B0->RXBUF);                 // Store first byte of channel 2 in the array
             //testarray[testcount++] = EUSCI_B0->RXBUF;
-            data = EUSCI_B0->RXBUF;
+//            data = EUSCI_B0->RXBUF;
 //            rec[datacount++] = EUSCI_B0->RXBUF;
-//            rec1 = EUSCI_B0->RXBUF;
+            rec4 = EUSCI_B0->RXBUF;
 
 
             EUSCI_B0->TXBUF = TXData;                   // Transmit dummy data to generate bit clock
             while(!(EUSCI_B0->IFG & EUSCI_B_IFG_RXIFG));// Wait until we receive entire byte to read
             //storebyte(eusci_B0->RXBUF);                 // Store second byte of channel 2 in the array
             //testarray[testcount++] = EUSCI_B0->RXBUF;
-            data = EUSCI_B0->RXBUF;
-//            rec2 = EUSCI_B0->RXBUF;
+//            data = EUSCI_B0->RXBUF;
+            rec5 = EUSCI_B0->RXBUF;
 //            rec[datacount++] = EUSCI_B0->RXBUF;
 
 
@@ -743,8 +769,8 @@ void PORT5_IRQHandler(void)
             while(!(EUSCI_B0->IFG & EUSCI_B_IFG_RXIFG));// Wait until we receive entire byte to read
             //storebyte(eusci_B0->RXBUF);                 // Store third byte of channel 2 in the array
             //testarray[testcount++] = EUSCI_B0->RXBUF;
-            data = EUSCI_B0->RXBUF;
-//            rec3 = EUSCI_B0->RXBUF;
+//            data = EUSCI_B0->RXBUF;
+            rec6 = EUSCI_B0->RXBUF;
 //            rec[datacount++] = EUSCI_B0->RXBUF;
 
 
@@ -752,23 +778,26 @@ void PORT5_IRQHandler(void)
             while(!(EUSCI_B0->IFG & EUSCI_B_IFG_RXIFG));// Wait until we receive entire byte to read
             //storebyte(eusci_B0->RXBUF);                 // Store first byte of channel 3 in the array
             //testarray[testcount++] = EUSCI_B0->RXBUF;
-            data = EUSCI_B0->RXBUF;
+//            data = EUSCI_B0->RXBUF;
 //            rec[datacount++] = EUSCI_B0->RXBUF;
+            rec7 = EUSCI_B0->RXBUF;
 
 
             EUSCI_B0->TXBUF = TXData;                   // Transmit dummy data to generate bit clock
             while(!(EUSCI_B0->IFG & EUSCI_B_IFG_RXIFG));// Wait until we receive entire byte to read
             //storebyte(eusci_B0->RXBUF);                 // Store second byte of channel 3 in the array
             //testarray[testcount++] = EUSCI_B0->RXBUF;
-            data = EUSCI_B0->RXBUF;
+//            data = EUSCI_B0->RXBUF;
 //            rec[datacount++] = EUSCI_B0->RXBUF;
+            rec8 = EUSCI_B0->RXBUF;
 
 
             EUSCI_B0->TXBUF = TXData;                   // Transmit dummy data to generate bit clock
             while(!(EUSCI_B0->IFG & EUSCI_B_IFG_RXIFG));// Wait until we receive entire byte to read
             //storebyte(eusci_B0->RXBUF);                 // Store third byte of channel 3 in the array
             //testarray[testcount++] = EUSCI_B0->RXBUF;
-            data = EUSCI_B0->RXBUF;
+//            data = EUSCI_B0->RXBUF;
+            rec9 = EUSCI_B0->RXBUF;
 
 
             EUSCI_B0->TXBUF = TXData;
@@ -776,14 +805,16 @@ void PORT5_IRQHandler(void)
             while(!(EUSCI_B0->IFG & EUSCI_B_IFG_RXIFG));// Wait until we receive entire byte to read
             //storebyte(eusci_B0->RXBUF);                 // Store first byte of channel 4 in the array
             //testarray[testcount++] = EUSCI_B0->RXBUF;
-            data = EUSCI_B0->RXBUF;
+//            data = EUSCI_B0->RXBUF;
+            rec10 = EUSCI_B0->RXBUF;
 //            rec[datacount++] = EUSCI_B0->RXBUF;
 
             EUSCI_B0->TXBUF = TXData;                   // Transmit dummy data to generate bit clock
             while(!(EUSCI_B0->IFG & EUSCI_B_IFG_RXIFG));// Wait until we receive entire byte to read
             //storebyte(eusci_B0->RXBUF);                 // Store second byte of channel 4 in the array
             //testarray[testcount++] = EUSCI_B0->RXBUF;
-            data = EUSCI_B0->RXBUF;
+//            data = EUSCI_B0->RXBUF;
+            rec11 = EUSCI_B0->RXBUF;
 //            rec[datacount++] = EUSCI_B0->RXBUF;
 
 
@@ -791,21 +822,22 @@ void PORT5_IRQHandler(void)
             while(!(EUSCI_B0->IFG & EUSCI_B_IFG_RXIFG));// Wait until we receive entire byte to read
             //storebyte(eusci_B0->RXBUF);                 // Store third byte of channel 4 in the array
             //testarray[testcount++] = EUSCI_B0->RXBUF;
-            data = EUSCI_B0->RXBUF;
+//            data = EUSCI_B0->RXBUF;
+            rec12 = EUSCI_B0->RXBUF;
 //            rec[datacount++] = EUSCI_B0->RXBUF;
 
             storeByte(rec1);
             storeByte(rec2);
             storeByte(rec3);
-            storeByte(0x00);
-            storeByte(0x00);
-            storeByte(0x00);
-            storeByte(0x00);
-            storeByte(0x00);
-            storeByte(0x00);
-            storeByte(0x00);
-            storeByte(0x00);
-            storeByte(0x00);
+            storeByte(rec4);
+            storeByte(rec5);
+            storeByte(rec6);
+            storeByte(rec7);
+            storeByte(rec8);
+            storeByte(rec9);
+            storeByte(rec10);
+            storeByte(rec11);
+            storeByte(rec12);
 
             testcount++;
         }
@@ -843,40 +875,34 @@ void PORT5_IRQHandler(void)
 //        testarray[testcount] = (int) rec1<<16 | rec2<<8 | rec3;
 
         if(testcount >= samplecount || testcount<0){
-//            testcount = 0;
             P3OUT &= ~BIT2;
-//            int final[200];
-//            int x = 0;
-//            SRAMdir('R', 0);
-//            for(x=0;x<200;x++){
-//                final[x] |= readByte() << 16;
-//                final[x] |= readByte() << 8;
-//                final[x] |= readByte();
-////                SRAMdir('R', (x+1)*12);
-//            }
             SRAMdir('R',0);
+            testcount = 0;
             ////////////////
+            if(debug == true){
+                P3OUT |= BIT0;           //enabling chip
+                int i, j=0;
+                for(i=0;i<300*12;i++){
+                    if(i%3==0) rec1 = P6IN;
+                    else if(i%3 == 1) rec2 = P6IN;
+                    else {
+                        rec3 = P6IN;
+                        if(i%12==2){
+                            testarray2[j++] = (int) rec1<<16 | rec2<<8 | rec3;
+                            if(testarray2[j-1] & 0x00800000) testarray2[j-1] |= 0xFF000000;
+                        }
+                    }
+                    if(++P7OUT == 0)
+                        if(++P9OUT == 0)
+                            P10OUT++;
+                }
+                P3OUT &= ~BIT0;
+                SRAMdir('R',0);
+            }
+            fillBuffer();
+            sendthis = readByte();
             P4OUT |= BIT4;
             P4OUT &= ~BIT4;
-//            P3OUT |= BIT0;           //enabling chip
-//            int i, j=0;
-//            for(i=0;i<testcount*12;i++){
-//                if(i%3==0) rec1 = P6IN;
-//                else if(i%3 == 1) rec2 = P6IN;
-//                else {
-//                    rec3 = P6IN;
-//                    if(i%12==2){
-//                        testarray2[j++] = (int) rec1<<16 | rec2<<8 | rec3;
-//                        if(testarray2[j-1] & 0x00800000) testarray2[j-1] |= 0xFF000000;
-//                    }
-//                }
-//                if(++P7OUT == 0)
-//                    if(++P9OUT == 0)
-//                        P10OUT++;
-//            }
-//            P3OUT &= ~BIT0;
-//            testcount = 0;
-//            SRAMdir('R',0);
         }
 
     }
@@ -893,7 +919,8 @@ int sentdata = 0;
 void EUSCIB2_IRQHandler(void){
 
     if (EUSCI_B2->CTLW0 & BIT4 /*&& datarequested*/){
-            EUSCI_B2->TXBUF = readByte();
+            EUSCI_B2->TXBUF = sendthis;
+            sendthis = readByte();
             EUSCI_B2->IFG = 0;
     //        if(sentdata == 600){
     //            sentdata = 0;
