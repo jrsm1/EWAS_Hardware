@@ -23,7 +23,9 @@
 //		Defines					//
 /********************************/
 
+//
 /* Console UART Macros */
+//
 #define CONSOLE_UART_BASE 			EUSCI_A0_BASE
 #define CONSOLE_UART_GPIO_PORT		GPIO_PORT_P1
 #define CONSOLE_UART_INT			INT_EUSCIA0
@@ -31,7 +33,9 @@
 #define CONSOLE_UART_TX				GPIO_PIN3
 
 
+//
 /* GPS UART Macros*/
+//
 #define GPS_UART_BASE				EUSCI_A2_BASE
 #define GPS_UART_GPIO_PORT			GPIO_PORT_P3
 #define GPS_UART_INT				INT_EUSCIA2
@@ -39,7 +43,9 @@
 #define GPS_UART_TX					GPIO_PIN3
 
 
+//
 /* GPS Timer Macros*/
+//
 #define MAX_FAILS 					5
 #define GPS_TIMER_PERIOD    		0x8000
 #define TIME_WAIT 					15
@@ -47,19 +53,25 @@
 #define GPS_TIMER_BASE				TIMER_A1_BASE
 #define GPS_TIMER_INT				INT_TA1_0
 
+
+//
 /* Solenoid Macros */
+//
 #define SOLENOID_GPIO_PORT			GPIO_PORT_P2
 #define SOLENOID_GPIO_PIN			GPIO_PIN4
 
+//
 /* FTDI UART Macros */
+//
 #define FTDI_UART_BASE				EUSCI_A1_BASE
 #define FTDI_UART_GPIO_PORT			GPIO_PORT_P2
 #define FTDI_UART_INT				INT_EUSCIA1
 #define FTDI_UART_RX				GPIO_PIN2
 #define FTDI_UART_TX				GPIO_PIN3
 
-
+//
 /* I2C Bus Macros */
+//
 #define DEFAULT_SLAVE_ADDRESS   	0x60 //0xC0 >> 1
 #define I2C_BUS_BASE				EUSCI_B2_BASE
 #define I2C_BUS_GPIO_PORT			GPIO_PORT_P3
@@ -98,16 +110,23 @@
 #define I2C_DAQ7_DRDY_PIN			GPIO_PIN6
 #define I2C_DAQ8_DRDY_PIN			GPIO_PIN7
 
-#define NUM_OF_REC_BYTES			245760	//TODO replace with
-#define DATA_BUF_SIZE				600
+#define NUM_OF_REC_BYTES			245760	//For Hardcoded tests, calculate number of bytes and
+											//replace bytesToRec with NUM_OF_REC_BYTES
+#define DATA_BUF_SIZE				1200		//Maybe increase size???
 
 
+//
 /* General System Macros */
+//
 #define BUFFER_SIZE 				128
 #define SYSTEM_FREQ					CS_DCO_FREQUENCY_12
 #define DAQ_RESET_PORT				GPIO_PORT_P3
 #define DAQ_RESET_PIN				GPIO_PIN0
 
+
+//
+/* SD Card Macros */
+//
 /* Buffer size used for the file copy process */
 #ifndef CPY_BUFF_SIZE
 #define CPY_BUFF_SIZE       		4096
@@ -147,25 +166,29 @@ void decodeInstruction();
 //		Global Variables		//
 /********************************/
 
+//
+/* General Variables */
+//
 static char consoleInput[BUFFER_SIZE];
 static char COMMAND[BUFFER_SIZE];
 static volatile uint8_t inputIndex = 0;
 static volatile uint8_t slaveIndex = 0;
 static volatile uint32_t bytesToRecCounter = 0;
-uint32_t bytesToRec = 0;
+static volatile uint32_t bytesToRec = 0;
 static volatile uint8_t inputFlag = 0;
 static volatile uint8_t appFlag = 0;
 static volatile uint8_t dreadyFlag = 0;
 const uint8_t DAQAddresses[] = {0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57};
 const uint16_t samplingRates[] = {2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 20000};
-
 static uint8_t ADCData[DATA_BUF_SIZE];
 static volatile uint16_t xferIndex = 0;
 static volatile uint8_t bufferFull = 0;
 static volatile uint16_t bytesToWrite = 0;
 
 
+//
 /* GPS Global Variables */
+//
 short timeout = 0;
 short seconds = 0;
 short check_format = 0;
@@ -196,7 +219,8 @@ typedef struct GPSformats
 GPS gps;
 
 /*RTC Configuration
- * Default is UNIX Epoch Time: Thursday, January 1st 1970 00:00:00 AM */
+* Default is UNIX Epoch Time: Thursday, January 1st 1970 00:00:00 AM
+*/
 const RTC_C_Calendar defaultTime = {
         0x00,                        //seconds
         0x00,                        //minutes
@@ -209,7 +233,9 @@ const RTC_C_Calendar defaultTime = {
 
 RTC_C_Calendar newTime;
 
-
+//
+/* SD card global variables */
+//
 SDFatFS_Handle sdfatfsHandle;
 FILE *src, *dst;
 
@@ -228,12 +254,14 @@ const char daq8[] = "fat:"STR(DRIVE_NUM)":DAQ8.txt";
 unsigned char cpy_buff[CPY_BUFF_SIZE + 1];
 
 
-//////////////////
+//
+/* PC Application global variables*/
+//
 uint8_t rxdata[1000];
 uint_fast8_t received_byte;
 char test_char;
 int rcount = 0;
-uint8_t modules_connected_code[8] = {1, 0, 0, 0, 0, 0, 0, 0};
+uint8_t modules_connected_code[8] = {1, 0, 0, 0, 0, 0, 0, 0}; //TODO Hardwired, must be configured during slave init
 char configuration[4500];
 int conf_place =  0;
 int live1[3] = {1, 1, 1};
@@ -251,7 +279,6 @@ int vis_sens2 = 0;
 //buffer for live data
 int live_buffer[100];
 
-//sensor enable
 uint8_t sensors_enabled[32];
 
 // recording parameters
@@ -261,10 +288,8 @@ uint8_t gain;
 short duration;
 uint8_t start_delay;
 
-//experiment name
 char experiment_name[20];
 
-//localization identifier
 char localization_name[20];
 
 
@@ -273,12 +298,13 @@ uint8_t recorded = 0;
 uint8_t stored = 0;
 uint8_t gps_synched = 0;
 
-////////////
 
+//
 /* Module Configuration Global Variables */
+//
 
-//Console Baudrate 9600bps
-const eUSCI_UART_Config consoleConfig =
+
+const eUSCI_UART_Config consoleConfig = 		//Console Baudrate 9600bps
 {
         EUSCI_A_UART_CLOCKSOURCE_SMCLK,          // SMCLK Clock Source
         3,                                     // BRDIV = 78
@@ -292,8 +318,8 @@ const eUSCI_UART_Config consoleConfig =
 };
 
 
-//GPS Baudrate 9600bps
-const eUSCI_UART_Config gpsConfig =
+
+const eUSCI_UART_Config gpsConfig =				//Console Baudrate 9600bps
 {
         EUSCI_A_UART_CLOCKSOURCE_SMCLK,          // SMCLK Clock Source
         78,                                     // BRDIV = 78
@@ -308,8 +334,8 @@ const eUSCI_UART_Config gpsConfig =
 
 
 
-//FTDI Baudrate 230400bps
-const eUSCI_UART_Config ftdiConfig =
+
+const eUSCI_UART_Config ftdiConfig =			//FTDI Baudrate 230400bps
 {
         EUSCI_A_UART_CLOCKSOURCE_SMCLK,          // SMCLK Clock Source
         3,                                     // BRDIV = 3
@@ -354,12 +380,14 @@ int main(void){
 	//Stop Watchdog Timer
     WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;
 
+    //Flush buffers
     memset(consoleInput, 0x00, BUFFER_SIZE);
     memset((char *)ADCData, 0x00, sizeof(ADCData));
 
+    //Configure SD Card first because SDInit changes clock configuration
     configureSDCard();
 
-    //SD Card configuration changes MCLK, SMCLK, re-init to desired values
+    //SD Card configuration changes MCLK, SMCLK, ACLK, re-init to desired values
     CS_initClockSignal(CS_SMCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_1); //DCO at 12MHz
     CS_initClockSignal(CS_ACLK, CS_LFXTCLK_SELECT, CS_CLOCK_DIVIDER_1); //ACLK at 32.768kHz
 
@@ -377,32 +405,29 @@ int main(void){
     initializeSlaves();
     Interrupt_enableMaster();
 
-    src = fopen(daq1, "w");
-    fclose(src);
-
     while(true){
 
-        if(inputFlag){
+        if(inputFlag){	//Command was received through console (putty) terminal
         	inputFlag = 0;
         	inputIndex = 0;
         	processCommand(consoleInput);
 
-        }else if(appFlag){
+        }else if(appFlag){ //Command was received from the PC application (from FTDI chip)
         	appFlag = 0;
         	decodeInstruction();
 
-        }else if(dreadyFlag){
+        }else if(dreadyFlag){ //Signal received from DAQ to initiate data request
         	dreadyFlag = 0;
         	processCommand("datareq");
         }
-        else if(bufferFull){
+        else if(bufferFull){ //Global buffer is full, must write to SD Card before receiving more data
 			bufferFull = 0;
 
 	       	src = fopen(daq1, "a"); //TODO HARDWIRED
 
-	        int i = 0;
-	        for(; i < bytesToWrite; i++){
-	        	putc(ADCData[i], src);
+	        int i;
+	        for(i = 0; i < xferIndex; i++){ //Replaced bytesToWrite with xferIndex
+	        	putc(ADCData[i], src);	//fwrite was not working correctly
 	        }
 
 	        memset(ADCData, 0x00, sizeof(ADCData));	//Flush ADCData
@@ -410,14 +435,13 @@ int main(void){
 	        fclose(src);
 
 	        xferIndex = 0;
-			memset(ADCData, 0x00, bytesToWrite);
-			ADCData[xferIndex++] = EUSCI_B2->RXBUF;
+			ADCData[xferIndex++] = EUSCI_B2->RXBUF; //Receive first byte of next buffer here, else we lose it
+													//This could be the problem though...
 
-
-			if(bytesToRecCounter == bytesToRec - 1){ //All data was received, Replace bytesToRec with NUM_OF_REC_BYTES
-				stored = 1;
+			if(bytesToRecCounter == bytesToRec - 1){ //All data was received, Replace bytesToRec with
+				stored = 1;							//NUM_OF_REC_BYTES for testing using the terminal
 				bytesToRecCounter = 0;
-				EUSCI_B2->IE &= ~BIT0;
+				EUSCI_B2->IE &= ~BIT0;	//Disable I2C RX interrupt
 
 			}else{ //More Data still left
 				processCommand("datareq");
@@ -547,7 +571,7 @@ void configureI2CBus(void){
 	GPIO_setAsPeripheralModuleFunctionInputPin(I2C_BUS_GPIO_PORT,
 			I2C_BUS_SCL + I2C_BUS_SDA, GPIO_PRIMARY_MODULE_FUNCTION);
 
-	//GPIO Pins for I2C Slave Enable
+	//GPIO Pins for I2C DAQ module enables
     GPIO_setAsOutputPin(I2C_DAQ1_GPIO_PORT, I2C_DAQ1_GPIO_PIN);
     GPIO_setOutputLowOnPin(I2C_DAQ1_GPIO_PORT, I2C_DAQ1_GPIO_PIN);
 
@@ -572,7 +596,7 @@ void configureI2CBus(void){
     GPIO_setAsOutputPin(I2C_DAQ8_GPIO_PORT, I2C_DAQ8_GPIO_PIN);
     GPIO_setOutputLowOnPin(I2C_DAQ8_GPIO_PORT, I2C_DAQ8_GPIO_PIN);
 
-	/* Initializing I2C Master to SMCLK at 400khz with no autostop */
+	/* Initializing I2C Master to SMCLK at 100khz with no autostop */
 	I2C_initMaster(I2C_BUS_BASE, &i2cBusConfig);
 
 	/* Specify slave address */
@@ -610,7 +634,7 @@ void initializeSlaves(void){
 
     int ii;
     bool slavesInitialized = false;
-    processCommand("reset");
+    processCommand("reset");	//Reset all DAQ modules before sending DAQ addresses
 
     while(!slavesInitialized){
 
@@ -652,8 +676,10 @@ void initializeSlaves(void){
 //	    	  	    I2C_masterSendSingleByteWithTimeout(I2C_BUS_BASE,
 //	    	  	    		  	   DAQAddresses[slaveIndex], 0x0000FFFF);
 
-//	    	  	    I2C_masterSendMultiByteStartWithTimeout(I2C_BUS_BASE,
-//	    	  	    		  	   DAQAddresses[slaveIndex], 0x0000FFFF);
+	    	  /*
+	    	 	 If DAQ responds, set bit on modules connected array, else
+	    	 	 leave bit cleared and continue with the next iteration
+	    	   */
 
 	    	  if(slaveIndex == 0){
 	    		  GPIO_setOutputLowOnPin(I2C_DAQ1_GPIO_PORT, I2C_DAQ1_GPIO_PIN);
@@ -691,9 +717,6 @@ void initializeSlaves(void){
     I2C_setSlaveAddress(I2C_BUS_BASE, 0x50); //TODO HARDWIRED
     modules_connected_code[0] = 1; //TODO HARDWIRED
 
-    //Enable Interrupts after initialization
-//    I2C_enableInterrupt(I2C_BUS_BASE, EUSCI_B_I2C_RECEIVE_INTERRUPT0);
-
     Interrupt_enableInterrupt(I2C_BUS_INT);
 }
 
@@ -712,9 +735,6 @@ void processCommand(char *CommandText){
 
 	memset(COMMAND, 0, sizeof(COMMAND));
 	strncpy(COMMAND, array[0], (strlen(array[0])));
-
-//	UARTprintf(FTDI_UART_BASE, "CMD->%s\n\r",COMMAND);
-
 
 	Status = CmdLineProcess(COMMAND);
 
@@ -763,6 +783,7 @@ void transmitTerminationSequence(){
     MAP_UART_transmitData(FTDI_UART_BASE, 0x0A);
 }
 
+
 void getCurrentTime(void){
 
     if(MAP_RTC_C_getEnabledInterruptStatus() & RTC_C_CLOCK_READ_READY_INTERRUPT){
@@ -797,6 +818,7 @@ void updateRTC(void)
 
 void PORT6_IRQHandler(void)
 {
+	//TODO Figure out a way to manage a DRDY conflict between multiple DAQs
 
     uint32_t status = MAP_GPIO_getEnabledInterruptStatus(I2C_DAQ_DRDY_PORT);
     GPIO_clearInterruptFlag(I2C_DAQ_DRDY_PORT, status);
@@ -838,7 +860,7 @@ void PORT6_IRQHandler(void)
 
 }
 
-//Console UART handler, lookup way to change function name without errors
+//Console UART handler
 void EUSCIA0_IRQHandler(void){
 
     uint32_t status = UART_getEnabledInterruptStatus(CONSOLE_UART_BASE);
@@ -864,7 +886,7 @@ void EUSCIA0_IRQHandler(void){
 
 }
 
-
+//FTDI UART Handler
 void EUSCIA1_IRQHandler(void)
 {
     uint32_t status = MAP_UART_getEnabledInterruptStatus(FTDI_UART_BASE);
@@ -983,13 +1005,13 @@ void EUSCIB2_IRQHandler(void)
      * send a STOP condition */
     if (status & EUSCI_B_I2C_RECEIVE_INTERRUPT0){
 
-    	if(bytesToRecCounter == bytesToRec - 2){
+    	if(bytesToRecCounter == bytesToRec - 2){ //For some reason, this doesnt work if I use -1, should try again
 
     		EUSCI_B2->CTLW0 |= BIT2; //Send Stop Bit
-            ADCData[xferIndex++] = EUSCI_B2->RXBUF; //Read from RX buf
+            ADCData[xferIndex++] = EUSCI_B2->RXBUF; //Buffer filled at some point in the middle
 
             bytesToRecCounter++;
-            bytesToWrite = xferIndex;
+//            bytesToWrite = xferIndex;
             bufferFull = 1;
             EUSCI_B2->IE &= ~BIT0;
 
@@ -997,10 +1019,10 @@ void EUSCIB2_IRQHandler(void)
     	else if(xferIndex == DATA_BUF_SIZE - 1){ //Changed from -2 to -1
 
 //    		EUSCI_B2->CTLW0 |= BIT2; //Send Stop Bit
-            ADCData[xferIndex++] = EUSCI_B2->RXBUF;
+            ADCData[xferIndex++] = EUSCI_B2->RXBUF; //Last empty index on buffer
 
             bytesToRecCounter++;
-            bytesToWrite = xferIndex;
+//            bytesToWrite = xferIndex;
             bufferFull = 1;
             EUSCI_B2->IE &= ~BIT0;
 
@@ -1014,7 +1036,7 @@ void EUSCIB2_IRQHandler(void)
 }
 
 
-
+//GPS Timer Handler
 void TA1_0_IRQHandler(void)
 {
     seconds++;                                                          //Increases seconds by one
@@ -1154,9 +1176,25 @@ void decodeInstruction(){
 
     	    	char instruction[20];
 
-    	    	//TODO verify
+    	    	//TODO This always create a blank file before each test,
+    	    	//Figure out a way to delimit different tests on a single file
     	    	src = fopen(daq1, "w");
     	    	fclose(src);
+
+    	    	processCommand("diagnose 16"); //TODO HARDWIRED
+
+    	    	//TODO
+    	    	//Sensors_Enabled contains the 32 sensors, 1 is ON, 0 is OFF
+    	    	//Modules connected contains the active modules, 1 is ON, 0 is OFF
+    	    	//Convert value to decimal equivalent of hex parameter
+
+//    	    	uint8_t channels;
+//    	    	channels = sensors_enabled[0] * 1 + sensors_enabled[1] * 2 + sensors_enabled[1] * 4 + sensors_enabled[1] * 8
+    	    	//Send mux channels as all 0 (Sensors enabled, voltage reference off)
+
+//    	    	sprintf(instruction, "diagnose %d", sample_rate);
+//    	    	processCommand(instruction);
+//    	    	memset(instruction, 0x00, sizeof(instruction));
 
     	    	sprintf(instruction, "duration %d", duration);
     	    	processCommand(instruction);

@@ -1,5 +1,8 @@
+/********************************/
+//		Defines					//
+/********************************/
+
 #define CMDLINE_MAX_ARGS 				3
-#define MASTER_TO_SLAVE_PACKET_SIZE 	3
 #define I2C_PACKET_HEADER				0xCA
 #define CMD_SET_SAMPLING_FREQ			0x61
 #define CMD_GAIN_DEFINITION				0x62
@@ -7,11 +10,11 @@
 #define CMD_SET_CUTOFF_FREQ_DEFINITION	0x64
 #define CMD_DURATION_DEFINITION			0x65
 
+/********************************/
+//		External variables		//
+//		declarede in main.c		//
+/********************************/
 
-
-extern uint8_t masterToSlaveByteCtr;
-extern uint8_t masterToSlaveIndex;
-extern char masterToSlavePacket[MASTER_TO_SLAVE_PACKET_SIZE];
 extern FILE *src, *dst;
 extern const char daq1[], daq2[], daq3[], daq4[], daq5[], daq6[], daq7[], daq8[];
 

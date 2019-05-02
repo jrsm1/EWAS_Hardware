@@ -1,15 +1,29 @@
 # FIXED
 
 utils/cmdline.obj: ../utils/cmdline.c
-utils/cmdline.obj: /opt/ti/ccsv6/tools/compiler/arm_15.12.3.LTS/include/stdint.h
-utils/cmdline.obj: /opt/ti/ccsv6/tools/compiler/arm_15.12.3.LTS/include/stdbool.h
-utils/cmdline.obj: /opt/ti/ccsv6/tools/compiler/arm_15.12.3.LTS/include/string.h
-utils/cmdline.obj: /opt/ti/ccsv6/tools/compiler/arm_15.12.3.LTS/include/linkage.h
-utils/cmdline.obj: /home/jrsm/ccs_workspace/NDT_Control_Module/utils/cmdline.h
+utils/cmdline.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/stdint.h
+utils/cmdline.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/sys/stdint.h
+utils/cmdline.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/sys/cdefs.h
+utils/cmdline.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/sys/_types.h
+utils/cmdline.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/machine/_types.h
+utils/cmdline.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/machine/_stdint.h
+utils/cmdline.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/sys/_stdint.h
+utils/cmdline.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/stdbool.h
+utils/cmdline.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/string.h
+utils/cmdline.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/_ti_config.h
+utils/cmdline.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/linkage.h
+utils/cmdline.obj: C:/Users/Juan/Downloads/NDT_Control_Module2/utils/cmdline.h
 
 ../utils/cmdline.c: 
-/opt/ti/ccsv6/tools/compiler/arm_15.12.3.LTS/include/stdint.h: 
-/opt/ti/ccsv6/tools/compiler/arm_15.12.3.LTS/include/stdbool.h: 
-/opt/ti/ccsv6/tools/compiler/arm_15.12.3.LTS/include/string.h: 
-/opt/ti/ccsv6/tools/compiler/arm_15.12.3.LTS/include/linkage.h: 
-/home/jrsm/ccs_workspace/NDT_Control_Module/utils/cmdline.h: 
+C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/stdint.h: 
+C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/sys/stdint.h: 
+C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/sys/cdefs.h: 
+C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/sys/_types.h: 
+C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/machine/_types.h: 
+C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/machine/_stdint.h: 
+C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/sys/_stdint.h: 
+C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/stdbool.h: 
+C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/string.h: 
+C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/_ti_config.h: 
+C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/linkage.h: 
+C:/Users/Juan/Downloads/NDT_Control_Module2/utils/cmdline.h: 

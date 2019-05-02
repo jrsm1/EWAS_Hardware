@@ -1,3 +1,6 @@
+/*******************************/
+//		Includes				//
+/********************************/
 #include <ti/devices/msp432p4xx/driverlib/driverlib.h>
 #include <stdio.h>
 #include <file.h>
@@ -20,16 +23,16 @@
 tCmdLineEntry g_psCmdTable[] =
 {
     {"help",     CMD_help, " : Display list of commands"},
-	{"diagnose", CMD_diagnose, " : Enable/Disable Diagnostic Mode"},
-	{"datareq", CMD_getData, " : Request Data from DAQ units"},
+	{"diagnose", CMD_diagnose, " : Select lines for turning On/Off Sensor/ADC channels"},
+	{"datareq", CMD_getData, " : Request Data from DAQ modules"},
 	{"gain", CMD_setGain, " : Configure PGA Gain factor"},
-	{"create", CMD_create, " : Read data from DAQ file"},
-	{"read", CMD_read, " : Read data from DAQ file"},
-	{"write", CMD_write, " : Read data from DAQ file"},
-	{"cutoff", CMD_setCutoffFreq, " : Set cutoff frequency"},
-	{"sample", CMD_setSamplingFreq, " : Set sampling frequency"},
-	{"start", CMD_start, " : Start test"},
-	{"duration", CMD_duration, " : Send duration of test"},
+	{"create", CMD_create, " : Create DAQ module files on SD card"},
+	{"read", CMD_read, " : Write data to a DAQ file"},
+	{"write", CMD_write, " : Read data from a DAQ file"},
+	{"cutoff", CMD_setCutoffFreq, " : Set filter cutoff frequency"},
+	{"sample", CMD_setSamplingFreq, " : Set ADC sampling frequency"},
+	{"start", CMD_start, " : Send excitation impulse to solenoid and start test"},
+	{"duration", CMD_duration, " : Send duration of an experiment in seconds"},
 	{"initcard", CMD_initCard, " : Reinitialize SD Card"},
 	{"reset", CMD_reset, " : Reset DAQ modules"},
     { 0, 0, 0 }
@@ -48,6 +51,7 @@ int CMD_help(int argc, char **argv)
     (void)argc;
     (void)argv;
     i32Index = 0;
+
     UARTprintf(EUSCI_A3_BASE, "List of Commands\n\r");
     while(g_psCmdTable[i32Index].pcCmd){
     	UARTprintf(EUSCI_A3_BASE, "%s %s\n\r", g_psCmdTable[i32Index].pcCmd,
@@ -66,13 +70,15 @@ int CMD_diagnose(int argc, char **argv){
 
 	uint8_t p = atoi(argv[1]);
 
-//	while (MAP_I2C_masterIsStopSent(EUSCI_B2_BASE) == EUSCI_B_I2C_SENDING_STOP);
+	EUSCI_B2->CTLW0 |= BIT1; //Send start
+	EUSCI_B2->TXBUF = I2C_PACKET_HEADER;
 
-	/* Sending the initial start condition */
-	MAP_I2C_masterSendMultiByteStart(EUSCI_B2_BASE, I2C_PACKET_HEADER);
+	//MAP_I2C_masterSendMultiByteStart(EUSCI_B2_BASE, I2C_PACKET_HEADER);
 	MAP_I2C_masterSendMultiByteNext(EUSCI_B2_BASE, CMD_DIAGNOSE_DEFINITION);
 	MAP_I2C_masterSendMultiByteNext(EUSCI_B2_BASE, p);
-	MAP_I2C_masterSendMultiByteStop(EUSCI_B2_BASE);
+	//MAP_I2C_masterSendMultiByteStop(EUSCI_B2_BASE);
+
+	EUSCI_B2->CTLW0 |= BIT2; //Send stop
 
 	return (0);
 }
@@ -80,16 +86,17 @@ int CMD_diagnose(int argc, char **argv){
 int CMD_setCutoffFreq(int argc, char **argv){
 	uint8_t p = atoi(argv[1]);
 
-//	while (MAP_I2C_masterIsStopSent(EUSCI_B2_BASE) == EUSCI_B_I2C_SENDING_STOP);
+    EUSCI_B2->CTLW0 |= BIT1; //Send start
+    EUSCI_B2->TXBUF = I2C_PACKET_HEADER;
 
-	/* Sending the initial start condition */
-	MAP_I2C_masterSendMultiByteStart(EUSCI_B2_BASE, I2C_PACKET_HEADER);
+	//MAP_I2C_masterSendMultiByteStart(EUSCI_B2_BASE, I2C_PACKET_HEADER);
 	MAP_I2C_masterSendMultiByteNext(EUSCI_B2_BASE, CMD_SET_CUTOFF_FREQ_DEFINITION);
 	MAP_I2C_masterSendMultiByteNext(EUSCI_B2_BASE, p);
-	MAP_I2C_masterSendMultiByteStop(EUSCI_B2_BASE);
+	//MAP_I2C_masterSendMultiByteStop(EUSCI_B2_BASE);
+
+	EUSCI_B2->CTLW0 |= BIT2; //Send stop
 
 	return (0);
-
 
 }
 
@@ -98,13 +105,15 @@ int CMD_setSamplingFreq(int argc, char **argv){
 
 	uint8_t p = atoi(argv[1]);
 
-//	while (MAP_I2C_masterIsStopSent(EUSCI_B2_BASE) == EUSCI_B_I2C_SENDING_STOP);
+    //EUSCI_B2->CTLW0 |= BIT1; //Send start
+    //EUSCI_B2->TXBUF = I2C_PACKET_HEADER;
 
-	/* Sending the initial start condition */
 	MAP_I2C_masterSendMultiByteStart(EUSCI_B2_BASE, I2C_PACKET_HEADER);
 	MAP_I2C_masterSendMultiByteNext(EUSCI_B2_BASE, CMD_SET_SAMPLING_FREQ);
 	MAP_I2C_masterSendMultiByteNext(EUSCI_B2_BASE, p);
 	MAP_I2C_masterSendMultiByteStop(EUSCI_B2_BASE);
+
+	//EUSCI_B2->CTLW0 |= BIT2;
 
 	return 0;
 }
@@ -117,13 +126,15 @@ int CMD_initCard(int argc, char **argv){
 
 
 int CMD_start(int argc, char ** argv){
-		GPIO_setOutputHighOnPin(GPIO_PORT_P2, GPIO_PIN4);
+
+		P2->OUT |= BIT4;
 
 		//Delay
 		int i = 0;
 		while(i < 400000)
 			i++;
-		GPIO_setOutputLowOnPin(GPIO_PORT_P2, GPIO_PIN4);
+
+		P2->OUT &= ~BIT4;
 
 		return 0;
 }
@@ -135,7 +146,7 @@ int CMD_getData(int argc, char ** argv){
     EUSCI_B2->CTLW0 &= ~BIT4;
     EUSCI_B2->CTLW0 |= BIT1;
 
-	return (0);
+	return 0;
 }
 
 
@@ -143,14 +154,16 @@ int CMD_setGain(int argc, char ** argv){
 
 	uint8_t p = atoi(argv[1]);
 
-	/* Making sure the last transaction has been completely sent out */
-//	while (MAP_I2C_masterIsStopSent(EUSCI_B2_BASE) == EUSCI_B_I2C_SENDING_STOP);
+    //EUSCI_B2->CTLW0 |= BIT1; //Send start
+    //EUSCI_B2->TXBUF = I2C_PACKET_HEADER;
 
-	/* Sending the initial start condition */
 	MAP_I2C_masterSendMultiByteStart(EUSCI_B2_BASE, I2C_PACKET_HEADER);
 	MAP_I2C_masterSendMultiByteNext(EUSCI_B2_BASE, CMD_GAIN_DEFINITION);
 	MAP_I2C_masterSendMultiByteNext(EUSCI_B2_BASE, p);
 	MAP_I2C_masterSendMultiByteStop(EUSCI_B2_BASE);
+
+	//EUSCI_B2->CTLW0 |= BIT2;
+
 	return 0;
 }
 
@@ -224,6 +237,7 @@ int CMD_read(int argc, char ** argv){
     char cpy_buff[2048 + 1];
     memset(cpy_buff, 0x00, 2048 + 1);
     int i;
+
     while (true) {
     	i = 0;
         /*  Read from source file */
@@ -238,15 +252,14 @@ int CMD_read(int argc, char ** argv){
 
     	}
 
-        MAP_UART_transmitData(EUSCI_A1_BASE, 0xAA);
-        MAP_UART_transmitData(EUSCI_A1_BASE, 0xBB);
-        MAP_UART_transmitData(EUSCI_A1_BASE, 0xAA);
-        MAP_UART_transmitData(EUSCI_A1_BASE, 0xBB);
-        MAP_UART_transmitData(EUSCI_A1_BASE, 0x0D);
-        MAP_UART_transmitData(EUSCI_A1_BASE, 0x0A);
-
-
 	}
+
+    MAP_UART_transmitData(EUSCI_A1_BASE, 0xAA);
+    MAP_UART_transmitData(EUSCI_A1_BASE, 0xBB);
+    MAP_UART_transmitData(EUSCI_A1_BASE, 0xAA);
+    MAP_UART_transmitData(EUSCI_A1_BASE, 0xBB);
+    MAP_UART_transmitData(EUSCI_A1_BASE, 0x0D);
+    MAP_UART_transmitData(EUSCI_A1_BASE, 0x0A);
 
 //    /* Get the filesize of the source file */
 //    fseek(src, 0, SEEK_END);
@@ -261,7 +274,6 @@ int CMD_read(int argc, char ** argv){
 
 int CMD_write(int argc, char ** argv){
 
-//	unsigned int bytesRead = 0;
 	if(argc != 3){
 		UARTprintf(EUSCI_A0_BASE, "Incorrect number of arguments\n");
 		return -1;
@@ -294,14 +306,16 @@ int CMD_duration(int argc, char ** argv){
 	uint8_t msb = (p >> 8);
 	uint8_t lsb = (uint8_t) p;
 
-	while (MAP_I2C_masterIsStopSent(EUSCI_B2_BASE) == EUSCI_B_I2C_SENDING_STOP);
+    //EUSCI_B2->CTLW0 |= BIT1; //Send start
+    //EUSCI_B2->TXBUF = I2C_PACKET_HEADER;
 
-	/* Sending the initial start condition */
 	MAP_I2C_masterSendMultiByteStart(EUSCI_B2_BASE, I2C_PACKET_HEADER);
 	MAP_I2C_masterSendMultiByteNext(EUSCI_B2_BASE, CMD_DURATION_DEFINITION);
 	MAP_I2C_masterSendMultiByteNext(EUSCI_B2_BASE, msb);
 	MAP_I2C_masterSendMultiByteNext(EUSCI_B2_BASE, lsb);
 	MAP_I2C_masterSendMultiByteStop(EUSCI_B2_BASE);
+
+	//EUSCI_B2->CTLW0 |= BIT2;
 
 	return 0;
 }
