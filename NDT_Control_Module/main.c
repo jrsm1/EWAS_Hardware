@@ -1,5 +1,5 @@
-/********************************/
-//		Includes				//
+/*******************************/
+//      Includes                //
 /********************************/
 
 #include <ti/devices/msp432p4xx/driverlib/driverlib.h>
@@ -20,120 +20,136 @@
 
 
 /********************************/
-//		Defines					//
+//      Defines                 //
 /********************************/
 
+//
 /* Console UART Macros */
-#define CONSOLE_UART_BASE 			EUSCI_A0_BASE
-#define CONSOLE_UART_GPIO_PORT		GPIO_PORT_P1
-#define CONSOLE_UART_INT			INT_EUSCIA0
-#define CONSOLE_UART_RX				GPIO_PIN2
-#define CONSOLE_UART_TX				GPIO_PIN3
+//
+#define CONSOLE_UART_BASE           EUSCI_A0_BASE
+#define CONSOLE_UART_GPIO_PORT      GPIO_PORT_P1
+#define CONSOLE_UART_INT            INT_EUSCIA0
+#define CONSOLE_UART_RX             GPIO_PIN2
+#define CONSOLE_UART_TX             GPIO_PIN3
 
 
+//
 /* GPS UART Macros*/
-#define GPS_UART_BASE				EUSCI_A2_BASE
-#define GPS_UART_GPIO_PORT			GPIO_PORT_P3
-#define GPS_UART_INT				INT_EUSCIA2
-#define GPS_UART_RX					GPIO_PIN2
-#define GPS_UART_TX					GPIO_PIN3
+//
+#define GPS_UART_BASE               EUSCI_A2_BASE
+#define GPS_UART_GPIO_PORT          GPIO_PORT_P3
+#define GPS_UART_INT                INT_EUSCIA2
+#define GPS_UART_RX                 GPIO_PIN2
+#define GPS_UART_TX                 GPIO_PIN3
 
 
+//
 /* GPS Timer Macros*/
-#define MAX_FAILS 					5
-#define GPS_TIMER_PERIOD    		0x8000
-#define TIME_WAIT 					15
-#define MAX_RETRIES 				3
-#define GPS_TIMER_BASE				TIMER_A1_BASE
-#define GPS_TIMER_INT				INT_TA1_0
+//
+#define MAX_FAILS                   5
+#define GPS_TIMER_PERIOD            0x8000
+#define TIME_WAIT                   15
+#define MAX_RETRIES                 3
+#define GPS_TIMER_BASE              TIMER_A1_BASE
+#define GPS_TIMER_INT               INT_TA1_0
 
+
+//
 /* Solenoid Macros */
-#define SOLENOID_TIMER_PERIOD    	0x4000
-#define SOLENOID_TIMER_BASE			TIMER_A0_BASE
-#define SOLENOID_TIMER_INT			INT_TA0_0
-#define SOLENOID_GPIO_PORT			GPIO_PORT_P2
-#define SOLENOID_GPIO_PIN			GPIO_PIN4
+//
+#define SOLENOID_GPIO_PORT          GPIO_PORT_P2
+#define SOLENOID_GPIO_PIN           GPIO_PIN4
 
+//
 /* FTDI UART Macros */
-#define FTDI_UART_BASE				EUSCI_A1_BASE
-#define FTDI_UART_GPIO_PORT			GPIO_PORT_P2
-#define FTDI_UART_INT				INT_EUSCIA1
-#define FTDI_UART_RX				GPIO_PIN2
-#define FTDI_UART_TX				GPIO_PIN3
+//
+#define FTDI_UART_BASE              EUSCI_A1_BASE
+#define FTDI_UART_GPIO_PORT         GPIO_PORT_P2
+#define FTDI_UART_INT               INT_EUSCIA1
+#define FTDI_UART_RX                GPIO_PIN2
+#define FTDI_UART_TX                GPIO_PIN3
 
-
+//
 /* I2C Bus Macros */
-#define DEFAULT_SLAVE_ADDRESS   	0x60 //0xC0 >> 1
-#define I2C_BUS_BASE				EUSCI_B2_BASE
-#define I2C_BUS_GPIO_PORT			GPIO_PORT_P3
-#define I2C_BUS_INT					INT_EUSCIB2
-#define I2C_BUS_SCL					GPIO_PIN6
-#define I2C_BUS_SDA					GPIO_PIN7
-#define I2C_BUS_MAX_DAQS			8
+//
+#define DEFAULT_SLAVE_ADDRESS       0x60 //0xC0 >> 1
+#define I2C_BUS_BASE                EUSCI_B2_BASE
+#define I2C_BUS_GPIO_PORT           GPIO_PORT_P3
+#define I2C_BUS_INT                 INT_EUSCIB2
+#define I2C_BUS_SCL                 GPIO_PIN6
+#define I2C_BUS_SDA                 GPIO_PIN7
+#define I2C_BUS_MAX_DAQS            8
 
-#define I2C_DAQ1_GPIO_PORT			GPIO_PORT_P4
-#define I2C_DAQ1_GPIO_PIN			GPIO_PIN0
-#define I2C_DAQ2_GPIO_PORT			GPIO_PORT_P4
-#define I2C_DAQ2_GPIO_PIN			GPIO_PIN1
-#define I2C_DAQ3_GPIO_PORT			GPIO_PORT_P4
-#define I2C_DAQ3_GPIO_PIN			GPIO_PIN2
-#define I2C_DAQ4_GPIO_PORT			GPIO_PORT_P5
-#define I2C_DAQ4_GPIO_PIN			GPIO_PIN3
+#define I2C_DAQ1_GPIO_PORT          GPIO_PORT_P4
+#define I2C_DAQ1_GPIO_PIN           GPIO_PIN0
+#define I2C_DAQ2_GPIO_PORT          GPIO_PORT_P4
+#define I2C_DAQ2_GPIO_PIN           GPIO_PIN1
+#define I2C_DAQ3_GPIO_PORT          GPIO_PORT_P4
+#define I2C_DAQ3_GPIO_PIN           GPIO_PIN2
+#define I2C_DAQ4_GPIO_PORT          GPIO_PORT_P5
+#define I2C_DAQ4_GPIO_PIN           GPIO_PIN3
 
-#define I2C_DAQ5_GPIO_PORT			GPIO_PORT_P4
-#define I2C_DAQ5_GPIO_PIN			GPIO_PIN4
-#define I2C_DAQ6_GPIO_PORT			GPIO_PORT_P5
-#define I2C_DAQ6_GPIO_PIN			GPIO_PIN5
-#define I2C_DAQ7_GPIO_PORT			GPIO_PORT_P4
-#define I2C_DAQ7_GPIO_PIN			GPIO_PIN6
-#define I2C_DAQ8_GPIO_PORT			GPIO_PORT_P5
-#define I2C_DAQ8_GPIO_PIN			GPIO_PIN7
+#define I2C_DAQ5_GPIO_PORT          GPIO_PORT_P4
+#define I2C_DAQ5_GPIO_PIN           GPIO_PIN4
+#define I2C_DAQ6_GPIO_PORT          GPIO_PORT_P5
+#define I2C_DAQ6_GPIO_PIN           GPIO_PIN5
+#define I2C_DAQ7_GPIO_PORT          GPIO_PORT_P5
+#define I2C_DAQ7_GPIO_PIN           GPIO_PIN6
+#define I2C_DAQ8_GPIO_PORT          GPIO_PORT_P5
+#define I2C_DAQ8_GPIO_PIN           GPIO_PIN7
 
-#define I2C_DAQ_DRDY_PORT			GPIO_PORT_P6
-#define I2C_DAQ_DRDY_INT			INT_PORT6
-#define I2C_DAQ1_DRDY_PIN			GPIO_PIN0
-#define I2C_DAQ2_DRDY_PIN			GPIO_PIN1
-#define I2C_DAQ3_DRDY_PIN			GPIO_PIN2
+#define I2C_DAQ_DRDY_PORT           GPIO_PORT_P6
+#define I2C_DAQ_DRDY_INT            INT_PORT6
+#define I2C_DAQ1_DRDY_PIN           GPIO_PIN0
+#define I2C_DAQ2_DRDY_PIN           GPIO_PIN1
+#define I2C_DAQ3_DRDY_PIN           GPIO_PIN2
 
-#define I2C_DAQ4_DRDY_PIN			GPIO_PIN3
-#define I2C_DAQ5_DRDY_PIN			GPIO_PIN4
-#define I2C_DAQ6_DRDY_PIN			GPIO_PIN5
-#define I2C_DAQ7_DRDY_PIN			GPIO_PIN6
-#define I2C_DAQ8_DRDY_PIN			GPIO_PIN7
+#define I2C_DAQ4_DRDY_PIN           GPIO_PIN3
+#define I2C_DAQ5_DRDY_PIN           GPIO_PIN4
+#define I2C_DAQ6_DRDY_PIN           GPIO_PIN5
+#define I2C_DAQ7_DRDY_PIN           GPIO_PIN6
+#define I2C_DAQ8_DRDY_PIN           GPIO_PIN7
 
-#define MASTER_TO_SLAVE_PACKET_SIZE 3
-#define NUM_OF_REC_BYTES			2400
+#define NUM_OF_REC_BYTES            1024*12 //For Hardcoded tests, calculate number of bytes and
+                                            //replace bytesToRec with NUM_OF_REC_BYTES
+#define DATA_BUF_SIZE               1200        //Maybe increase size???
 
 
+//
 /* General System Macros */
-#define BUFFER_SIZE 				128
-#define SYSTEM_FREQ					CS_DCO_FREQUENCY_12
-#define DAQ_RESET_PORT				GPIO_PORT_P3
-#define DAQ_RESET_PIN				GPIO_PIN0
+//
+#define BUFFER_SIZE                 128
+#define SYSTEM_FREQ                 CS_DCO_FREQUENCY_12
+#define DAQ_RESET_PORT              GPIO_PORT_P3
+#define DAQ_RESET_PIN               GPIO_PIN0
 
+
+//
+/* SD Card Macros */
+//
 /* Buffer size used for the file copy process */
 #ifndef CPY_BUFF_SIZE
-#define CPY_BUFF_SIZE       		2048
+#define CPY_BUFF_SIZE               4096
 #endif
 
 
 /* String conversion macro */
-#define STR_(n)             		#n
-#define STR(n)              		STR_(n)
+#define STR_(n)                     #n
+#define STR(n)                      STR_(n)
 
 
 /* Drive number used for FatFs */
-#define DRIVE_NUM           		0
+#define DRIVE_NUM                   0
 
 
 /********************************/
-//		Function Prototypes		//
+//      Function Prototypes     //
 /********************************/
 
 void configureConsoleUART(void);
 void configureGPSUART(void);
 void configureGPSTimer(void);
-void configureSolenoidTimer(void);
+void configureSolenoid(void);
 void configureDAQReset(void);
 void configureRTC();
 void configureDataReadyPort(void);
@@ -147,28 +163,32 @@ void decodeInstruction();
 
 
 /********************************/
-//		Global Variables		//
+//      Global Variables        //
 /********************************/
 
+//
+/* General Variables */
+//
 static char consoleInput[BUFFER_SIZE];
 static char COMMAND[BUFFER_SIZE];
-char masterToSlavePacket[MASTER_TO_SLAVE_PACKET_SIZE];
-uint8_t masterToSlaveIndex = 0;
-uint8_t masterToSlaveByteCtr = 3;
 static volatile uint8_t inputIndex = 0;
-static volatile bool slavesInitialized = false;
 static volatile uint8_t slaveIndex = 0;
+static volatile uint32_t bytesToRecCounter = 0;
+static volatile uint32_t bytesToRec = 0;
 static volatile uint8_t inputFlag = 0;
-static volatile uint8_t cardFlag = 0;
 static volatile uint8_t appFlag = 0;
 static volatile uint8_t dreadyFlag = 0;
 const uint8_t DAQAddresses[] = {0x50, 0x51, 0x52, 0x53, 0x54, 0x55, 0x56, 0x57};
-static uint8_t activeDAQModules = 0;
-static unsigned char ADCData[NUM_OF_REC_BYTES];
-static volatile uint32_t xferIndex;
+const uint16_t samplingRates[] = {2, 4, 8, 16, 32, 64, 128, 256, 512, 1024, 2048, 4096, 8192, 16384, 20000};
+static uint8_t ADCData[DATA_BUF_SIZE];
+static volatile uint16_t xferIndex = 0;
+static volatile uint8_t bufferFull = 0;
+static volatile uint16_t bytesToWrite = 0;
 
 
+//
 /* GPS Global Variables */
+//
 short timeout = 0;
 short seconds = 0;
 short check_format = 0;
@@ -199,7 +219,8 @@ typedef struct GPSformats
 GPS gps;
 
 /*RTC Configuration
- * Default is UNIX Epoch Time: Thursday, January 1st 1970 00:00:00 AM */
+* Default is UNIX Epoch Time: Thursday, January 1st 1970 00:00:00 AM
+*/
 const RTC_C_Calendar defaultTime = {
         0x00,                        //seconds
         0x00,                        //minutes
@@ -212,9 +233,12 @@ const RTC_C_Calendar defaultTime = {
 
 RTC_C_Calendar newTime;
 
-
+//
+/* SD card global variables */
+//
 SDFatFS_Handle sdfatfsHandle;
 FILE *src, *dst;
+
 /* File name prefix for this filesystem for use with TI C RTS */
 char fatfsPrefix[] = "fat";
 
@@ -227,23 +251,24 @@ const char daq6[] = "fat:"STR(DRIVE_NUM)":DAQ6.txt";
 const char daq7[] = "fat:"STR(DRIVE_NUM)":DAQ7.txt";
 const char daq8[] = "fat:"STR(DRIVE_NUM)":DAQ8.txt";
 
-unsigned char cpy_buff[CPY_BUFF_SIZE + 1];
+//unsigned char cpy_buff[CPY_BUFF_SIZE + 1];
 
 
-//////////////////
+//
+/* PC Application global variables*/
+//
 uint8_t rxdata[1000];
 uint_fast8_t received_byte;
 char test_char;
 int rcount = 0;
-int modules_connected_code[8] = {0, 0, 0, 0, 0, 0, 0, 0};
+uint8_t modules_connected_code[8] = {1, 0, 0, 0, 0, 0, 0, 0}; //TODO Hardwired, must be configured during slave init
 char configuration[4500];
 int conf_place =  0;
 int live1[3] = {1, 1, 1};
 int live2[3] = {1, 1, 1};
 char *gps_data = "gps data";
 uint8_t valid_conf = 0;
-int status = 1;
-uint8_t diagnosis = 1;
+uint8_t diagnosis = 0;
 
 // module sensor visualization
 int store_enable = 0; //Flag for determining if DAta shall be stored in sd card
@@ -254,7 +279,6 @@ int vis_sens2 = 0;
 //buffer for live data
 int live_buffer[100];
 
-//sensor enable
 uint8_t sensors_enabled[32];
 
 // recording parameters
@@ -262,13 +286,10 @@ uint8_t sample_rate;
 uint8_t cutoff;
 uint8_t gain;
 short duration;
-int start_delay;
-int numRecBytes;
+uint8_t start_delay;
 
-//experiment name
 char experiment_name[20];
 
-//localization identifier
 char localization_name[20];
 
 
@@ -277,12 +298,13 @@ uint8_t recorded = 0;
 uint8_t stored = 0;
 uint8_t gps_synched = 0;
 
-////////////
 
+//
 /* Module Configuration Global Variables */
+//
 
-//Console Baudrate 9600bps
-const eUSCI_UART_Config consoleConfig =
+
+const eUSCI_UART_Config consoleConfig =         //Console Baudrate 9600bps
 {
         EUSCI_A_UART_CLOCKSOURCE_SMCLK,          // SMCLK Clock Source
         3,                                     // BRDIV = 78
@@ -296,8 +318,8 @@ const eUSCI_UART_Config consoleConfig =
 };
 
 
-//GPS Baudrate 9600bps
-const eUSCI_UART_Config gpsConfig =
+
+const eUSCI_UART_Config gpsConfig =             //Console Baudrate 9600bps
 {
         EUSCI_A_UART_CLOCKSOURCE_SMCLK,          // SMCLK Clock Source
         78,                                     // BRDIV = 78
@@ -312,8 +334,8 @@ const eUSCI_UART_Config gpsConfig =
 
 
 
-//FTDI Baudrate 230400bps
-const eUSCI_UART_Config ftdiConfig =
+
+const eUSCI_UART_Config ftdiConfig =            //FTDI Baudrate 230400bps
 {
         EUSCI_A_UART_CLOCKSOURCE_SMCLK,          // SMCLK Clock Source
         3,                                     // BRDIV = 3
@@ -340,7 +362,7 @@ const eUSCI_I2C_MasterConfig i2cBusConfig =
 
 //GPS Timer Configuration
 const Timer_A_UpModeConfig gpsTimerConfig = {
-		TIMER_A_CLOCKSOURCE_ACLK,              // ACLK Clock Source
+        TIMER_A_CLOCKSOURCE_ACLK,              // ACLK Clock Source
         TIMER_A_CLOCKSOURCE_DIVIDER_1,          // ACLK/1 = 32.768kHz
         GPS_TIMER_PERIOD,                           // 32768 ticks
         TIMER_A_TAIE_INTERRUPT_DISABLE,         // Disable Timer interrupt
@@ -348,103 +370,90 @@ const Timer_A_UpModeConfig gpsTimerConfig = {
         TIMER_A_DO_CLEAR                        // Clear value
 };
 
-//Solenoid Timer Configuration
-const Timer_A_UpModeConfig solenoidTimerConfig = {
-        TIMER_A_CLOCKSOURCE_ACLK,              // ACLK Clock Source
-        TIMER_A_CLOCKSOURCE_DIVIDER_1,          // ACLK/1 = 32.768kHz
-        SOLENOID_TIMER_PERIOD,                           // 32768 ticks
-        TIMER_A_TAIE_INTERRUPT_DISABLE,         // Disable Timer interrupt
-        TIMER_A_CCIE_CCR0_INTERRUPT_ENABLE ,    // Enable CCR0 interrupt
-        TIMER_A_DO_CLEAR                        // Clear value
-};
-
 
 /********************************/
-//		Main					//
+//      Main                    //
 /********************************/
 
-int main(void)
-{
+int main(void){
 
-	//Stop Watchdog Timer
+    //Stop Watchdog Timer
     WDT_A->CTL = WDT_A_CTL_PW | WDT_A_CTL_HOLD;
 
+    //Flush buffers
     memset(consoleInput, 0x00, BUFFER_SIZE);
+    memset((char *)ADCData, 0x00, sizeof(ADCData));
 
+    //Configure SD Card first because SDInit changes clock configuration
     configureSDCard();
 
-    //SD Card configuration changes MCLK, SMCLK, re-init to desired values
+    //SD Card configuration changes MCLK, SMCLK, ACLK, re-init to desired values
     CS_initClockSignal(CS_SMCLK, CS_DCOCLK_SELECT, CS_CLOCK_DIVIDER_1); //DCO at 12MHz
     CS_initClockSignal(CS_ACLK, CS_LFXTCLK_SELECT, CS_CLOCK_DIVIDER_1); //ACLK at 32.768kHz
 
     configureConsoleUART();
     configureFTDIUART();
-//    configureGPSUART();
-//    configureRTC();
+    configureGPSUART();
+    configureRTC();
+
 //    configureGPSTimer();
-    configureDataReadyPort();
     configureDAQReset();
-    configureSolenoidTimer();
+    configureDataReadyPort();
+    configureSolenoid();
+
     configureI2CBus();
-
     initializeSlaves();
-
     Interrupt_enableMaster();
 
+    src = fopen(daq1, "w");
+    fclose(src);
 
     while(true){
 
-        if(inputFlag){
-        	inputFlag = 0;
-        	processCommand(consoleInput);
+        if(inputFlag){  //Command was received through console (putty) terminal
+            inputFlag = 0;
             inputIndex = 0;
+            processCommand(consoleInput);
 
-        }else if(appFlag){
-        	appFlag = 0;
-        	decodeInstruction();
+        }else if(appFlag){ //Command was received from the PC application (from FTDI chip)
+            appFlag = 0;
+            decodeInstruction();
 
-        }else if(cardFlag){
-        	cardFlag = 0;
-
-        	int j = 1;
-//		    converter[0] = '\0';
-        	//Convert Bytes received
-//        	for(i = 0; i < NUM_OF_REC_BYTES; i++){
-//        		converter[j++] = ADCData[i];
-//        		if(j % 4 == 0)
-//        			converter[j++] = '\0';
-//
-//        	}
-
-        	xferIndex = 0;
-//	    	if(slaveIndex == 0){
-//	    		src = fopen(daq1, "w");
-//	    	}else if(slaveIndex == 1){
-//	    		src = fopen(daq2, "w");
-//	    	}else if(slaveIndex == 2){
-//	    		  	 //TODO
-//	    	}else if(slaveIndex == 3){
-//	    		  	 //TODO
-//	    	}else if(slaveIndex == 4){
-//	    		  	 //TODO
-//	    	}else if(slaveIndex == 5){
-//	    		  	  //TODO
-//	    	}else if(slaveIndex == 6){
-//	    		  	  //TODO
-//	    	}else if(slaveIndex == 7){
-//	    		  	  //TODO
-//	    	}
-        	src = fopen(daq1, "w");
-
-//            fwrite(converter, sizeof(char), j, src);
-            fwrite(ADCData, sizeof(char), j, src);
-            //Flush RXData afterwards
-            rewind(src);
-            fclose(src);
-        }else if(dreadyFlag){
-        	dreadyFlag = 0;
-        	processCommand("datareq");
+        }else if(dreadyFlag){ //Signal received from DAQ to initiate data request
+            dreadyFlag = 0;
+            processCommand("datareq");
         }
+        else if(bufferFull){ //Global buffer is full, must write to SD Card before receiving more data
+            bufferFull = 0;
+
+            src = fopen(daq1, "a"); //TODO HARDWIRED
+
+            int i;
+            for(i = 0; i < xferIndex; i++){ //Replaced bytesToWrite with xferIndex
+                putc(ADCData[i], src);  //fwrite was not working correctly
+            }
+
+            memset(ADCData, 0x00, sizeof(ADCData)); //Flush ADCData
+
+            fclose(src);
+
+            xferIndex = 0;
+
+
+            ADCData[xferIndex++] = EUSCI_B2->RXBUF; //Receive first byte of next buffer here, else we lose it
+                                                    //This could be the problem though...
+
+            if(bytesToRecCounter == bytesToRec - 1){ //All data was received, Replace bytesToRec with
+                stored = 1;                         //NUM_OF_REC_BYTES for testing using the terminal
+                bytesToRecCounter = 0;
+                EUSCI_B2->IE &= ~BIT0;  //Disable I2C RX interrupt
+
+            }else{ //More Data still left
+                processCommand("datareq");
+            }
+
+        }
+
     }
 
 
@@ -452,13 +461,13 @@ int main(void)
 
 
 /********************************/
-//		Function Definitions	//
+//      Function Definitions    //
 /********************************/
 
 
 void configureConsoleUART(void){
     GPIO_setAsPeripheralModuleFunctionInputPin(CONSOLE_UART_GPIO_PORT,
-    		CONSOLE_UART_RX | CONSOLE_UART_TX, GPIO_PRIMARY_MODULE_FUNCTION);
+            CONSOLE_UART_RX | CONSOLE_UART_TX, GPIO_PRIMARY_MODULE_FUNCTION);
 
     CS_setDCOCenteredFrequency(SYSTEM_FREQ); //DCO Freq is used for MCLK, SMCLK upon reset
 
@@ -473,7 +482,7 @@ void configureConsoleUART(void){
 
 void configureGPSUART(void){
     GPIO_setAsPeripheralModuleFunctionInputPin(GPS_UART_GPIO_PORT,
-    		CONSOLE_UART_RX | CONSOLE_UART_TX, GPIO_PRIMARY_MODULE_FUNCTION);
+            CONSOLE_UART_RX | CONSOLE_UART_TX, GPIO_PRIMARY_MODULE_FUNCTION);
 
     CS_setDCOCenteredFrequency(SYSTEM_FREQ); //DCO Freq is used for MCLK, SMCLK upon reset
 
@@ -488,15 +497,14 @@ void configureGPSUART(void){
 
 
 void configureGPSTimer(void){
-	Timer_A_configureUpMode(GPS_TIMER_BASE, &gpsTimerConfig);
-	Interrupt_enableInterrupt(GPS_TIMER_INT);
+    Timer_A_configureUpMode(GPS_TIMER_BASE, &gpsTimerConfig);
+    Interrupt_enableInterrupt(GPS_TIMER_INT);
 
-	Timer_A_startCounter(GPS_TIMER_BASE, TIMER_A_UP_MODE);
+    Timer_A_startCounter(GPS_TIMER_BASE, TIMER_A_UP_MODE);
 }
 
 
-void configureSolenoidTimer(void){
-	Timer_A_configureUpMode(SOLENOID_TIMER_BASE, &solenoidTimerConfig);
+void configureSolenoid(void){
     GPIO_setAsOutputPin(SOLENOID_GPIO_PORT, SOLENOID_GPIO_PIN);
 
     GPIO_setOutputLowOnPin(SOLENOID_GPIO_PORT, SOLENOID_GPIO_PIN);
@@ -506,7 +514,7 @@ void configureSolenoidTimer(void){
 
 void configureFTDIUART(void){
     GPIO_setAsPeripheralModuleFunctionInputPin(FTDI_UART_GPIO_PORT,
-    		FTDI_UART_RX | FTDI_UART_TX, GPIO_PRIMARY_MODULE_FUNCTION);
+            FTDI_UART_RX | FTDI_UART_TX, GPIO_PRIMARY_MODULE_FUNCTION);
 
     CS_setDCOCenteredFrequency(SYSTEM_FREQ); //DCO Freq is used for MCLK, SMCLK upon reset
 
@@ -550,13 +558,13 @@ void configureDAQReset(void){
 
 void configureDataReadyPort(void){
     GPIO_setAsInputPinWithPullDownResistor(I2C_DAQ_DRDY_PORT, I2C_DAQ1_DRDY_PIN | I2C_DAQ2_DRDY_PIN | I2C_DAQ3_DRDY_PIN
-    		| I2C_DAQ4_DRDY_PIN | I2C_DAQ5_DRDY_PIN | I2C_DAQ6_DRDY_PIN | I2C_DAQ7_DRDY_PIN | I2C_DAQ8_DRDY_PIN);
+            | I2C_DAQ4_DRDY_PIN | I2C_DAQ5_DRDY_PIN | I2C_DAQ6_DRDY_PIN | I2C_DAQ7_DRDY_PIN | I2C_DAQ8_DRDY_PIN);
 
     GPIO_clearInterruptFlag(I2C_DAQ_DRDY_PORT, I2C_DAQ1_DRDY_PIN | I2C_DAQ2_DRDY_PIN | I2C_DAQ3_DRDY_PIN
-    		| I2C_DAQ4_DRDY_PIN | I2C_DAQ5_DRDY_PIN | I2C_DAQ6_DRDY_PIN | I2C_DAQ7_DRDY_PIN | I2C_DAQ8_DRDY_PIN);
+            | I2C_DAQ4_DRDY_PIN | I2C_DAQ5_DRDY_PIN | I2C_DAQ6_DRDY_PIN | I2C_DAQ7_DRDY_PIN | I2C_DAQ8_DRDY_PIN);
 
     GPIO_enableInterrupt(I2C_DAQ_DRDY_PORT, I2C_DAQ1_DRDY_PIN | I2C_DAQ2_DRDY_PIN | I2C_DAQ3_DRDY_PIN
-    		| I2C_DAQ4_DRDY_PIN | I2C_DAQ5_DRDY_PIN | I2C_DAQ6_DRDY_PIN | I2C_DAQ7_DRDY_PIN | I2C_DAQ8_DRDY_PIN);
+            | I2C_DAQ4_DRDY_PIN | I2C_DAQ5_DRDY_PIN | I2C_DAQ6_DRDY_PIN | I2C_DAQ7_DRDY_PIN | I2C_DAQ8_DRDY_PIN);
 
     Interrupt_enableInterrupt(I2C_DAQ_DRDY_INT);
 
@@ -565,10 +573,10 @@ void configureDataReadyPort(void){
 
 void configureI2CBus(void){
 
-	GPIO_setAsPeripheralModuleFunctionInputPin(I2C_BUS_GPIO_PORT,
-			I2C_BUS_SCL + I2C_BUS_SDA, GPIO_PRIMARY_MODULE_FUNCTION);
+    GPIO_setAsPeripheralModuleFunctionInputPin(I2C_BUS_GPIO_PORT,
+            I2C_BUS_SCL + I2C_BUS_SDA, GPIO_PRIMARY_MODULE_FUNCTION);
 
-	//GPIO Pins for I2C Slave Enable
+    //GPIO Pins for I2C DAQ module enables
     GPIO_setAsOutputPin(I2C_DAQ1_GPIO_PORT, I2C_DAQ1_GPIO_PIN);
     GPIO_setOutputLowOnPin(I2C_DAQ1_GPIO_PORT, I2C_DAQ1_GPIO_PIN);
 
@@ -593,180 +601,171 @@ void configureI2CBus(void){
     GPIO_setAsOutputPin(I2C_DAQ8_GPIO_PORT, I2C_DAQ8_GPIO_PIN);
     GPIO_setOutputLowOnPin(I2C_DAQ8_GPIO_PORT, I2C_DAQ8_GPIO_PIN);
 
-	/* Initializing I2C Master to SMCLK at 400khz with no autostop */
-	I2C_initMaster(I2C_BUS_BASE, &i2cBusConfig);
+    /* Initializing I2C Master to SMCLK at 100khz with no autostop */
+    I2C_initMaster(I2C_BUS_BASE, &i2cBusConfig);
 
-	/* Specify slave address */
-	I2C_setSlaveAddress(I2C_BUS_BASE, DEFAULT_SLAVE_ADDRESS);
+    /* Specify slave address */
+    I2C_setSlaveAddress(I2C_BUS_BASE, DEFAULT_SLAVE_ADDRESS);
 
-	I2C_setMode(I2C_BUS_BASE, EUSCI_B_I2C_TRANSMIT_MODE);
+    I2C_setMode(I2C_BUS_BASE, EUSCI_B_I2C_TRANSMIT_MODE);
 
-	/* Enable I2C Module to start operations */
-	I2C_enableModule(I2C_BUS_BASE);
+    /* Enable I2C Module to start operations */
+    I2C_enableModule(I2C_BUS_BASE);
 
 
-	/* Enable and clear the interrupt flag */
-	I2C_clearInterruptFlag(I2C_BUS_BASE,EUSCI_B_I2C_TRANSMIT_INTERRUPT0 +
-			EUSCI_B_I2C_NAK_INTERRUPT + EUSCI_B_I2C_RECEIVE_INTERRUPT0);
+    /* Enable and clear the interrupt flag */
+    I2C_clearInterruptFlag(I2C_BUS_BASE, EUSCI_B_I2C_RECEIVE_INTERRUPT0);
 
 
 }
 
 
 void configureRTC(){
-	GPIO_setAsPeripheralModuleFunctionOutputPin(GPIO_PORT_PJ,
-	        GPIO_PIN0 | GPIO_PIN1,GPIO_PRIMARY_MODULE_FUNCTION);
+    GPIO_setAsPeripheralModuleFunctionOutputPin(GPIO_PORT_PJ,
+            GPIO_PIN0 | GPIO_PIN1,GPIO_PRIMARY_MODULE_FUNCTION);
 
-	CS_setExternalClockSourceFrequency(32000, 48000000);
-	CS_startLFXT(CS_LFXT_DRIVE3);
+    CS_setExternalClockSourceFrequency(32000, 48000000);
+    CS_startLFXT(CS_LFXT_DRIVE3);
 
-	/* Initializing RTC with default time */
-	RTC_C_initCalendar(&defaultTime, RTC_C_FORMAT_BINARY);
-	RTC_C_clearInterruptFlag(RTC_C_CLOCK_READ_READY_INTERRUPT);     //Clears Read Ready Interrupt Flag
-	RTC_C_enableInterrupt(RTC_C_CLOCK_READ_READY_INTERRUPT);        //Enables Read Ready Interupt Flag
-	RTC_C_startClock();
+    /* Initializing RTC with default time */
+    RTC_C_initCalendar(&defaultTime, RTC_C_FORMAT_BINARY);
+    RTC_C_clearInterruptFlag(RTC_C_CLOCK_READ_READY_INTERRUPT);     //Clears Read Ready Interrupt Flag
+    RTC_C_enableInterrupt(RTC_C_CLOCK_READ_READY_INTERRUPT);        //Enables Read Ready Interupt Flag
+    RTC_C_startClock();
 }
 
 
 void initializeSlaves(void){
 
     int ii;
+    bool slavesInitialized = false;
+    processCommand("reset");    //Reset all DAQ modules before sending DAQ addresses
 
     while(!slavesInitialized){
 
-	      /* Delay between Transmissions */
-	      for (ii = 0; ii < 4000; ii++);
+          /* Delay between Transmissions */
+          for (ii = 0; ii < 4000; ii++);
 
-	      /* Making sure the last transaction has been completely sent out */
-	      while (MAP_I2C_masterIsStopSent(I2C_BUS_BASE) == EUSCI_B_I2C_SENDING_STOP);
+          /* Making sure the last transaction has been completely sent out */
+          while (MAP_I2C_masterIsStopSent(I2C_BUS_BASE) == EUSCI_B_I2C_SENDING_STOP);
 
-	      /* Send only a Start condition and the address byte */
-	      if(slaveIndex < I2C_BUS_MAX_DAQS){
+          /* Send only a Start condition and the address byte */
+          if(slaveIndex < I2C_BUS_MAX_DAQS){
 
-	    	  if(slaveIndex == 0){
-	    		  GPIO_setOutputHighOnPin(I2C_DAQ1_GPIO_PORT, I2C_DAQ1_GPIO_PIN);
+              if(slaveIndex == 0){
+                  GPIO_setOutputHighOnPin(I2C_DAQ1_GPIO_PORT, I2C_DAQ1_GPIO_PIN);
 
-	    	  }else if(slaveIndex == 1){
-	    		  GPIO_setOutputHighOnPin(I2C_DAQ2_GPIO_PORT, I2C_DAQ2_GPIO_PIN);
+              }else if(slaveIndex == 1){
+                  GPIO_setOutputHighOnPin(I2C_DAQ2_GPIO_PORT, I2C_DAQ2_GPIO_PIN);
 
-	    	  }else if(slaveIndex == 2){
-	    		  GPIO_setOutputHighOnPin(I2C_DAQ3_GPIO_PORT, I2C_DAQ3_GPIO_PIN);
+              }else if(slaveIndex == 2){
+                  GPIO_setOutputHighOnPin(I2C_DAQ3_GPIO_PORT, I2C_DAQ3_GPIO_PIN);
 
-	    	  }else if(slaveIndex == 3){
-	    		  GPIO_setOutputHighOnPin(I2C_DAQ4_GPIO_PORT, I2C_DAQ4_GPIO_PIN);
+              }else if(slaveIndex == 3){
+                  GPIO_setOutputHighOnPin(I2C_DAQ4_GPIO_PORT, I2C_DAQ4_GPIO_PIN);
 
-	    	  }else if(slaveIndex == 4){
-	    		  GPIO_setOutputHighOnPin(I2C_DAQ5_GPIO_PORT, I2C_DAQ5_GPIO_PIN);
+              }else if(slaveIndex == 4){
+                  GPIO_setOutputHighOnPin(I2C_DAQ5_GPIO_PORT, I2C_DAQ5_GPIO_PIN);
 
-	    	  }else if(slaveIndex == 5){
-	    		  GPIO_setOutputHighOnPin(I2C_DAQ6_GPIO_PORT, I2C_DAQ6_GPIO_PIN);
+              }else if(slaveIndex == 5){
+                  GPIO_setOutputHighOnPin(I2C_DAQ6_GPIO_PORT, I2C_DAQ6_GPIO_PIN);
 
-	    	  }else if(slaveIndex == 6){
-	    		  GPIO_setOutputHighOnPin(I2C_DAQ7_GPIO_PORT, I2C_DAQ7_GPIO_PIN);
+              }else if(slaveIndex == 6){
+                  GPIO_setOutputHighOnPin(I2C_DAQ7_GPIO_PORT, I2C_DAQ7_GPIO_PIN);
 
-	    	  }else if(slaveIndex == 7){
-	    		  GPIO_setOutputHighOnPin(I2C_DAQ8_GPIO_PORT, I2C_DAQ8_GPIO_PIN);
+              }else if(slaveIndex == 7){
+                  GPIO_setOutputHighOnPin(I2C_DAQ8_GPIO_PORT, I2C_DAQ8_GPIO_PIN);
 
-	    	  }
+              }
 
+//                  I2C_masterSendSingleByteWithTimeout(I2C_BUS_BASE,
+//                                 DAQAddresses[slaveIndex], 0x0000FFFF);
 
-	    	  	    I2C_masterSendMultiByteStartWithTimeout(I2C_BUS_BASE,
-	    	  	    		  	   DAQAddresses[slaveIndex], 0x0000FFFF);
-//	    	  	    I2C_masterSendSingleByteWithTimeout(I2C_BUS_BASE,
-//	    	  	    		  	   DAQAddresses[slaveIndex], 0x0000FFFF);
-//	    	  	    I2C_masterReceiveSingleByte(I2C_BUS_BASE);
+              /*
+                 If DAQ responds, set bit on modules connected array, else
+                 leave bit cleared and continue with the next iteration
+               */
 
-	    	  	 /*
-	    	  	  * If DAQ responds, add 1 to DAQ counter, else continue
-	    	  	  */
+              if(slaveIndex == 0){
+                  GPIO_setOutputLowOnPin(I2C_DAQ1_GPIO_PORT, I2C_DAQ1_GPIO_PIN);
 
-	    	  if(slaveIndex == 0){
-	    		  GPIO_setOutputLowOnPin(I2C_DAQ1_GPIO_PORT, I2C_DAQ1_GPIO_PIN);
-	    	  }else if(slaveIndex == 1){
-	    		  GPIO_setOutputLowOnPin(I2C_DAQ2_GPIO_PORT, I2C_DAQ2_GPIO_PIN);
-	    	  }else if(slaveIndex == 2){
-	    		  GPIO_setOutputLowOnPin(I2C_DAQ3_GPIO_PORT, I2C_DAQ3_GPIO_PIN);
-	    	  }else if(slaveIndex == 3){
-	    		  GPIO_setOutputLowOnPin(I2C_DAQ4_GPIO_PORT, I2C_DAQ4_GPIO_PIN);
-	    	  }else if(slaveIndex == 4){
-	    		  GPIO_setOutputLowOnPin(I2C_DAQ5_GPIO_PORT, I2C_DAQ5_GPIO_PIN);
-	    	  }else if(slaveIndex == 5){
-	    		  GPIO_setOutputLowOnPin(I2C_DAQ6_GPIO_PORT, I2C_DAQ6_GPIO_PIN);
-	    	  }else if(slaveIndex == 6){
-	    		  GPIO_setOutputLowOnPin(I2C_DAQ7_GPIO_PORT, I2C_DAQ7_GPIO_PIN);
-	    	  }else if(slaveIndex == 7){
-	    		  GPIO_setOutputLowOnPin(I2C_DAQ8_GPIO_PORT, I2C_DAQ8_GPIO_PIN);
-	    	  }
-	    	  slaveIndex++;
+              }else if(slaveIndex == 1){
+                  GPIO_setOutputLowOnPin(I2C_DAQ2_GPIO_PORT, I2C_DAQ2_GPIO_PIN);
 
-	      }else{
-	    	  slavesInitialized = true;
-	      }
+              }else if(slaveIndex == 2){
+                  GPIO_setOutputLowOnPin(I2C_DAQ3_GPIO_PORT, I2C_DAQ3_GPIO_PIN);
+
+              }else if(slaveIndex == 3){
+                  GPIO_setOutputLowOnPin(I2C_DAQ4_GPIO_PORT, I2C_DAQ4_GPIO_PIN);
+
+              }else if(slaveIndex == 4){
+                  GPIO_setOutputLowOnPin(I2C_DAQ5_GPIO_PORT, I2C_DAQ5_GPIO_PIN);
+
+              }else if(slaveIndex == 5){
+                  GPIO_setOutputLowOnPin(I2C_DAQ6_GPIO_PORT, I2C_DAQ6_GPIO_PIN);
+
+              }else if(slaveIndex == 6){
+                  GPIO_setOutputLowOnPin(I2C_DAQ7_GPIO_PORT, I2C_DAQ7_GPIO_PIN);
+
+              }else if(slaveIndex == 7){
+                  GPIO_setOutputLowOnPin(I2C_DAQ8_GPIO_PORT, I2C_DAQ8_GPIO_PIN);
+
+              }
+              slaveIndex++;
+
+          }else{
+              slavesInitialized = true;
+          }
 
     }
     //Only one slave, for demo purposes only
-    I2C_setSlaveAddress(I2C_BUS_BASE, 0x51);
-    //Enable Interrupts after initialization
-    I2C_enableInterrupt(I2C_BUS_BASE, EUSCI_B_I2C_RECEIVE_INTERRUPT0);
+    I2C_setSlaveAddress(I2C_BUS_BASE, 0x50); //TODO HARDWIRED
+    modules_connected_code[0] = 1; //TODO HARDWIRED
 
     Interrupt_enableInterrupt(I2C_BUS_INT);
 }
 
 
 void processCommand(char *CommandText){
-	long Status;
-	char *array[10];
-	int i=0;
+    long Status;
+    char *array[10];
+    int i=0;
 
-	array[i] = strtok(CommandText,":");
+    array[i] = strtok(CommandText,":");
 
-	while(array[i]!=NULL)
-	{
-		array[++i] = strtok(NULL,":");
-	}
+    while(array[i]!=NULL)
+    {
+        array[++i] = strtok(NULL,":");
+    }
 
-	memset(COMMAND, 0, sizeof(COMMAND));
-	strncpy(COMMAND, array[0], (strlen(array[0])));
+    memset(COMMAND, 0, sizeof(COMMAND));
+    strncpy(COMMAND, array[0], (strlen(array[0])));
 
-//	UARTprintf(FTDI_UART_BASE, "CMD->%s\n\r",COMMAND);
+    Status = CmdLineProcess(COMMAND);
 
-
-	Status = CmdLineProcess(COMMAND);
-
-	if(Status == CMDLINE_BAD_CMD)
-	{
-//		UARTprintf(FTDI_UART_BASE, "Bad command!\n\r");
-	}
+    if(Status == CMDLINE_BAD_CMD)
+    {
+//      UARTprintf(FTDI_UART_BASE, "Bad command!\n\r");
+    }
 }
 
 
 void sendUARTString(uint32_t moduleInstance, char * msg){
 
-	while(UART_queryStatusFlags(moduleInstance, EUSCI_A_UART_BUSY));
+    while(UART_queryStatusFlags(moduleInstance, EUSCI_A_UART_BUSY));
 
-	//The null char is used to delimit strings in C
-	while(*msg != '\0'){
-		UART_transmitData(moduleInstance, (uint_fast8_t) *msg++);
+    //The null char is used to delimit strings in C
+    while(*msg != '\0'){
+        UART_transmitData(moduleInstance, (uint_fast8_t) *msg++);
 
-	}
-
-	//Return cursor to the start (left) of the screen
-	UART_transmitData(moduleInstance, (uint_fast8_t) '\r');
-	UART_transmitData(moduleInstance, (uint_fast8_t) '\n');
-
-}
-
-
-void transmitStringData(char *string){
-
-    while(*string){
-        MAP_UART_transmitData(FTDI_UART_BASE, (uint_fast8_t) *string++);
     }
 
-    MAP_UART_transmitData(FTDI_UART_BASE, (uint_fast8_t) 0x0D);
-    MAP_UART_transmitData(FTDI_UART_BASE, (uint_fast8_t) 0x0A);
+    //Return cursor to the start (left) of the screen
+    UART_transmitData(moduleInstance, (uint_fast8_t) '\r');
+    UART_transmitData(moduleInstance, (uint_fast8_t) '\n');
 
 }
+
 
 void transmitByteData(uint8_t byte){
     MAP_UART_transmitData(FTDI_UART_BASE, (uint_fast8_t) byte);
@@ -789,13 +788,13 @@ void transmitTerminationSequence(){
     MAP_UART_transmitData(FTDI_UART_BASE, 0x0A);
 }
 
-void getCurrentTime(void)
-{
-    if(MAP_RTC_C_getEnabledInterruptStatus() & RTC_C_CLOCK_READ_READY_INTERRUPT)
-    {
+
+void getCurrentTime(void){
+
+    if(MAP_RTC_C_getEnabledInterruptStatus() & RTC_C_CLOCK_READ_READY_INTERRUPT){
         RTC_C_Calendar currTime = RTC_C_getCalendarTime();
         int num = currTime.hours*10000 + currTime.minutes*100 + currTime.seconds;
-	sprintf(current_time, "%i", num);
+        sprintf(current_time, "%i", num);
     }
 }
 
@@ -819,30 +818,54 @@ void updateRTC(void)
 
 
 /********************************/
-//	Interrupt Service Routines	//
+//  Interrupt Service Routines  //
 /********************************/
 
 void PORT6_IRQHandler(void)
 {
+    //TODO Figure out a way to manage a DRDY conflict between multiple DAQs
 
     uint32_t status = MAP_GPIO_getEnabledInterruptStatus(I2C_DAQ_DRDY_PORT);
     GPIO_clearInterruptFlag(I2C_DAQ_DRDY_PORT, status);
-    if (status & GPIO_PIN0)
-    {
-            I2C_setSlaveAddress(I2C_BUS_BASE, 0x51); // TODO This should be 0x50
-            dreadyFlag = 1;
 
+    if (status & GPIO_PIN0){
+        I2C_setSlaveAddress(I2C_BUS_BASE, 0x50);
+        dreadyFlag = 1;
+
+    }else if (status & GPIO_PIN1){
+        I2C_setSlaveAddress(I2C_BUS_BASE, 0x51);
+        dreadyFlag = 1;
+
+    }else if (status & GPIO_PIN2){
+        I2C_setSlaveAddress(I2C_BUS_BASE, 0x52);
+        dreadyFlag = 1;
+
+    }else if (status & GPIO_PIN3){
+        I2C_setSlaveAddress(I2C_BUS_BASE, 0x53);
+        dreadyFlag = 1;
+
+    }else if (status & GPIO_PIN4){
+        I2C_setSlaveAddress(I2C_BUS_BASE, 0x54);
+        dreadyFlag = 1;
+
+    }else if (status & GPIO_PIN5){
+        I2C_setSlaveAddress(I2C_BUS_BASE, 0x55);
+        dreadyFlag = 1;
+
+    }else if (status & GPIO_PIN6){
+        I2C_setSlaveAddress(I2C_BUS_BASE, 0x56);
+        dreadyFlag = 1;
+
+    }else if (status & GPIO_PIN7){
+        I2C_setSlaveAddress(I2C_BUS_BASE, 0x57);
+        dreadyFlag = 1;
 
     }
-//    MAP_Interrupt_enableInterrupt(INT_TA1_0);
-//    MAP_Timer_A_startCounter(TIMER_A1_BASE, TIMER_A_UP_MODE);
-//    MAP_Timer_A_clearCaptureCompareInterrupt(TIMER_A1_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_0);
-//    MAP_GPIO_disableInterrupt(GPIO_PORT_P1, GPIO_PIN1);
-//    MAP_Interrupt_enableInterrupt(INT_PORT1);
+
 
 }
 
-//Console UART handler, lookup way to change function name without errors
+//Console UART handler
 void EUSCIA0_IRQHandler(void){
 
     uint32_t status = UART_getEnabledInterruptStatus(CONSOLE_UART_BASE);
@@ -850,24 +873,25 @@ void EUSCIA0_IRQHandler(void){
     UART_clearInterruptFlag(CONSOLE_UART_BASE, status);
 
     if(status & EUSCI_A_UART_RECEIVE_INTERRUPT_FLAG){
-    	consoleInput[inputIndex++] = MAP_UART_receiveData(CONSOLE_UART_BASE);
-        if(consoleInput[inputIndex - 1] == '\r'){
-        	MAP_UART_transmitData(CONSOLE_UART_BASE, '\n');
-        	MAP_UART_transmitData(CONSOLE_UART_BASE, '\r');
-        	consoleInput[inputIndex - 1] = '\0';
-        	inputFlag = 1;
+        consoleInput[inputIndex++] = MAP_UART_receiveData(CONSOLE_UART_BASE);
 
-        	inputIndex = 0;
+        if(consoleInput[inputIndex - 1] == '\r'){
+            MAP_UART_transmitData(CONSOLE_UART_BASE, '\n');
+            MAP_UART_transmitData(CONSOLE_UART_BASE, '\r');
+            consoleInput[inputIndex - 1] = '\0';
+            inputFlag = 1;
+
+            inputIndex = 0;
 
         }else{
-        	MAP_UART_transmitData(CONSOLE_UART_BASE, consoleInput[inputIndex - 1]);
+            MAP_UART_transmitData(CONSOLE_UART_BASE, consoleInput[inputIndex - 1]);
         }
 
      }
 
 }
 
-
+//FTDI UART Handler
 void EUSCIA1_IRQHandler(void)
 {
     uint32_t status = MAP_UART_getEnabledInterruptStatus(FTDI_UART_BASE);
@@ -880,9 +904,7 @@ void EUSCIA1_IRQHandler(void)
         rxdata[rcount] = received_byte;
     }
     if(received_byte == (uint8_t) 13){
-        //if end of line, do something
-    	appFlag = 1;
-//        decodeInstruction();
+        appFlag = 1;
 
     } else {
         rcount++;
@@ -984,70 +1006,49 @@ void EUSCIB2_IRQHandler(void)
     status = MAP_I2C_getEnabledInterruptStatus(I2C_BUS_BASE);
     MAP_I2C_clearInterruptFlag(I2C_BUS_BASE, status);
 
-//    if (status & EUSCI_B_I2C_TRANSMIT_INTERRUPT0){
-//        /* Check the byte counter */
-//        if (masterToSlaveByteCtr){
-//            /* Send the next data and decrement the byte counter */
-//            if(I2C_masterSendMultiByteNextWithTimeout(I2C_BUS_BASE,
-//            		masterToSlavePacket[masterToSlaveIndex++], 0x0000FFFF)){
-//            	masterToSlaveByteCtr--;
-//            }
-//            //Decrement masterToSlaveIndex??
-//        }else{
-//
-//            MAP_I2C_masterSendMultiByteStop(I2C_BUS_BASE);
-//            masterToSlaveIndex = 0;
-//
-//        }
-//    }
-
     /* Receives bytes into the receive buffer. If we have received all bytes,
      * send a STOP condition */
     if (status & EUSCI_B_I2C_RECEIVE_INTERRUPT0){
-//    	MAP_I2C_masterReceiveMultiByteStop(EUSCI_B0_BASE);
-        if (xferIndex == numRecBytes - 2)
+
+        if(bytesToRecCounter == bytesToRec - 2){ //For some reason, this doesnt work if I use -1, should try again
+
+            EUSCI_B2->CTLW0 |= BIT2; //Send Stop Bit
+            ADCData[xferIndex++] = EUSCI_B2->RXBUF; //Buffer filled at some point in the middle
+
+            bytesToRecCounter++;
+//            bytesToWrite = xferIndex;
+            bufferFull = 1;
+            EUSCI_B2->IE &= ~BIT0;
+
+        }
+        else if(xferIndex == DATA_BUF_SIZE - 1){ //Changed from -2 to -1
+
+//          EUSCI_B2->CTLW0 |= BIT2; //Send Stop Bit
+            ADCData[xferIndex++] = EUSCI_B2->RXBUF; //Last empty index on buffer
+
+            bytesToRecCounter++;
+//            bytesToWrite = xferIndex;
+            bufferFull = 1;
+            EUSCI_B2->IE &= ~BIT0;
+
+        }
+        else
         {
-//            MAP_I2C_disableInterrupt(EUSCI_B0_BASE, EUSCI_B_I2C_RECEIVE_INTERRUPT0);
-            MAP_I2C_enableInterrupt(I2C_BUS_BASE, EUSCI_B_I2C_STOP_INTERRUPT);
-
-//            /*
-//             * Switch order so that stop is being set during reception of last
-//             * byte read byte so that next byte can be read.
-//             */
-            MAP_I2C_masterReceiveMultiByteStop(I2C_BUS_BASE);
-            ADCData[xferIndex++] = MAP_I2C_masterReceiveMultiByteNext(
-            		I2C_BUS_BASE);
-            cardFlag = true;
-//            if(xferIndex == NUM_OF_REC_BYTES){
-//
-//            }
-
-        } else
-        {
-            ADCData[xferIndex++] = MAP_I2C_masterReceiveMultiByteNext(I2C_BUS_BASE);
-
+                ADCData[xferIndex++] = EUSCI_B2->RXBUF;
+                bytesToRecCounter++;
         }
     }
 }
 
 
-void TA0_0_IRQHandler(void){
-
-    GPIO_setOutputLowOnPin(SOLENOID_GPIO_PORT, SOLENOID_GPIO_PIN);
-    Timer_A_clearCaptureCompareInterrupt(TIMER_A1_BASE, TIMER_A_CAPTURECOMPARE_REGISTER_0);
-    Interrupt_disableInterrupt(INT_TA1_0);
-    Timer_A_stopTimer(TIMER_A1_BASE);
-}
-
-
+//GPS Timer Handler
 void TA1_0_IRQHandler(void)
 {
     seconds++;                                                          //Increases seconds by one
     UARTprintf(EUSCI_A0_BASE, "Time until we check GPS: %i\r\n",
            TIME_WAIT - seconds);                                        //Displays how much time is left before checking
     if (seconds >= TIME_WAIT){                                               //Checks if we reached or gone past TIME_WAIT
-        MAP_UART_enableInterrupt(EUSCI_A2_BASE,
-                                 EUSCI_A_UART_RECEIVE_INTERRUPT);       //Enables GPS UART receive interrupt
+        MAP_UART_enableInterrupt(EUSCI_A2_BASE, EUSCI_A_UART_RECEIVE_INTERRUPT);       //Enables GPS UART receive interrupt
         MAP_Interrupt_enableInterrupt(INT_EUSCIA2);                     //Enables interrupts for GPS UART
         MAP_Interrupt_disableInterrupt(INT_TA1_0);                      //Disables timer interrupt
     }
@@ -1090,7 +1091,7 @@ void decodeInstruction(){
         transmitByteData((uint8_t) 129);
         int temp = conf_place;
         int i = 0;
-        while(conf_place > 1){//this is a place holder, but eventually I2C_setSlaveAddress(I2C_BUS_BASE, 0x51);it should transm
+        while(conf_place > 1){//this is a place holder, but eventually it should transm
             transmitNByteData(configuration[i]);
             i++;
             conf_place--;
@@ -1104,7 +1105,15 @@ void decodeInstruction(){
         recorded = 0;
         stored = 0;
 
-    	processCommand("start");
+
+        char instruction[20];
+
+        sprintf(instruction, "sample %d", sample_rate);
+        processCommand(instruction);
+        memset(instruction, 0x00, sizeof(instruction));
+
+        processCommand("start");
+
     } else if(inst == (uint8_t) 131){//request control module status
         transmitByteData((uint8_t) 131); //acknowledge
         transmitNByteData(recorded);
@@ -1119,121 +1128,120 @@ void decodeInstruction(){
         }
         transmitByteData((uint8_t) modules_connected_code[7]);
     }else if(inst == (uint8_t) 133){ // Set configuration
-    	transmitByteData((uint8_t) 133);
+        transmitByteData((uint8_t) 133);
 
-    	transmitByteData((uint8_t) 133);
+        transmitByteData((uint8_t) 133);
 
-    	        sample_rate = (uint8_t) rxdata[1];
-    	        cutoff = (uint8_t) rxdata[2];
-    	        gain = (uint8_t) rxdata[3];
+                sample_rate = (uint8_t) rxdata[1];
+                cutoff = (uint8_t) rxdata[2];
+                gain = (uint8_t) rxdata[3];
 
-    	        duration = ((uint8_t)rxdata[4])*1000 + ((uint8_t)rxdata[5])*100 + ((uint8_t)rxdata[6])*10 + ((uint8_t)rxdata[7]);
-//    	        processCommand(duration);
-    	        start_delay = ((uint8_t)rxdata[8])*1000 + ((uint8_t)rxdata[9])*100 + ((uint8_t)rxdata[10])*10 + ((uint8_t)rxdata[11]);
-    	        numRecBytes = duration * sample_rate * 12;
+                duration = ((uint8_t)rxdata[4])*1000 + ((uint8_t)rxdata[5])*100 + ((uint8_t)rxdata[6])*10 + ((uint8_t)rxdata[7]);
 
-    	        store_enable = (uint8_t)rxdata[12];
-    	        vis_sens1 = (uint8_t)rxdata[13];
-    	        vis_mod2 = (uint8_t)rxdata[14];
-    	        vis_sens2 = (uint8_t)rxdata[15];
+                start_delay = ((uint8_t)rxdata[8])*1000 + ((uint8_t)rxdata[9])*100 + ((uint8_t)rxdata[10])*10 + ((uint8_t)rxdata[11]);
+                bytesToRec = duration * samplingRates[sample_rate] * 12;
 
-    	        int count = 16;
-    	        int i = 0;
-    	        for(i = 0; i<32; i++){
-    	            sensors_enabled[i] = rxdata[count];
-    	            count++;
-    	        }
+                store_enable = (uint8_t)rxdata[12];
+                vis_sens1 = (uint8_t)rxdata[13];
+                vis_mod2 = (uint8_t)rxdata[14];
+                vis_sens2 = (uint8_t)rxdata[15];
 
-    	        int hold_initial = 49;
-    	        char a = rxdata[hold_initial];
-    	        count = 0;
+                int count = 16;
+                int i;
+                for(i = 0; i<32; i++){
+                    sensors_enabled[i] = rxdata[count];
+                    count++;
+                }
+
+                int hold_initial = 49;
+                char a = rxdata[hold_initial];
+                count = 0;
 
 
-    	        while(a != ',' && count < 20){
-    	            experiment_name[count] = a;
-    	            a = rxdata[count + hold_initial + 1];
-    	            count++;
-    	        }
+                while(a != ',' && count < 20){
+                    experiment_name[count] = a;
+                    a = rxdata[count + hold_initial + 1];
+                    count++;
+                }
 
-    	        //treating edge case of being sent blanks
-    	        if(count == 0) count ++;
+                //treating edge case of being sent blanks
+                if(count == 0) count ++;
 
-    	        int hold_place = count + hold_initial + 1;
-    	        count = 0;
+                int hold_place = count + hold_initial + 1;
+                count = 0;
 
-    	        a = rxdata[hold_place];
+                a = rxdata[hold_place];
 
-    	        while(a != ',' && count < 20 ){
-    	            localization_name[count] = a;
-    	            a = rxdata[hold_place + count + 1];
-    	            count++;
-    	        }
-    	        count = 0;
+                while(a != ',' && count < 20 ){
+                    localization_name[count] = a;
+                    a = rxdata[hold_place + count + 1];
+                    count++;
+                }
+                count = 0;
 
-    	    	char instruction[20];
+                char instruction[20];
 
-    	    	sprintf(instruction, "gain %d", gain);
+                //TODO This always create a blank file before each test,
+                //Figure out a way to delimit different tests on a single file
+                src = fopen(daq1, "w+");
+                fclose(src);
 
-    	    	processCommand(instruction); //Set Gain
-    	    	memset(instruction, 0x00, 20);
+                //TODO
+                //Sensors_Enabled contains the 32 sensors, 1 is ON, 0 is OFF
+                //Modules connected contains the active modules, 1 is ON, 0 is OFF
+                //Convert value to decimal equivalent of hex parameter
 
-    	    	sprintf(instruction, "cutoff %d", cutoff);
-    	    	processCommand(instruction); // Set cutoff Frequency
-    	    	memset(instruction, 0x00, 20);
+                //Send mux channels as all 0 (Sensors enabled, voltage reference off)
 
-    	    	sprintf(instruction, "sample %d", sample_rate);
-    	    	processCommand(instruction);
-    	    	memset(instruction, 0x00, 20);
+                if(diagnosis){
 
-//    	    	while (MAP_I2C_masterIsStopSent(EUSCI_B2_BASE) == EUSCI_B_I2C_SENDING_STOP);
-//
-//    	    	/* Sending the initial start condition */
-//    	    	MAP_I2C_masterSendMultiByteStart(EUSCI_B2_BASE, 0xCA);
-//    	    	MAP_I2C_masterSendMultiByteNext(EUSCI_B2_BASE, CMD_GAIN_DEFINITION);
-//    	    	MAP_I2C_masterSendMultiByteNext(EUSCI_B2_BASE, gain);
-//    	    	MAP_I2C_masterSendMultiByteStop(EUSCI_B2_BASE);
-//
-//    	    	while (MAP_I2C_masterIsStopSent(EUSCI_B2_BASE) == EUSCI_B_I2C_SENDING_STOP);
-//
-//    	    	/* Sending the initial start condition */
-//    	    	MAP_I2C_masterSendMultiByteStart(EUSCI_B2_BASE, 0xCA);
-//    	    	MAP_I2C_masterSendMultiByteNext(EUSCI_B2_BASE, CMD_SET_CUTOFF_FREQ_DEFINITION);
-//    	    	MAP_I2C_masterSendMultiByteNext(EUSCI_B2_BASE, cutoff);
-//    	    	MAP_I2C_masterSendMultiByteStop(EUSCI_B2_BASE);
-//
-//
-//    	    	MAP_I2C_masterSendMultiByteStart(EUSCI_B2_BASE, 0xCA);
-//    	    	MAP_I2C_masterSendMultiByteNext(EUSCI_B2_BASE, CMD_SET_SAMPLING_FREQ);
-//    	    	MAP_I2C_masterSendMultiByteNext(EUSCI_B2_BASE, sample_rate);
-//    	    	MAP_I2C_masterSendMultiByteStop(EUSCI_B2_BASE);
+                    diagnosis = 0;
+                    uint8_t muxChannels, channelParam;
+                    muxChannels = sensors_enabled[0] * 1 + sensors_enabled[1] * 2 + sensors_enabled[2] * 4 + sensors_enabled[3] * 8;
+                    channelParam = (0xF0 | muxChannels);
 
-//    	        processCommand("start");
+                    sprintf(instruction, "diagnose %d", channelParam);
+                    processCommand(instruction);
+                    memset(instruction, 0x00, sizeof(instruction));
+
+                }else{
+
+                    uint8_t adcChannels, channelParam;
+                    adcChannels = sensors_enabled[0] * 1 + sensors_enabled[1] * 2 + sensors_enabled[2] * 4 + sensors_enabled[3] * 8;
+                    channelParam = (0xF0 & (adcChannels << 4));
+
+                    sprintf(instruction, "diagnose %d", channelParam);
+                    processCommand(instruction);
+                    memset(instruction, 0x00, sizeof(instruction));
+                }
+
+
+
+                sprintf(instruction, "duration %d", duration);
+                processCommand(instruction);
+                memset(instruction, 0x00, sizeof(instruction));
+
+                sprintf(instruction, "gain %d", gain);
+
+                processCommand(instruction); //Set Gain
+                memset(instruction, 0x00, sizeof(instruction));
+
+                sprintf(instruction, "cutoff %d", cutoff);
+                processCommand(instruction); // Set cutoff Frequency
+                memset(instruction, 0x00, sizeof(instruction));
+
 
     }
     else if(inst == (uint8_t) 135){ //Request data for one module
 
-    	transmitByteData((uint8_t) 135); //send success byte
+        transmitByteData((uint8_t) 135); //send success byte
         rcount = 0;
         rxdata[0] = 0;
 
-    	if(rxdata[1] == 0x01){
-    		processCommand("read 1");
-    	}else if(rxdata[1] == 0x02){
-    		processCommand("read 2");
-    	}else if(rxdata[1] == 0x03){
-    		processCommand("read 3");
-    	}else if(rxdata[1] == 0x04){
-    		processCommand("read 4");
-    	}else if(rxdata[1] == 0x05){
-    		processCommand("read 5");
-    	}else if(rxdata[1] == 0x06){
-    		processCommand("read 6");
-    	}else if(rxdata[1] == 0x07){
-    		processCommand("read 7");;
-    	}else if(rxdata[1] == 0x08){
-    		processCommand("read 8");
-    	}
 
+        if(rxdata[1] == 0x01){
+            processCommand("read 1");
+        }
 
     }
     else if(inst == (uint8_t) 136){ //set visualization module + channels x88
@@ -1246,12 +1254,12 @@ void decodeInstruction(){
         transmitNByteData(live2[1]);
         transmitByteData(live2[2]);
     } else if(inst == (uint8_t) 141){ //send the live bytes to the application x87
-    	//TODO NOT YET IMPLEMENTED
-    	transmitByteData((uint8_t) 141);
+        //TODO NOT YET IMPLEMENTED
+        transmitByteData((uint8_t) 141);
 
     } else if(inst == (uint8_t) 137){ //send GPS data request 0x89
         transmitByteData((uint8_t) 137); //acknowledge
-        transmitStringData(gps.transmission); //actually send the GPS data
+        sendUARTString(FTDI_UART_BASE, gps.transmission);
     } else if(inst == (uint8_t) 138){//sync the RTC with the GPS time 0x8A
 
         gps_synched = 0;
@@ -1260,22 +1268,24 @@ void decodeInstruction(){
         record = 0;
         counter = 0;
         comma_counter = 0;
+        MAP_Interrupt_enableInterrupt(INT_TA1_0);
         Timer_A_startCounter(GPS_TIMER_BASE, TIMER_A_UP_MODE);
         transmitByteData((uint8_t) 138); //acknowledge
 
     } else if(inst == (uint8_t) 139){ //diagnose request, this hasn't been completely thought about
         transmitByteData((uint8_t) 139); //acknowledge
         //todo:we must figure this out
+        diagnosis = 1;
         transmitByteData(diagnosis);
-        //Set Select lines on muxes for voltage references
+
     } else if(inst == (uint8_t) 140){ //request configuration validity
         transmitByteData((uint8_t) 140); //acknowledge
         transmitByteData(valid_conf);
     } else if(inst == (uint8_t) 255){ //request cancel xff
-    	//TODO TEST!
         transmitByteData((uint8_t) 255);
         //Send Reset signal to DAQs
-        //STOP GPS
+        MAP_Interrupt_disableInterrupt(INT_EUSCIA2);
+        MAP_Interrupt_disableInterrupt(INT_TA1_0);
         processCommand("reset");
     } else { //send a message stating that the function was a mistake
         transmitByteData((uint8_t) 254);
@@ -1284,5 +1294,3 @@ void decodeInstruction(){
     rcount = 0;
     rxdata[0] = 0;
 }
-
-

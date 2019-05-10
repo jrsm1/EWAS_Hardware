@@ -30,7 +30,7 @@ static const unsigned long dv[] = {
 		1, // +9
 		};
 
-void puts(uint32_t moduleInstance, char *s) {
+void UARTputs(uint32_t moduleInstance, char *s) {
 	char c;
 
 	while (c = *s++) {
@@ -38,7 +38,7 @@ void puts(uint32_t moduleInstance, char *s) {
 	}
 }
 
-void putc(uint32_t moduleInstance, unsigned b) {
+void UARTputc(uint32_t moduleInstance, unsigned b) {
 	sendByte(moduleInstance, b);
 }
 
@@ -53,16 +53,16 @@ static void xtoa(uint32_t moduleInstance, unsigned long x, const unsigned long *
 			c = '0';
 			while (x >= d)
 				++c, x -= d;
-			putc(moduleInstance, c);
+			UARTputs(moduleInstance, c);
 		} while (!(d & 1));
 	} else
-		putc(moduleInstance, '0');
+		UARTputs(moduleInstance, '0');
 }
 
 static void puth(uint32_t moduleInstance, unsigned n) {
 	static const char hex[16] = { '0', '1', '2', '3', '4', '5', '6', '7', '8',
 			'9', 'A', 'B', 'C', 'D', 'E', 'F' };
-	putc(moduleInstance, hex[n & 15]);
+	UARTputs(moduleInstance, hex[n & 15]);
 }
 
 void UARTprintf(uint32_t moduleInstance, char *format, ...)
@@ -77,21 +77,21 @@ void UARTprintf(uint32_t moduleInstance, char *format, ...)
 		if(c == '%') {
 			switch(c = *format++) {
 				case 's': // String
-					puts(moduleInstance, va_arg(a, char*));
+					UARTputs(moduleInstance, va_arg(a, char*));
 					break;
 				case 'c':// Char
-					putc(moduleInstance, va_arg(a, char));
+					UARTputs(moduleInstance, va_arg(a, char));
 				break;
 				case 'i':// 16 bit Integer
 				case 'u':// 16 bit Unsigned
 					i = va_arg(a, int);
-					if(c == 'i' && i < 0) i = -i, putc(moduleInstance, '-');
+					if(c == 'i' && i < 0) i = -i, UARTputs(moduleInstance, '-');
 					xtoa(moduleInstance, (unsigned)i, dv + 5);
 				break;
 				case 'l':// 32 bit Long
 				case 'n':// 32 bit uNsigned loNg
 					n = va_arg(a, long);
-					if(c == 'l' && n < 0) n = -n, putc(moduleInstance, '-');
+					if(c == 'l' && n < 0) n = -n, UARTputc(moduleInstance, '-');
 					xtoa(moduleInstance, (unsigned long)n, dv);
 				break;
 				case 'x':// 16 bit heXadecimal
@@ -105,7 +105,7 @@ void UARTprintf(uint32_t moduleInstance, char *format, ...)
 				default: goto bad_fmt;
 			}
 		} else
-			bad_fmt: putc(moduleInstance, c);
+			bad_fmt: UARTputs(moduleInstance, c);
 	}
 	va_end(a);
 }

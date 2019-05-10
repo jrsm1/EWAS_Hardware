@@ -10,21 +10,21 @@ C_SRCS += \
 ../main.c \
 ../system_msp432p401r.c 
 
-OBJS += \
-./main.obj \
-./system_msp432p401r.obj 
-
 C_DEPS += \
 ./main.d \
 ./system_msp432p401r.d 
 
-C_DEPS__QUOTED += \
-"main.d" \
-"system_msp432p401r.d" 
+OBJS += \
+./main.obj \
+./system_msp432p401r.obj 
 
 OBJS__QUOTED += \
 "main.obj" \
 "system_msp432p401r.obj" 
+
+C_DEPS__QUOTED += \
+"main.d" \
+"system_msp432p401r.d" 
 
 C_SRCS__QUOTED += \
 "../main.c" \
