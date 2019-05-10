@@ -12,7 +12,7 @@
 	<createSlaveProjects value=""/>
 	<ignoreDefaultDeviceSettings value="true"/>
 	<templateProperties value="id=empty_MSP_EXP432P401R_nortos_ccs.projectspec.empty_MSP_EXP432P401R_nortos_ccs,buildProfile=release,isHybrid=true,"/>
-	<origin value="/opt/ti/simplelink_msp432p4_sdk_2_30_00_14/examples/nortos/MSP_EXP432P401R/driverlib/empty/ccs/empty_MSP_EXP432P401R_nortos_ccs.projectspec"/>
+	<origin value="/home/jrsm/Documents/RUM/7mo_a~o/2do_Semestre/ICOM5047/Unsorted/NDT_Control_Module"/>
 	<filesToOpen value=""/>
 	<isTargetManual value="false"/>
 </projectOptions>

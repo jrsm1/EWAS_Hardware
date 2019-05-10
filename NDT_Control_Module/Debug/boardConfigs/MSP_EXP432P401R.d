@@ -1,111 +1,113 @@
 # FIXED
 
 boardConfigs/MSP_EXP432P401R.obj: ../boardConfigs/MSP_EXP432P401R.c
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/stdbool.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/stddef.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/stdint.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/sys/stdint.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/sys/cdefs.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/sys/_types.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/machine/_types.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/machine/_stdint.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/sys/_stdint.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/DeviceFamily.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/drivers/Power.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/drivers/utils/List.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/drivers/power/PowerMSP432.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/driverlib/pcm.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/inc/msp.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/inc/msp432p401r.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/inc/msp_compatibility.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/inc/msp432p401r_classic.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/third_party/CMSIS/Include/core_cm4.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/third_party/CMSIS/Include/cmsis_compiler.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/third_party/CMSIS/Include/cmsis_ccs.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/inc/system_msp432p401r.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/driverlib/cs.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/driverlib/rom.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/driverlib/rom_map.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/driverlib/adc14.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/driverlib/dma.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/driverlib/interrupt.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/driverlib/gpio.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/driverlib/i2c.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/driverlib/eusci.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/driverlib/pmap.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/driverlib/ref_a.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/driverlib/spi.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/driverlib/timer_a.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/driverlib/timer32.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/driverlib/uart.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/driverlib/wdt_a.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/ccs901/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include/stdbool.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/ccs901/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include/stddef.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/ccs901/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include/_ti_config.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/ccs901/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include/linkage.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/ccs901/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include/stdint.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/ccs901/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include/_stdint40.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/ccs901/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include/sys/stdint.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/ccs901/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include/sys/cdefs.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/ccs901/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include/sys/_types.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/ccs901/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include/machine/_types.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/ccs901/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include/machine/_stdint.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/ccs901/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include/sys/_stdint.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/DeviceFamily.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/drivers/Power.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/drivers/utils/List.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/drivers/power/PowerMSP432.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/inc/msp.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/inc/msp432p401r.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/inc/msp_compatibility.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/inc/msp432p401r_classic.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/third_party/CMSIS/Include/core_cm4.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/third_party/CMSIS/Include/cmsis_compiler.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/third_party/CMSIS/Include/cmsis_ccs.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/inc/system_msp432p401r.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/driverlib/rom.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/driverlib/rom_map.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/driverlib/adc14.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/driverlib/dma.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/driverlib/interrupt.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/driverlib/gpio.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/driverlib/i2c.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/driverlib/eusci.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/driverlib/pmap.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/driverlib/ref_a.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/driverlib/spi.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/driverlib/timer_a.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/driverlib/timer32.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/driverlib/uart.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/driverlib/wdt_a.h
 boardConfigs/MSP_EXP432P401R.obj: ../boardConfigs/MSP_EXP432P401R.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/drivers/dma/UDMAMSP432.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/drivers/dpl/HwiP.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/drivers/GPIO.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/drivers/gpio/GPIOMSP432.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/drivers/SD.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/drivers/SDFatFS.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/third_party/fatfs/ff.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/third_party/fatfs/integer.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/third_party/fatfs/ffconf.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/third_party/fatfs/diskio.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/drivers/sd/SDSPI.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/drivers/dpl/SemaphoreP.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/drivers/SPI.h
-boardConfigs/MSP_EXP432P401R.obj: C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/drivers/spi/SPIMSP432DMA.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/drivers/dma/UDMAMSP432.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/drivers/dpl/HwiP.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/drivers/GPIO.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/drivers/gpio/GPIOMSP432.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/drivers/SD.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/drivers/SDFatFS.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/third_party/fatfs/ff.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/third_party/fatfs/integer.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/third_party/fatfs/ffconf.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/third_party/fatfs/diskio.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/drivers/sd/SDSPI.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/drivers/dpl/SemaphoreP.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/drivers/SPI.h
+boardConfigs/MSP_EXP432P401R.obj: /opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/drivers/spi/SPIMSP432DMA.h
 
 ../boardConfigs/MSP_EXP432P401R.c: 
-C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/stdbool.h: 
-C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/stddef.h: 
-C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/stdint.h: 
-C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/sys/stdint.h: 
-C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/sys/cdefs.h: 
-C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/sys/_types.h: 
-C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/machine/_types.h: 
-C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/machine/_stdint.h: 
-C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include/sys/_stdint.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/DeviceFamily.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/drivers/Power.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/drivers/utils/List.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/drivers/power/PowerMSP432.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/driverlib/pcm.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/inc/msp.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/inc/msp432p401r.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/inc/msp_compatibility.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/inc/msp432p401r_classic.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/third_party/CMSIS/Include/core_cm4.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/third_party/CMSIS/Include/cmsis_compiler.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/third_party/CMSIS/Include/cmsis_ccs.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/inc/system_msp432p401r.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/driverlib/cs.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/driverlib/rom.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/driverlib/rom_map.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/driverlib/adc14.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/driverlib/dma.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/driverlib/interrupt.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/driverlib/gpio.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/driverlib/i2c.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/driverlib/eusci.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/driverlib/pmap.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/driverlib/ref_a.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/driverlib/spi.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/driverlib/timer_a.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/driverlib/timer32.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/driverlib/uart.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/devices/msp432p4xx/driverlib/wdt_a.h: 
+/opt/ti/ccs901/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include/stdbool.h: 
+/opt/ti/ccs901/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include/stddef.h: 
+/opt/ti/ccs901/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include/_ti_config.h: 
+/opt/ti/ccs901/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include/linkage.h: 
+/opt/ti/ccs901/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include/stdint.h: 
+/opt/ti/ccs901/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include/_stdint40.h: 
+/opt/ti/ccs901/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include/sys/stdint.h: 
+/opt/ti/ccs901/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include/sys/cdefs.h: 
+/opt/ti/ccs901/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include/sys/_types.h: 
+/opt/ti/ccs901/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include/machine/_types.h: 
+/opt/ti/ccs901/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include/machine/_stdint.h: 
+/opt/ti/ccs901/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include/sys/_stdint.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/DeviceFamily.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/drivers/Power.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/drivers/utils/List.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/drivers/power/PowerMSP432.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/inc/msp.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/inc/msp432p401r.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/inc/msp_compatibility.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/inc/msp432p401r_classic.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/third_party/CMSIS/Include/core_cm4.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/third_party/CMSIS/Include/cmsis_compiler.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/third_party/CMSIS/Include/cmsis_ccs.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/inc/system_msp432p401r.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/driverlib/rom.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/driverlib/rom_map.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/driverlib/adc14.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/driverlib/dma.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/driverlib/interrupt.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/driverlib/gpio.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/driverlib/i2c.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/driverlib/eusci.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/driverlib/pmap.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/driverlib/ref_a.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/driverlib/spi.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/driverlib/timer_a.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/driverlib/timer32.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/driverlib/uart.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/devices/msp432p4xx/driverlib/wdt_a.h: 
 ../boardConfigs/MSP_EXP432P401R.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/drivers/dma/UDMAMSP432.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/drivers/dpl/HwiP.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/drivers/GPIO.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/drivers/gpio/GPIOMSP432.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/drivers/SD.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/drivers/SDFatFS.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/third_party/fatfs/ff.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/third_party/fatfs/integer.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/third_party/fatfs/ffconf.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/third_party/fatfs/diskio.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/drivers/sd/SDSPI.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/drivers/dpl/SemaphoreP.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/drivers/SPI.h: 
-C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source/ti/drivers/spi/SPIMSP432DMA.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/drivers/dma/UDMAMSP432.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/drivers/dpl/HwiP.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/drivers/GPIO.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/drivers/gpio/GPIOMSP432.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/drivers/SD.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/drivers/SDFatFS.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/third_party/fatfs/ff.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/third_party/fatfs/integer.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/third_party/fatfs/ffconf.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/third_party/fatfs/diskio.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/drivers/sd/SDSPI.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/drivers/dpl/SemaphoreP.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/drivers/SPI.h: 
+/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source/ti/drivers/spi/SPIMSP432DMA.h: 

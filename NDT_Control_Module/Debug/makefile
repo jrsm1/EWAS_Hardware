@@ -2,9 +2,7 @@
 # Automatically-generated file. Do not edit!
 ################################################################################
 
-SHELL = cmd.exe
-
-CG_TOOL_ROOT := C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS
+CG_TOOL_ROOT := /opt/ti/ccs901/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS
 
 GEN_OPTS__FLAG := 
 GEN_CMDS__FLAG := 
@@ -30,8 +28,8 @@ $(GEN_CMDS__FLAG) \
 
 -include ../makefile.init
 
-RM := DEL /F
-RMDIR := RMDIR /S/Q
+RM := rm -rf
+RMDIR := rm -rf
 
 # All of the sources participating in the build are defined here
 -include sources.mk
@@ -157,23 +155,23 @@ all: NDT_Control_Module.out
 # Tool invocations
 NDT_Control_Module.out: $(OBJS) $(CMD_SRCS) $(GEN_CMDS)
 	@echo 'Building target: "$@"'
-	@echo 'Invoking: MSP432 Linker'
-	"C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=FPv4SPD16 -me --advice:power=none -g --define=__MSP432P401R__ --define=DeviceFamily_MSP432P401x --display_error_number --diag_wrap=off --diag_warning=225 --diag_warning=255 --gen_func_subsections=on -z -m"NDT_Control_Module.map" --stack_size=512 -i"C:/ti/simplelink_msp432p4_sdk_2_30_00_14/source" -i"C:/ti/simplelink_msp432p4_sdk_2_30_00_14/kernel/nortos" -i"C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/lib" -i"C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/include" --reread_libs --warn_sections --display_error_number --diag_wrap=off --xml_link_info="NDT_Control_Module_linkInfo.xml" --rom_model -o "NDT_Control_Module.out" $(ORDERED_OBJS)
+	@echo 'Invoking: ARM Linker'
+	"/opt/ti/ccs901/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/bin/armcl" -mv7M4 --code_state=16 --float_support=FPv4SPD16 -me --advice:power=none --define=__MSP432P401R__ --define=DeviceFamily_MSP432P401x -g --diag_warning=225 --diag_warning=255 --diag_wrap=off --display_error_number --gen_func_subsections=on -z -m"NDT_Control_Module.map" --stack_size=512 -i"/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/source" -i"/opt/ti/simplelink_msp432p4_sdk_3_10_00_08/kernel/nortos" -i"/opt/ti/ccs901/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/lib" -i"/opt/ti/ccs901/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/include" --reread_libs --diag_wrap=off --display_error_number --warn_sections --xml_link_info="NDT_Control_Module_linkInfo.xml" --rom_model -o "NDT_Control_Module.out" $(ORDERED_OBJS)
 	@echo 'Finished building target: "$@"'
 	@echo ' '
 
 NDT_Control_Module.hex: $(EXE_OUTPUTS)
 	@echo 'Building files: $(strip $(EXE_OUTPUTS__QUOTED))'
-	@echo 'Invoking: MSP432 Hex Utility'
-	"C:/ti/ccsv8/tools/compiler/ti-cgt-arm_18.1.1.LTS/bin/armhex"  -o "NDT_Control_Module.hex" $(EXE_OUTPUTS__QUOTED)
+	@echo 'Invoking: ARM Hex Utility'
+	"/opt/ti/ccs901/ccs/tools/compiler/ti-cgt-arm_18.12.1.LTS/bin/armhex"  -o "NDT_Control_Module.hex" $(EXE_OUTPUTS__QUOTED)
 	@echo 'Finished building: $(strip $(EXE_OUTPUTS__QUOTED))'
 	@echo ' '
 
 # Other Targets
 clean:
 	-$(RM) $(BIN_OUTPUTS__QUOTED)$(EXE_OUTPUTS__QUOTED)
-	-$(RM) "main.obj" "system_msp432p401r.obj" "boardConfigs\MSP_EXP432P401R.obj" "ccs\startup_msp432p401r_ccs.obj" "utils\cmd.obj" "utils\cmdline.obj" "utils\printf.obj" 
-	-$(RM) "main.d" "system_msp432p401r.d" "boardConfigs\MSP_EXP432P401R.d" "ccs\startup_msp432p401r_ccs.d" "utils\cmd.d" "utils\cmdline.d" "utils\printf.d" 
+	-$(RM) "main.obj" "system_msp432p401r.obj" "boardConfigs/MSP_EXP432P401R.obj" "ccs/startup_msp432p401r_ccs.obj" "utils/cmd.obj" "utils/cmdline.obj" "utils/printf.obj" 
+	-$(RM) "main.d" "system_msp432p401r.d" "boardConfigs/MSP_EXP432P401R.d" "ccs/startup_msp432p401r_ccs.d" "utils/cmd.d" "utils/cmdline.d" "utils/printf.d" 
 	-@echo 'Finished clean'
 	-@echo ' '
 
