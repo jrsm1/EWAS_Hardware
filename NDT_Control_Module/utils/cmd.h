@@ -12,7 +12,7 @@
 
 /********************************/
 //		External variables		//
-//		declarede in main.c		//
+//		declared in main.c		//
 /********************************/
 
 extern FILE *src, *dst;
@@ -32,7 +32,6 @@ extern int CMD_setGain(int argc, char ** argv);
 extern int CMD_setCutoffFreq(int argc, char ** argv);
 extern int CMD_start(int argc, char ** argv);
 extern int CMD_setSamplingFreq(int argc, char **argv);
-extern int CMD_initCard(int argc, char ** argv);
 extern int CMD_create(int argc, char **argv);
 extern int CMD_read(int argc, char **argv);
 extern int CMD_write(int argc, char **argv);
